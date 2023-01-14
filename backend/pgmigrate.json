@@ -1,0 +1,4 @@
+{
+    "migration-filename-format": "utc",
+    "tsconfig": "./tsconfig.json"
+}
