@@ -4,6 +4,11 @@
         "lib": [
             "es6"
         ],
+        "paths": {
+            "@src/*": ["src/*"],
+            "@crypto/*": ["src/crypto/*"]
+        },
+        "baseUrl": ".",
         "module": "commonjs",
         "rootDir": "src",
         "resolveJsonModule": true,
