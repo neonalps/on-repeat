@@ -1,6 +1,9 @@
 import fastify from "fastify";
 import { getServerHost, getServerPort } from "@src/configuration";
+<<<<<<< HEAD
+=======
 import { scheduler } from '@jobs/scheduler';
+>>>>>>> main
 
 const server = fastify();
 
