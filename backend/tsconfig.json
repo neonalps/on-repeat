@@ -6,7 +6,8 @@
         ],
         "paths": {
             "@src/*": ["src/*"],
-            "@crypto/*": ["src/crypto/*"]
+            "@crypto/*": ["src/crypto/*"],
+            "@jobs/*": ["src/jobs/*"]
         },
         "baseUrl": ".",
         "module": "commonjs",
