@@ -1,6 +1,6 @@
 {
   "name": "on-repeat-backend",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A fun tool for people who love music and statistics",
   "main": "index.js",
   "scripts": {
