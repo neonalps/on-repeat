@@ -7,8 +7,11 @@
         "paths": {
             "@src/*": ["src/*"],
             "@crypto/*": ["src/crypto/*"],
+            "@http/*": ["src/http/*"],
             "@log/*": ["src/log/*"],
-            "@jobs/*": ["src/jobs/*"]
+            "@jobs/*": ["src/jobs/*"],
+            "@providers/*": ["src/providers/*"],
+            "@router/*": ["src/router/*"],
         },
         "baseUrl": ".",
         "module": "commonjs",

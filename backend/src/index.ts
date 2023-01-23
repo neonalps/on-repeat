@@ -1,13 +1,11 @@
 import fastify from "fastify";
 import { getServerHost, getServerPort } from "@src/configuration";
 import logger from "@log/logger";
+import router from "@router/router";
 import scheduler from '@jobs/scheduler';
 
 const server = fastify();
-
-server.get('/hello', async (request, reply) => {
-  return `🎵 Hello from on-repeat 🎵`;
-});
+router.registerRoutes(server);
 
 server.listen({ host: getServerHost(), port: getServerPort() }, (err, address) => {
   if (err) {
