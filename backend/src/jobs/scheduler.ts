@@ -11,12 +11,13 @@ const runBaseScheduler = () => {
 
 const schedule = () => {
     // task that is executed on every scheduler interval
-    console.log('scheduling');
 }
 
-export const scheduler = {
+const scheduler = {
     run: () => {
         schedule();
         runBaseScheduler();
     }
 };
+
+export default scheduler;
