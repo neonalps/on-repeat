@@ -10,8 +10,8 @@
             "@http/*": ["src/http/*"],
             "@log/*": ["src/log/*"],
             "@jobs/*": ["src/jobs/*"],
-            "@providers/*": ["src/providers/*"],
-            "@router/*": ["src/router/*"],
+            "@provider/*": ["src/provider/*"],
+            "@router/*": ["src/router/*"]
         },
         "baseUrl": ".",
         "module": "commonjs",
