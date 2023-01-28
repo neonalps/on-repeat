@@ -12,6 +12,10 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
             type: 'varchar(1000)',
             notNull: true
         },
+        enabled: {
+            type: 'boolean',
+            notNull: true
+        },
         created_at: {
             type: 'timestamp',
             notNull: true,

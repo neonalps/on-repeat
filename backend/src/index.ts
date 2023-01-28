@@ -1,20 +1,22 @@
 import fastify from "fastify";
-import { getServerHost, getServerPort } from "@src/configuration";
+import { getNodeEnv, getServerHost, getServerPort } from "@src/config";
 import logger from "@log/logger";
+import router from "@router/router";
 import scheduler from '@jobs/scheduler';
 
-const server = fastify();
+const start = async () =>  {
+  const server = fastify();
+  await router.registerRoutes(server);
 
-server.get('/hello', async (request, reply) => {
-  return `🎵 Hello from on-repeat 🎵`;
-});
+  server.listen({ host: getServerHost(), port: getServerPort() }, (err, address) => {
+    if (err) {
+      logger.error(err);
+      process.exit(1);
+    }
+    logger.info(`Server listening at ${address}, environment: ${getNodeEnv()}`);
+    
+    scheduler.run();
+  });
+};
 
-server.listen({ host: getServerHost(), port: getServerPort() }, (err, address) => {
-  if (err) {
-    logger.error(err);
-    process.exit(1);
-  }
-  logger.info(`Server listening at ${address}`);
-  
-  scheduler.run();
-});
+start();

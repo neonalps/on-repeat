@@ -6,9 +6,14 @@
         ],
         "paths": {
             "@src/*": ["src/*"],
+            "@config/*": ["src/config/*"],
             "@crypto/*": ["src/crypto/*"],
+            "@db/*": ["src/db/*"],
+            "@http/*": ["src/http/*"],
             "@log/*": ["src/log/*"],
-            "@jobs/*": ["src/jobs/*"]
+            "@jobs/*": ["src/jobs/*"],
+            "@provider/*": ["src/provider/*"],
+            "@router/*": ["src/router/*"]
         },
         "baseUrl": ".",
         "module": "commonjs",
