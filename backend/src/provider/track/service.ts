@@ -13,7 +13,8 @@ const spotifyOauthClient: OauthClient = {
 
 const spotify: TrackProvider = {
     id: 1,
-    name: 'Spotify',
+    name: 'spotify',
+    displayName: 'Spotify',
     enabled: true,
     createdAt: new Date(),
     authProvider: spotifyOauthClient
@@ -23,11 +24,11 @@ const trackProviders = [
     spotify
 ];
 
-const getAll = (): TrackProvider[] => {
+const getAll = async (): Promise<TrackProvider[]> => {
     return [...trackProviders];
 };
 
-const getById = (id: number): TrackProvider | null => {
+const getById = async (id: number): Promise<TrackProvider | null> => {
     const item = trackProviders.find(provider => provider.id === id);
 
     if (!item) {

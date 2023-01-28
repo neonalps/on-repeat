@@ -6,7 +6,9 @@
         ],
         "paths": {
             "@src/*": ["src/*"],
+            "@config/*": ["src/config/*"],
             "@crypto/*": ["src/crypto/*"],
+            "@db/*": ["src/db/*"],
             "@http/*": ["src/http/*"],
             "@log/*": ["src/log/*"],
             "@jobs/*": ["src/jobs/*"],

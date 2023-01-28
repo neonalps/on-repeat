@@ -1,14 +1,18 @@
 import { FastifyInstance } from "fastify";
+import trackProviderService from "@provider/track/service";
 import helloRegistrar from "@router/handlers/hello"; 
 
-const registrarProvider = () => {
+const registrarProvider = async () => {
+    const trackProviders = await trackProviderService.getAll();
+    // TODO convert providers to registrars
+
     return [
         helloRegistrar
     ];
 };
 
-const registerRoutes = (server: FastifyInstance): void => {
-    for (const registrar of registrarProvider()) {
+const registerRoutes = async (server: FastifyInstance): Promise<void> => {
+    for (const registrar of await registrarProvider()) {
         server.register(registrar); 
     }
 };;
