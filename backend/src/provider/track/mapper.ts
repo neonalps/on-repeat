@@ -8,9 +8,9 @@ const getAll = (): Promise<TrackProviderDao[]> => {
             display_name,
             enabled,
             created_at,
-            auth_provider_id
+            oauth_client_id
         from
-            track_providers
+            track_provider
     `;
 };
 

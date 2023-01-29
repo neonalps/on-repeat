@@ -4,5 +4,5 @@ interface TrackProviderDao {
     displayName: string;
     enabled: boolean;
     createdAt: Date;
-    authProviderId: number;
+    oauthClientId: number;
 };

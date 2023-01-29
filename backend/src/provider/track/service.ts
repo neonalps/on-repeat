@@ -1,3 +1,5 @@
+import mapper from "./mapper";
+
 const spotifyOauthClient: OauthClient = {
     id: 1,
     name: 'Spotify',
@@ -25,6 +27,7 @@ const trackProviders = [
 ];
 
 const getAll = async (): Promise<TrackProvider[]> => {
+    console.log(await mapper.getAll());
     return [...trackProviders];
 };
 
