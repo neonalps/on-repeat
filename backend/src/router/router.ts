@@ -4,6 +4,8 @@ import helloRegistrar from "@router/handlers/hello";
 
 const registrarProvider = async () => {
     const trackProviders = await trackProviderService.getAll();
+    console.log('got track providers 🥳', trackProviders);
+
     // TODO convert providers to registrars
 
     return [
