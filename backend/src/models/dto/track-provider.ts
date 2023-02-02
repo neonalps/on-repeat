@@ -4,5 +4,5 @@ interface TrackProvider {
     displayName: string;
     enabled: boolean;
     createdAt: Date;
-    authProvider: OauthClient | null;
+    oauthClient: OauthClient | null;
 }

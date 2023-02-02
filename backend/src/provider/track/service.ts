@@ -1,49 +1,52 @@
 import mapper from "./mapper";
-
-const spotifyOauthClient: OauthClient = {
-    id: 1,
-    name: 'Spotify',
-    clientId: 'spotify-oauth-client',
-    clientSecret: 'secret',
-    grantType: 'authorization_code',
-    scope: 'recently-played',
-    authorizeUrl: 'aurl',
-    authorizeRedirectUrl: 'authred',
-    refreshTokenUrl: 'refr',
-    stateProvider: 'random'
-};
-
-const spotify: TrackProvider = {
-    id: 1,
-    name: 'spotify',
-    displayName: 'Spotify',
-    enabled: true,
-    createdAt: new Date(),
-    authProvider: spotifyOauthClient
-};
-
-const trackProviders = [
-    spotify
-];
+import oauthClientService from "@oauth/service";
 
 const getAll = async (): Promise<TrackProvider[]> => {
-    console.log(await mapper.getAll());
-    return [...trackProviders];
+    const providers = await mapper.getAll();
+    const oauthClients = await oauthClientService.getAll();
+
+    if (!providers || providers.length === 0) {
+        return [];
+    }
+
+    return providers.map(provider => {
+        let oauthClient = null;
+        if (provider.oauthClientId) {
+            oauthClient = oauthClients.find(client => client.id === provider.oauthClientId) || null;
+        }
+        return toDto(provider, oauthClient);
+    });
 };
 
 const getById = async (id: number): Promise<TrackProvider | null> => {
-    const item = trackProviders.find(provider => provider.id === id);
+    const provider = await mapper.getById(id);
 
-    if (!item) {
+    if (!provider) {
         return null;
-    } 
+    }
 
-    return { ...item };
+    let oauthClient = null;
+    if (provider.oauthClientId) {
+        oauthClient = await oauthClientService.getById(provider.oauthClientId);
+    }
+
+    return toDto(provider, oauthClient);
 };
 
 const service = {
     getAll,
     getById,
+};
+
+const toDto = (dao: TrackProviderDao, client: OauthClient | null): TrackProvider => {
+    return {
+        id: dao.id,
+        name: dao.name,
+        displayName: dao.displayName,
+        enabled: dao.enabled,
+        createdAt: dao.createdAt,
+        oauthClient: client
+    };
 };
 
 export default service;
