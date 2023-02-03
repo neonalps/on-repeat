@@ -7,11 +7,12 @@
         "paths": {
             "@src/*": ["src/*"],
             "@config/*": ["src/config/*"],
-            "@crypto/*": ["src/crypto/*"],
+            "@sec/*": ["src/sec/*"],
             "@db/*": ["src/db/*"],
             "@http/*": ["src/http/*"],
             "@log/*": ["src/log/*"],
             "@jobs/*": ["src/jobs/*"],
+            "@oauth/*": ["src/oauth/*"],
             "@provider/*": ["src/provider/*"],
             "@router/*": ["src/router/*"]
         },

@@ -1,4 +1,4 @@
-interface OauthClient {
+interface OauthClientDao {
     id: number;
     name: string;
     clientId: string;

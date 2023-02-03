@@ -16,7 +16,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
             type: 'varchar(1000)',
             notNull: true
         },
-        encrypted_client_secret: {
+        client_secret: {
             type: 'varchar(1000)',
             notNull: true
         },
