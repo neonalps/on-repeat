@@ -1,4 +1,5 @@
 import mapper from "./mapper";
+import cryptoService from "@sec/service";
 
 const getAll = async (): Promise<OauthClient[]> => {
     const clients = await mapper.getAll();
@@ -7,7 +8,11 @@ const getAll = async (): Promise<OauthClient[]> => {
         return [];
     }
 
-    return clients.map(toDto);
+    return clients
+        .map(client => {
+            return { ...client, clientSecret: decryptClientSecret(client.clientSecret) };
+        })
+        .map(toDto);
 };
 
 const getById = async (id: number): Promise<OauthClient | null> => {
@@ -17,7 +22,13 @@ const getById = async (id: number): Promise<OauthClient | null> => {
         return null;
     }
 
+    client.clientSecret = decryptClientSecret(client.clientSecret);
+
     return toDto(client);
+};
+
+const decryptClientSecret = (encryptedSecret: string): string => {
+    return cryptoService.decrypt(encryptedSecret);
 };
 
 const service = {

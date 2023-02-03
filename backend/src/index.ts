@@ -1,5 +1,5 @@
 import fastify from "fastify";
-import { getNodeEnv, getServerHost, getServerPort } from "@src/config";
+import { getNodeEnv, getServerHost, getServerPort, getCryptoKey } from "@src/config";
 import logger from "@log/logger";
 import router from "@router/router";
 import scheduler from '@jobs/scheduler';

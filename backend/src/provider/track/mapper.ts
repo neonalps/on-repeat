@@ -1,26 +1,30 @@
 import sql from '@db/db';
 
-const BASE_SELECT = `
-    select
-        id,
-        name,
-        display_name,
-        enabled,
-        created_at,
-        oauth_client_id
-    from
-        track_provider
-`;
-
 const getAll = (): Promise<TrackProviderDao[]> => {
     return sql<TrackProviderDao[]>`
-        ${ BASE_SELECT }
+        select
+            id,
+            name,
+            display_name,
+            enabled,
+            created_at,
+            oauth_client_id
+        from
+            track_provider
     `;
 };
 
 const getById = async (id: number): Promise<TrackProviderDao | null> => {
     const providers = await sql<TrackProviderDao[]>`
-        ${ BASE_SELECT }
+        select
+            id,
+            name,
+            display_name,
+            enabled,
+            created_at,
+            oauth_client_id
+        from
+            track_provider
         where
             id = ${ id }
     `;

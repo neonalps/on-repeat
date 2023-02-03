@@ -1,31 +1,40 @@
 import sql from '@db/db';
 
-const BASE_SELECT = `
-    select
-        id,
-        name,
-        client_id,
-        client_secret,
-        grant_type,
-        scope,
-        authorize_url,
-        authorize_redirect_url,
-        refresh_token_url,
-        state_provider,
-        created_at
-    from
-        oauth_client
-`;
-
 const getAll = (): Promise<OauthClientDao[]> => {
     return sql<OauthClientDao[]>`
-        ${ BASE_SELECT }
+        select
+            id,
+            name,
+            client_id,
+            client_secret,
+            grant_type,
+            scope,
+            authorize_url,
+            authorize_redirect_url,
+            refresh_token_url,
+            state_provider,
+            created_at
+        from
+            oauth_client
     `;
 };
 
 const getById = async (id: number): Promise<OauthClientDao | null> => {
     const clients = await sql<OauthClientDao[]>`
-        ${ BASE_SELECT }
+        select
+            id,
+            name,
+            client_id,
+            client_secret,
+            grant_type,
+            scope,
+            authorize_url,
+            authorize_redirect_url,
+            refresh_token_url,
+            state_provider,
+            created_at
+        from
+            oauth_client
         where
             id = ${ id }
     `;
