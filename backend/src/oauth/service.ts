@@ -1,5 +1,6 @@
 import mapper from "./mapper";
 import cryptoService from "@sec/service";
+import { validateNotNull } from "@util/validation";
 
 const getAll = async (): Promise<OauthClient[]> => {
     const clients = await mapper.getAll();
@@ -16,6 +17,8 @@ const getAll = async (): Promise<OauthClient[]> => {
 };
 
 const getById = async (id: number): Promise<OauthClient | null> => {
+    validateNotNull(id, "id");
+
     const client = await mapper.getById(id);
 
     if (!client) {
@@ -31,13 +34,13 @@ const decryptClientSecret = (encryptedSecret: string): string => {
     return cryptoService.decrypt(encryptedSecret);
 };
 
+const toDto = (dao: OauthClientDao): OauthClient => {
+    return { ...dao };
+};
+
 const service = {
     getAll,
     getById,
-};
-
-const toDto = (dao: OauthClientDao): OauthClient => {
-    return { ...dao };
 };
 
 export default service;

@@ -1,6 +1,8 @@
 import { FastifyInstance } from "fastify";
 import trackProviderService from "@provider/track/service";
-import helloRegistrar from "@router/handlers/hello"; 
+import helloRegistrar from "@router/handlers/hello";
+import googleRegistrar from "@router/handlers/oauth/google";
+import spotifyRegistrar from "@router/handlers/oauth/spotify";
 
 const registrarProvider = async () => {
     const trackProviders = await trackProviderService.getAll();
@@ -9,7 +11,9 @@ const registrarProvider = async () => {
     // TODO convert providers to registrars
 
     return [
-        helloRegistrar
+        helloRegistrar,
+        googleRegistrar,
+        spotifyRegistrar
     ];
 };
 
