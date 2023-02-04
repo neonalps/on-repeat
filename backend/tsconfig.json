@@ -14,7 +14,9 @@
             "@jobs/*": ["src/jobs/*"],
             "@oauth/*": ["src/oauth/*"],
             "@provider/*": ["src/provider/*"],
-            "@router/*": ["src/router/*"]
+            "@router/*": ["src/router/*"],
+            "@user/*": ["src/user/*"],
+            "@util/*": ["src/util/*"],
         },
         "baseUrl": ".",
         "module": "commonjs",
