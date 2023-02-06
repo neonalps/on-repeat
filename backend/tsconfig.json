@@ -6,8 +6,8 @@
         ],
         "paths": {
             "@src/*": ["src/*"],
+            "@auth/*": ["src/auth/*"],
             "@config/*": ["src/config/*"],
-            "@sec/*": ["src/sec/*"],
             "@db/*": ["src/db/*"],
             "@http/*": ["src/http/*"],
             "@log/*": ["src/log/*"],
@@ -15,8 +15,9 @@
             "@oauth/*": ["src/oauth/*"],
             "@provider/*": ["src/provider/*"],
             "@router/*": ["src/router/*"],
+            "@sec/*": ["src/sec/*"],
             "@user/*": ["src/user/*"],
-            "@util/*": ["src/util/*"],
+            "@util/*": ["src/util/*"]
         },
         "baseUrl": ".",
         "module": "commonjs",
