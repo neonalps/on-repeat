@@ -1,10 +1,11 @@
 import { FastifyInstance } from "fastify";
 import trackProviderService from "@provider/track/service";
 import helloRegistrar from "@router/handlers/hello";
+import authHandler from "@src/auth/handler";
 import googleRegistrar from "@router/handlers/oauth/google";
 import spotifyRegistrar from "@router/handlers/oauth/spotify";
 
-const registrarProvider = async () => {
+const handlerProvider = async () => {
     const trackProviders = await trackProviderService.getAll();
     console.log('got track providers 🥳', trackProviders);
 
@@ -12,19 +13,20 @@ const registrarProvider = async () => {
 
     return [
         helloRegistrar,
+        authHandler,
         googleRegistrar,
         spotifyRegistrar
     ];
 };
 
-const registerRoutes = async (server: FastifyInstance): Promise<void> => {
-    for (const registrar of await registrarProvider()) {
-        server.register(registrar); 
+const registerHandlers = async (server: FastifyInstance): Promise<void> => {
+    for (const handler of await handlerProvider()) {
+        server.register(handler); 
     }
 };;
 
 const router = {
-    registerRoutes
+    registerHandlers
 };
 
 export default router;

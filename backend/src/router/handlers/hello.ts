@@ -4,9 +4,8 @@ const handler = (request: FastifyRequest, reply: FastifyReply) => {
     return `🎵 Hello from on-repeat 🎵`;
 };
 
-const registrar = (server: FastifyInstance, opts: unknown, done: CallableFunction) => {
+const registrar = async (server: FastifyInstance, opts: unknown, done: CallableFunction): Promise<void> => {
     server.get('/hello', handler);
-    done();
 };
 
 export default registrar;

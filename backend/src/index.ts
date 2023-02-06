@@ -6,7 +6,7 @@ import scheduler from '@jobs/scheduler';
 
 const start = async () =>  {
   const server = fastify();
-  await router.registerRoutes(server);
+  await router.registerHandlers(server);
 
   server.listen({ host: getServerHost(), port: getServerPort() }, (err, address) => {
     if (err) {
