@@ -30,5 +30,9 @@
         "strict": true,
         "noImplicitAny": true,
         "skipLibCheck": true
-    }
+    },
+    "exclude": [
+        "jest.config.js",
+        "src/**/*.test.ts"
+    ]
 }
