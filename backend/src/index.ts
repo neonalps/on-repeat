@@ -3,6 +3,7 @@ import { getNodeEnv, getServerHost, getServerPort, getCryptoKey } from "@src/con
 import logger from "@log/logger";
 import router from "@router/router";
 import scheduler from '@jobs/scheduler';
+import { getAuthorizeUrl } from "./oauth/spotify";
 
 const start = async () =>  {
   const server = fastify();
@@ -14,6 +15,13 @@ const start = async () =>  {
       process.exit(1);
     }
     logger.info(`Server listening at ${address}, environment: ${getNodeEnv()}`);
+
+    logger.info('\n');
+    
+    if (getNodeEnv() === "development") {
+      console.log(`🎵 Spotify Authorize URL: ${getAuthorizeUrl('mystate')}`);
+    }
+    
     
     scheduler.run();
   });

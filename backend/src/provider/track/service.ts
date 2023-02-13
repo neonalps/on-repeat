@@ -1,10 +1,9 @@
 import mapper from "./mapper";
-import oauthClientService from "@oauth/service";
 import { validateNotNull } from "@util/validation";
 
 const getAll = async (): Promise<TrackProvider[]> => {
     const providers = await mapper.getAll();
-    const oauthClients = await oauthClientService.getAll();
+    const oauthClients: OauthClient[] = [];
 
     if (!providers || providers.length === 0) {
         return [];
@@ -28,12 +27,7 @@ const getById = async (id: number): Promise<TrackProvider | null> => {
         return null;
     }
 
-    let oauthClient = null;
-    if (provider.oauthClientId) {
-        oauthClient = await oauthClientService.getById(provider.oauthClientId);
-    }
-
-    return toDto(provider, oauthClient);
+    return toDto(provider, null);
 };
 
 const toDto = (dao: TrackProviderDao, client: OauthClient | null): TrackProvider => {

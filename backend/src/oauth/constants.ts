@@ -1,0 +1,4 @@
+export const OAUTH_PROVIDER_GOOGLE = "google";
+export const OAUTH_PROVIDER_SPOTIFY = "spotify";
+
+export const OAUTH_PROVIDERS = [OAUTH_PROVIDER_GOOGLE, OAUTH_PROVIDER_SPOTIFY];

@@ -1,46 +1,34 @@
-import mapper from "./mapper";
-import cryptoService from "@sec/service";
-import { validateNotNull } from "@util/validation";
+import { validateNotBlank, validateNotNull } from "@src/util/validation";
+import { OAUTH_PROVIDER_GOOGLE, OAUTH_PROVIDER_SPOTIFY } from "./constants";
+import { exchangeCodeForToken } from "./spotify";
 
-const getAll = async (): Promise<OauthClient[]> => {
-    const clients = await mapper.getAll();
+const retrieveOauthToken = async (dto: RetrieveOauthTokenDto): Promise<OauthTokenResponse> => {
+    validateNotNull(dto, "dto");
+    validateNotBlank(dto.provider, "dto.provider");
+    validateNotBlank(dto.code, "dto.code");
 
-    if (!clients || clients.length === 0) {
-        return [];
+    switch (dto.provider) {
+        case OAUTH_PROVIDER_SPOTIFY:
+            return retrieveSpotifyOauthToken(dto);
+
+        case OAUTH_PROVIDER_GOOGLE:
+            return retrieveGoogleOauthToken(dto);
+
+        default:
+            throw new Error(`Unknown Oauth provider ${dto.provider}`);
     }
-
-    return clients
-        .map(client => {
-            return { ...client, clientSecret: decryptClientSecret(client.clientSecret) };
-        })
-        .map(toDto);
 };
 
-const getById = async (id: number): Promise<OauthClient | null> => {
-    validateNotNull(id, "id");
-
-    const client = await mapper.getById(id);
-
-    if (!client) {
-        return null;
-    }
-
-    client.clientSecret = decryptClientSecret(client.clientSecret);
-
-    return toDto(client);
+const retrieveSpotifyOauthToken = async (dto: RetrieveOauthTokenDto): Promise<OauthTokenResponse> => {
+    return exchangeCodeForToken(dto.code);
 };
 
-const decryptClientSecret = (encryptedSecret: string): string => {
-    return cryptoService.decrypt(encryptedSecret);
-};
-
-const toDto = (dao: OauthClientDao): OauthClient => {
-    return { ...dao };
+const retrieveGoogleOauthToken = async (dto: RetrieveOauthTokenDto): Promise<OauthTokenResponse> => {
+    return exchangeCodeForToken(dto.code);
 };
 
 const service = {
-    getAll,
-    getById,
+    retrieveOauthToken,
 };
 
 export default service;

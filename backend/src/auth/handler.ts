@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyReply, FastifyRequest, FastifySchema } from "fastify";
 import service from "./service";
 
-const createAuthTokenDtoJsonSchema = {
+const createAuthTokenDtoJsonSchema   = {
     type: 'object',
     required: ['userId'],
     properties: {
@@ -9,11 +9,11 @@ const createAuthTokenDtoJsonSchema = {
     }
 };
 
-const schema: FastifySchema = {
+const createAuthTokenSchema: FastifySchema = {
     body: createAuthTokenDtoJsonSchema
 };
 
-const handler = async (request: FastifyRequest, reply: FastifyReply) => {
+const createAuthTokenHandler = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
     const body = request.body as CreateAccessTokenDto;
     const signedAccessToken = service.createSignedAccessToken(body.userId);
 
@@ -23,8 +23,8 @@ const handler = async (request: FastifyRequest, reply: FastifyReply) => {
         .send({ accessToken: signedAccessToken });
 };
 
-const registrar = async (server: FastifyInstance): Promise<void> => {
-    server.post('/auth/token', { schema }, handler);
+const handler = async (server: FastifyInstance): Promise<void> => {
+    server.post('/api/v1/auth/token', { schema: createAuthTokenSchema }, createAuthTokenHandler);
 };
 
-export default registrar;
+export default handler;
