@@ -5,7 +5,7 @@ const validateNotNull = (input: unknown, property: string): void => {
 };
 
 const validateNotBlank = (input: string, property: string): void => {
-    if (input.trim().length <= 0) {
+    if (!input || input.trim().length <= 0) {
         throw new Error(`${property} must not be blank`);
     }
 };

@@ -1,9 +1,8 @@
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 const charactersLength = characters.length;
 
-export const HTTP_STATUS: Record<string, number> = {
-    OK: 200,
-    CREATED: 201,
+export const getQueryString = (params: Record<string, string>): string => {
+    return new URLSearchParams(params).toString();
 };
 
 export const generateRandomString = (size: number) => {

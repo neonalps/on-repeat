@@ -2,6 +2,7 @@ import { FastifyInstance, FastifyReply, FastifyRequest, FastifySchema } from "fa
 import { OAUTH_PROVIDERS } from "./constants";
 import service from "./service";
 import { exchangeCodeForToken } from "./spotify";
+import userService from "@user/service";
 
 type GetCodeTokenRequest = FastifyRequest<{
     Querystring: { code: string }
@@ -36,15 +37,21 @@ const getCodeTokenHandler = async (request: GetCodeTokenRequest, reply: FastifyR
     const { code } = request.query;
 
     const oauthToken: OauthTokenResponse = await exchangeCodeForToken(code);
+    const identityInformation: SpotifyUserProfile = await service.retrieveIdentityInformation(oauthToken.accessToken);
 
-    // TODO store in token service (provider, scope, expiration, access, refresh)
+    if (!identityInformation || !identityInformation.email) {
+        // TODO return error
+    }
 
-    const identityInformation: UserProfile = await service.retrieveIdentityInformation(oauthToken.accessToken);
+    const user = await userService.getOrCreate(identityInformation.email);
+    
+    // TODO get/add in user service
+    // TODO store in token service (userId, provider, scope, expiration, access, refresh)
 
     reply
         .code(200)
         .header('Content-Type', 'application/json; charset=utf-8')
-        .send({ oauthToken, identity: identityInformation });
+        .send({ oauthToken, identity: identityInformation, user });
 };
 
 const handler = async (server: FastifyInstance): Promise<void> => {
