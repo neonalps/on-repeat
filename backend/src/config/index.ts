@@ -12,6 +12,9 @@ const accessTokenValiditySeconds = env.get("ACCESS_TOKEN_VALIDITY_SECONDS").requ
 const authTokenAudience = env.get("AUTH_TOKEN_AUDIENCE").required().asString();
 const authTokenIssuer = env.get("AUTH_TOKEN_ISSUER").required().asString();
 const authTokenSigningKey = env.get("AUTH_TOKEN_SIGNING_KEY").required().asString();
+const spotifyClientId = env.get("SPOTIFY_CLIENT_ID").required().asString();
+const spotifyClientSecret = env.get("SPOTIFY_CLIENT_SECRET").required().asString();
+const spotifyRedirectUrl = env.get("SPOTIFY_REDIRECT_URL").required().asString();
 
 export const getNodeEnv = () => nodeEnv;
 export const getCryptoKey = () => cryptoKey;
@@ -22,3 +25,6 @@ export const getAccessTokenValiditySeconds = () => accessTokenValiditySeconds;
 export const getAuthTokenAudience = () => authTokenAudience;
 export const getAuthTokenIssuer = () => authTokenIssuer;
 export const getAuthTokenSigningKey = () => authTokenSigningKey;
+export const getSpotifyClientId = () => spotifyClientId;
+export const getSpotifyClientSecret = () => spotifyClientSecret;
+export const getSpotifyRedirectUrl = () => spotifyRedirectUrl;
