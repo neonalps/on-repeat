@@ -2,7 +2,7 @@ import sql from '@db/db';
 
 const create = async (user: CreateUserDto): Promise<string> => {
     const result = await sql`
-        insert into user
+        insert into account
             (id, email, enabled, created_at)
         values
             (${ user.id }, ${ user.email }, ${ user.enabled }, now())
@@ -20,7 +20,7 @@ const getAll = (): Promise<UserDao[]> => {
             enabled,
             created_at
         from
-            user
+            account
     `;
 };
 
@@ -32,7 +32,7 @@ const getById = async (id: string): Promise<UserDao | null> => {
             enabled,
             created_at
         from
-            user
+            account
         where
             id = ${ id }
     `;
@@ -52,7 +52,7 @@ const getByEmail = async (email: string): Promise<UserDao | null> => {
             enabled,
             created_at
         from
-            user
+            account
         where
             email = ${ email }
     `;

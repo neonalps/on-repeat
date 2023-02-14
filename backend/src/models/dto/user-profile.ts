@@ -1,4 +1,4 @@
-interface UserProfile {
+interface SpotifyUserProfile {
     id: string;
     email: string;
     displayName?: string;

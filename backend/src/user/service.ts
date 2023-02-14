@@ -3,7 +3,6 @@ import { validateNotBlank, validateNotNull } from "@util/validation";
 import { getUuid } from "@util/uuid";
 
 const getOrCreate = async (email: string): Promise<User | null> => {
-    validateNotNull(email, "email");
     validateNotBlank(email, "email");
 
     const existingUser = await getByEmail(email);

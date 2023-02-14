@@ -19,7 +19,7 @@ const retrieveOauthToken = async (dto: RetrieveOauthTokenDto): Promise<OauthToke
     }
 };
 
-const retrieveIdentityInformation = async (accessToken: string): Promise<UserProfile> => {
+const retrieveIdentityInformation = async (accessToken: string): Promise<SpotifyUserProfile> => {
     validateNotBlank(accessToken, "accessToken");
     return getUserProfile(accessToken);
 };

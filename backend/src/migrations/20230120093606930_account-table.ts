@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { MigrationBuilder, ColumnDefinitions } from 'node-pg-migrate';
 
-const TABLE_NAME = "user";
+const TABLE_NAME = "account";
 
 export const shorthands: ColumnDefinitions | undefined = undefined;
 

@@ -1,6 +1,8 @@
 import { getSpotifyClientId, getSpotifyClientSecret, getSpotifyRedirectUrl } from "@src/config";
-import { generateRandomString, HTTP_STATUS } from "@src/util/common";
-import { request } from "undici";
+import { AUTHORIZATION, CONTENT_TYPE, HEADER, HTTP_STATUS } from "@src/http/constants";
+import { generateRandomString, getQueryString } from "@src/util/common";
+import { OAUTH_GRANT_TYPE_AUTHORIZATION_CODE, OAUTH_RESPONSE_TYPE_CODE } from "./constants";
+import http from "@src/http/index";
 
 const OAUTH_AUTHORIZE_URL = 'https://accounts.spotify.com/authorize';
 const OAUTH_TOKEN_URL = 'https://accounts.spotify.com/api/token';
@@ -20,7 +22,7 @@ export const getAuthorizeUrl = (): string => {
 
     const params = {
         state,
-        response_type: "code",
+        response_type: OAUTH_RESPONSE_TYPE_CODE,
         client_id: clientId,
         scope: OAUTH_SCOPE_EMAIL,
         redirect_uri: redirectUrl
@@ -29,22 +31,23 @@ export const getAuthorizeUrl = (): string => {
 };
 
 export const exchangeCodeForToken = async (code: string): Promise<OauthTokenResponse> => {
-    const { statusCode, body: response } = await request(OAUTH_TOKEN_URL, {
-        method: 'POST',
+    const response = await http.post<OauthTokenResponseDto>(OAUTH_TOKEN_URL, {
         headers: { 
-            'Accept': 'application/json',
-            'Authorization': `Basic ${getAuthHeader(clientId, clientSecret)}`,
-            'Content-Type': 'application/x-www-form-urlencoded',
+            [HEADER.ACCEPT]: CONTENT_TYPE.JSON,
+            [HEADER.AUTHORIZATION]: `${AUTHORIZATION.BASIC} ${getAuthHeader(clientId, clientSecret)}`,
+            [HEADER.CONTENT_TYPE]: CONTENT_TYPE.FORM_URLENCODED,
         },
         body: getCodeExchangeParams(code)
     });
 
-    if (statusCode !== HTTP_STATUS.OK) {
+    if (response.statusCode !== HTTP_STATUS.OK) {
         // TODO improve error handling (create extended error class?)
         throw new Error("something went wrong while exchanging code for token");
     }
 
-    const responseBody = await response.json() as OauthTokenResponseDto;
+    const responseBody = response.body;
+
+    // TODO check whether response body is present
 
     return {
         accessToken: responseBody.access_token,
@@ -55,22 +58,23 @@ export const exchangeCodeForToken = async (code: string): Promise<OauthTokenResp
     };
 };
 
-export const getUserProfile = async (accessToken: string): Promise<UserProfile> => {
-    const { statusCode, body: response } = await request(OAUTH_USER_PROFILE_URL, {
-        method: 'GET',
+export const getUserProfile = async (accessToken: string): Promise<SpotifyUserProfile> => {
+    const response = await http.get<GetUserProfileResponseDto>(OAUTH_USER_PROFILE_URL, {
         headers: { 
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
+            [HEADER.ACCEPT]: CONTENT_TYPE.JSON,
+            [HEADER.AUTHORIZATION]: `${AUTHORIZATION.BEARER} ${accessToken}`,
+            [HEADER.CONTENT_TYPE]: CONTENT_TYPE.JSON,
         }
     });
 
-    if (statusCode !== HTTP_STATUS.OK) {
+    if (response.statusCode !== HTTP_STATUS.OK) {
         // TODO improve error handling (create extended error class?)
         throw new Error("something went wrong while getting the user profile");
     }
 
-    const responseBody = await response.json() as GetUserProfileResponseDto;
+    const responseBody = response.body;
+
+    // TODO check whether response body is present
 
     return {
         id: responseBody.id,
@@ -84,14 +88,10 @@ export const getAuthHeader = (id: string, secret: string): string => {
     return Buffer.from(`${id}:${secret}`, 'utf8').toString('base64');
 };
 
-const getQueryString = (params: Record<string, string>): string => {
-    return new URLSearchParams(params).toString();
-};
-
 const getCodeExchangeParams = (code: string): string => {
     return getQueryString({
         code,
-        grant_type: 'authorization_code',
+        grant_type: OAUTH_GRANT_TYPE_AUTHORIZATION_CODE,
         redirect_uri: redirectUrl,
     });
 }
