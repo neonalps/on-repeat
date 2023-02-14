@@ -15,13 +15,10 @@ const start = async () =>  {
       process.exit(1);
     }
     logger.info(`Server listening at ${address}, environment: ${getNodeEnv()}`);
-
-    logger.info('\n');
     
     if (getNodeEnv() === "development") {
-      console.log(`🎵 Spotify Authorize URL: ${getAuthorizeUrl('mystate')}`);
+      console.log(`🎵 Spotify Authorize URL: ${getAuthorizeUrl()}`);
     }
-    
     
     scheduler.run();
   });

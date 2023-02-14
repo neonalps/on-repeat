@@ -24,7 +24,7 @@ const retrieveOauthTokenSchema: FastifySchema = {
 const retrieveOauthTokenHandler = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
     const body = request.body as RetrieveOauthTokenDto;
     
-    const oauthToken = await service.retrieveOauthToken(body);
+    const oauthToken: OauthTokenResponse = await service.retrieveOauthToken(body);
 
     reply
         .code(200)
@@ -35,12 +35,16 @@ const retrieveOauthTokenHandler = async (request: FastifyRequest, reply: Fastify
 const getCodeTokenHandler = async (request: GetCodeTokenRequest, reply: FastifyReply): Promise<void> => {
     const { code } = request.query;
 
-    const response = await exchangeCodeForToken(code);
+    const oauthToken: OauthTokenResponse = await exchangeCodeForToken(code);
+
+    // TODO store in token service (provider, scope, expiration, access, refresh)
+
+    const identityInformation: UserProfile = await service.retrieveIdentityInformation(oauthToken.accessToken);
 
     reply
         .code(200)
         .header('Content-Type', 'application/json; charset=utf-8')
-        .send({ ...response });
+        .send({ oauthToken, identity: identityInformation });
 };
 
 const handler = async (server: FastifyInstance): Promise<void> => {

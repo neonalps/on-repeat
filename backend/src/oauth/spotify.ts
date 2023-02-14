@@ -1,73 +1,97 @@
 import { getSpotifyClientId, getSpotifyClientSecret, getSpotifyRedirectUrl } from "@src/config";
-import axios from "axios";
-import qs from "qs";
+import { generateRandomString, HTTP_STATUS } from "@src/util/common";
+import { request } from "undici";
 
 const OAUTH_AUTHORIZE_URL = 'https://accounts.spotify.com/authorize';
 const OAUTH_TOKEN_URL = 'https://accounts.spotify.com/api/token';
+const OAUTH_USER_PROFILE_URL = 'https://api.spotify.com/v1/me';
 
-const OAUTH_SCOPE = "user-read-private user-read-email user-read-recently-played";
+const OAUTH_SCOPE_EMAIL = "user-read-private user-read-email";
+const OAUTH_SCOPE_RECENTLY_PLAYED = "user-read-recently-played";
+
+const OAUTH_STATE_PARAM_LENGTH = 12;
 
 const clientId = getSpotifyClientId();
 const clientSecret = getSpotifyClientSecret();
 const redirectUrl = getSpotifyRedirectUrl();
 
-export const getAuthorizeUrl = (state: string): string => {
+export const getAuthorizeUrl = (): string => {
+    const state = generateRandomString(OAUTH_STATE_PARAM_LENGTH);
+
     const params = {
         state,
         response_type: "code",
         client_id: clientId,
-        scope: OAUTH_SCOPE,
+        scope: OAUTH_SCOPE_EMAIL,
         redirect_uri: redirectUrl
     };
-    
-    const queryParams: string = new URLSearchParams(params).toString();
-    return `${OAUTH_AUTHORIZE_URL}?${queryParams}`;
+    return `${OAUTH_AUTHORIZE_URL}?${getQueryString(params)}`;
 };
 
 export const exchangeCodeForToken = async (code: string): Promise<OauthTokenResponse> => {
-    const headers = { 
-        'Accept': 'application/json',
-        'Authorization': `Basic ${getAuthHeader(clientId, clientSecret)}`,
-        'Content-Type': 'application/x-www-form-urlencoded'
-    };
+    const { statusCode, body: response } = await request(OAUTH_TOKEN_URL, {
+        method: 'POST',
+        headers: { 
+            'Accept': 'application/json',
+            'Authorization': `Basic ${getAuthHeader(clientId, clientSecret)}`,
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: getCodeExchangeParams(code)
+    });
 
-    try {
-        const response = await axios({
-            method: 'post',
-            url: OAUTH_TOKEN_URL,
-            data: new URLSearchParams({
-                code,
-                grant_type: 'authorization_code',
-                redirect_uri: redirectUrl,
-            }),
-            headers,
-        });
-        console.log('response', response.data);
-    } catch (ex) {
-        console.error(ex);
-    } finally {
-        return {
-            accessToken: 'accessToken',
-            refreshToken: 'refreshToken',
-            expiresIn: 3600,
-            scope: 'scope',
-            tokenType: 'access'
-        };
+    if (statusCode !== HTTP_STATUS.OK) {
+        // TODO improve error handling (create extended error class?)
+        throw new Error("something went wrong while exchanging code for token");
     }
 
-    
-    //const body = await response.body.json().data as OauthTokenResponse;
-    //return body;
+    const responseBody = await response.json() as OauthTokenResponseDto;
+
+    return {
+        accessToken: responseBody.access_token,
+        refreshToken: responseBody.refresh_token,
+        expiresIn: responseBody.expires_in,
+        scope: responseBody.scope,
+        tokenType: responseBody.token_type,
+    };
 };
+
+export const getUserProfile = async (accessToken: string): Promise<UserProfile> => {
+    const { statusCode, body: response } = await request(OAUTH_USER_PROFILE_URL, {
+        method: 'GET',
+        headers: { 
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+        }
+    });
+
+    if (statusCode !== HTTP_STATUS.OK) {
+        // TODO improve error handling (create extended error class?)
+        throw new Error("something went wrong while getting the user profile");
+    }
+
+    const responseBody = await response.json() as GetUserProfileResponseDto;
+
+    return {
+        id: responseBody.id,
+        email: responseBody.email,
+        displayName: responseBody.display_name,
+        href: responseBody.href,
+    };
+}
 
 export const getAuthHeader = (id: string, secret: string): string => {
     return Buffer.from(`${id}:${secret}`, 'utf8').toString('base64');
 };
 
-export const getCodeExchangeParams = (dto: CodeExchangeDto): URLSearchParams => {
-    return new URLSearchParams({
-        code: dto.code,
-        redirect_uri: dto.redirectUrl,
-        grant_type: dto.grantType
-    });
+const getQueryString = (params: Record<string, string>): string => {
+    return new URLSearchParams(params).toString();
 };
+
+const getCodeExchangeParams = (code: string): string => {
+    return getQueryString({
+        code,
+        grant_type: 'authorization_code',
+        redirect_uri: redirectUrl,
+    });
+}
