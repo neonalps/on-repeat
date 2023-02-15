@@ -10,14 +10,14 @@ const KEY_BUFFER = Buffer.from(keyProvider.getCryptoKey(), HEX);
 
 const getIv = () => crypto.randomBytes(IV_SIZE);
 
-const encrypt = (plaintext: string): string => {
+export const encrypt = (plaintext: string): string => {
     const iv = getIv();
     const cipher = crypto.createCipheriv(ALGORITHM, KEY_BUFFER, iv)
     const encrypted = Buffer.concat([cipher.update(plaintext), cipher.final()]);
     return [iv.toString(HEX), encrypted.toString(HEX)].join(JOIN_CHAR);
 };
 
-const decrypt = (ciphertext: string): string => {
+export const decrypt = (ciphertext: string): string => {
     const ciphertextParts = ciphertext.split(JOIN_CHAR);
 
     if (!ciphertextParts || ciphertextParts.length != 2) {
@@ -30,10 +30,18 @@ const decrypt = (ciphertext: string): string => {
     return Buffer.concat([decipher.update(encryptedText), decipher.final()]).toString();
 };
 
-const service = {
-    decrypt,
-    encrypt
+export const safelyEncrypt = (plaintextInput?: string): string | undefined => {
+    if (!plaintextInput) {
+        return;
+    }
+
+    return encrypt(plaintextInput);
 };
 
-export default service;
+export const safelyDecrypt = (encryptedInput?: string): string | undefined => {
+    if (!encryptedInput) {
+        return;
+    }
 
+    return decrypt(encryptedInput);
+};

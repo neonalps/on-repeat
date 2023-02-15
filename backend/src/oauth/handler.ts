@@ -45,7 +45,6 @@ const getCodeTokenHandler = async (request: GetCodeTokenRequest, reply: FastifyR
 
     const user = await userService.getOrCreate(identityInformation.email);
     
-    // TODO get/add in user service
     // TODO store in token service (userId, provider, scope, expiration, access, refresh)
 
     reply
