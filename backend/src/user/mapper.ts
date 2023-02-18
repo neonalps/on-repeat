@@ -3,9 +3,9 @@ import sql from '@db/db';
 const create = async (user: CreateUserDto): Promise<string> => {
     const result = await sql`
         insert into account
-            (id, email, enabled, created_at)
+            (id, hashed_email, enabled, created_at)
         values
-            (${ user.id }, ${ user.email }, ${ user.enabled }, now())
+            (${ user.id }, ${ user.hashedEmail }, ${ user.enabled }, now())
         returning id
     `;
 
@@ -16,7 +16,6 @@ const getAll = (): Promise<UserDao[]> => {
     return sql<UserDao[]>`
         select
             id,
-            email,
             enabled,
             created_at
         from
@@ -28,7 +27,6 @@ const getById = async (id: string): Promise<UserDao | null> => {
     const result = await sql<UserDao[]>`
         select
             id,
-            email,
             enabled,
             created_at
         from
@@ -44,17 +42,16 @@ const getById = async (id: string): Promise<UserDao | null> => {
     return result[0];
 };
 
-const getByEmail = async (email: string): Promise<UserDao | null> => {
+const getByHashedEmail = async (hashedEmail: string): Promise<UserDao | null> => {
     const result = await sql<UserDao[]>`
         select
             id,
-            email,
             enabled,
             created_at
         from
             account
         where
-            email = ${ email }
+            hashed_email = ${ hashedEmail }
     `;
 
     if (!result || result.length === 0) {
@@ -67,7 +64,7 @@ const getByEmail = async (email: string): Promise<UserDao | null> => {
 const mapper = {
     create,
     getAll,
-    getByEmail,
+    getByHashedEmail,
     getById
 };
 

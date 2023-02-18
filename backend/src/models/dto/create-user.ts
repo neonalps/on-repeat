@@ -1,5 +1,5 @@
 interface CreateUserDto {
     id: string;
-    email: string;
+    hashedEmail: string;
     enabled: boolean;
 };

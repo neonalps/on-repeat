@@ -1,6 +1,7 @@
 interface UserDao {
     id: string;
-    email: string;
+    hashedEmail: string;
+    encryptedEmail: string | null;
     enabled: boolean;
     createdAt: Date;
 }
