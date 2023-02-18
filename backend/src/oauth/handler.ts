@@ -1,8 +1,10 @@
 import { FastifyInstance, FastifyReply, FastifyRequest, FastifySchema } from "fastify";
-import { OAUTH_PROVIDERS } from "./constants";
+import { OAUTH_PROVIDERS, OAUTH_PROVIDER_SPOTIFY } from "./constants";
 import service from "./service";
 import { exchangeCodeForToken } from "./spotify";
 import userService from "@user/service";
+import accountTokenService from "@src/account-token/service";
+import { getNowPlusSeconds } from "@src/util/time";
 
 type GetCodeTokenRequest = FastifyRequest<{
     Querystring: { code: string }
@@ -44,8 +46,23 @@ const getCodeTokenHandler = async (request: GetCodeTokenRequest, reply: FastifyR
     }
 
     const user = await userService.getOrCreate(identityInformation.email);
-    
-    // TODO store in token service (userId, provider, scope, expiration, access, refresh)
+
+    if (user === null) {
+        throw new Error("could not create user");
+    }
+
+    const accountToken = await accountTokenService.create({
+        oauthProvider: OAUTH_PROVIDER_SPOTIFY,
+        accountId: user.id,
+        accessToken: oauthToken.accessToken,
+        accessTokenExpiresAt: getNowPlusSeconds(oauthToken.expiresIn),
+        refreshToken: oauthToken.refreshToken,
+        scope: oauthToken.scope,
+    });
+
+    if (accountToken === null) {
+        throw new Error("could not create account token");
+    }
 
     reply
         .code(200)

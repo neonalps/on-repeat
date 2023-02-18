@@ -1,6 +1,7 @@
 import mapper from "./mapper";
 import { validateNotBlank, validateNotNull } from "@util/validation";
 import { getUuid } from "@util/uuid";
+import { decrypt, encrypt } from "@src/sec/service";
 
 const getOrCreate = async (email: string): Promise<User | null> => {
     validateNotBlank(email, "email");
@@ -25,7 +26,10 @@ const create = async (user: CreateUserDto): Promise<User | null> => {
     validateNotBlank(user.id, "user.id");
     validateNotBlank(user.email, "user.email");
 
-    const userId = await mapper.create(user);
+    const userId = await mapper.create({
+        ...user,
+        email: encrypt(user.email),
+    });
 
     if (user.id !== userId) {
         throw new Error("Failed to create user");
@@ -69,7 +73,10 @@ const getById = async (id: string): Promise<User | null> => {
 };
 
 const toDto = (userDao: UserDao): User => {
-    return { ...userDao };
+    return { 
+        ...userDao,
+        email: decrypt(userDao.email),
+     };
 }
 
 const service = {

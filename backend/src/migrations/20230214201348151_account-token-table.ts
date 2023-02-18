@@ -23,15 +23,15 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
         },
         access_token: {
             type: 'varchar(1000)',
-            notNull: false
+            notNull: true
         },
         access_token_expires_at: {
             type: 'timestamp',
-            notNull: false
+            notNull: true
         },
         refresh_token: {
             type: 'varchar(1000)',
-            notNull: false
+            notNull: true
         },
         refresh_token_retry_count: {
             type: 'smallint',
