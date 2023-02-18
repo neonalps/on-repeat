@@ -1,12 +1,14 @@
 import mapper from "./mapper";
 import { validateNotBlank, validateNotNull } from "@util/validation";
 import { getUuid } from "@util/uuid";
-import { decrypt, encrypt } from "@src/sec/service";
+import { hash } from "@src/sec/service";
 
 const getOrCreate = async (email: string): Promise<User | null> => {
     validateNotBlank(email, "email");
 
-    const existingUser = await getByEmail(email);
+    const emailHash = hash(email);
+
+    const existingUser = await getByEmail(emailHash);
 
     if (existingUser) {
         return existingUser;
@@ -14,7 +16,7 @@ const getOrCreate = async (email: string): Promise<User | null> => {
 
     const user: CreateUserDto = {
         id: getUuid(),
-        email,
+        hashedEmail: emailHash,
         enabled: true,
     };
 
@@ -24,12 +26,9 @@ const getOrCreate = async (email: string): Promise<User | null> => {
 const create = async (user: CreateUserDto): Promise<User | null> => {
     validateNotNull(user, "user");
     validateNotBlank(user.id, "user.id");
-    validateNotBlank(user.email, "user.email");
+    validateNotBlank(user.hashedEmail, "user.hashedEmail");
 
-    const userId = await mapper.create({
-        ...user,
-        email: encrypt(user.email),
-    });
+    const userId = await mapper.create({ ...user });
 
     if (user.id !== userId) {
         throw new Error("Failed to create user");
@@ -51,7 +50,7 @@ const getAll = async (): Promise<User[]> => {
 const getByEmail = async (email: string): Promise<User | null> => {
     validateNotNull(email, "email");
 
-    const userDao = await mapper.getByEmail(email);
+    const userDao = await mapper.getByHashedEmail(hash(email));
 
     if (userDao == null) {
         return null;
@@ -75,12 +74,10 @@ const getById = async (id: string): Promise<User | null> => {
 const toDto = (userDao: UserDao): User => {
     return { 
         ...userDao,
-        email: decrypt(userDao.email),
      };
 }
 
 const service = {
-    create,
     getAll,
     getByEmail,
     getById,

@@ -12,9 +12,14 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
             notNull: true,
             primaryKey: true
         },
-        email: {
+        hashed_email: {
             type: 'varchar(1000)',
+            unique: true,
             notNull: true
+        },
+        encrypted_email: {
+            type: 'varchar(1000)',
+            notNull: false
         },
         enabled: {
             type: 'boolean',
