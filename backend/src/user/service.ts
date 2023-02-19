@@ -6,9 +6,7 @@ import { hash } from "@src/sec/service";
 const getOrCreate = async (email: string): Promise<User | null> => {
     validateNotBlank(email, "email");
 
-    const emailHash = hash(email);
-
-    const existingUser = await getByEmail(emailHash);
+    const existingUser = await getByEmail(email);
 
     if (existingUser) {
         return existingUser;
@@ -16,7 +14,7 @@ const getOrCreate = async (email: string): Promise<User | null> => {
 
     const user: CreateUserDto = {
         id: getUuid(),
-        hashedEmail: emailHash,
+        hashedEmail: hash(email),
         enabled: true,
     };
 
