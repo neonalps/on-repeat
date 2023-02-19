@@ -1,7 +1,7 @@
 import { getSpotifyClientId, getSpotifyClientSecret, getSpotifyRedirectUrl } from "@src/config";
 import { AUTHORIZATION, CONTENT_TYPE, HEADER, HTTP_STATUS } from "@src/http/constants";
 import { generateRandomString, getQueryString } from "@src/util/common";
-import { OAUTH_GRANT_TYPE_AUTHORIZATION_CODE, OAUTH_RESPONSE_TYPE_CODE } from "./constants";
+import { OAUTH_GRANT_TYPE_AUTHORIZATION_CODE, OAUTH_GRANT_TYPE_REFRESH_TOKEN, OAUTH_RESPONSE_TYPE_CODE } from "./constants";
 import http from "@src/http/index";
 
 const OAUTH_AUTHORIZE_URL = 'https://accounts.spotify.com/authorize';
@@ -82,6 +82,33 @@ export const getUserProfile = async (accessToken: string): Promise<SpotifyUserPr
         displayName: responseBody.display_name,
         href: responseBody.href,
     };
+};
+
+export const getNewAccessToken = async (refreshToken: string): Promise<RefreshTokenResponse> => {
+    const response = await http.post<OauthTokenResponseDto>(OAUTH_TOKEN_URL, {
+        headers: { 
+            [HEADER.ACCEPT]: CONTENT_TYPE.JSON,
+            [HEADER.AUTHORIZATION]: `${AUTHORIZATION.BASIC} ${getAuthHeader(clientId, clientSecret)}`,
+            [HEADER.CONTENT_TYPE]: CONTENT_TYPE.FORM_URLENCODED,
+        },
+        body: getRefreshTokenParams(refreshToken)
+    });
+
+    if (response.statusCode !== HTTP_STATUS.OK) {
+        // TODO improve error handling (create extended error class?)
+        throw new Error("something went wrong while getting new access token");
+    }
+
+    const responseBody = response.body;
+
+    // TODO check whether response body is present
+
+    return {
+        accessToken: responseBody.access_token,
+        expiresIn: responseBody.expires_in,
+        scope: responseBody.scope,
+        tokenType: responseBody.token_type,
+    };
 }
 
 export const getAuthHeader = (id: string, secret: string): string => {
@@ -94,4 +121,11 @@ const getCodeExchangeParams = (code: string): string => {
         grant_type: OAUTH_GRANT_TYPE_AUTHORIZATION_CODE,
         redirect_uri: redirectUrl,
     });
-}
+};
+
+const getRefreshTokenParams = (refreshToken: string): string => {
+    return getQueryString({
+        refresh_token: refreshToken,
+        grant_type: OAUTH_GRANT_TYPE_REFRESH_TOKEN,
+    });
+};

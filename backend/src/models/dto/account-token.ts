@@ -6,6 +6,6 @@ interface AccountToken {
     accessToken: string;
     accessTokenExpiresAt: Date;
     refreshToken: string;
-    refreshTokenRetryCount: number;
     createdAt: Date;
+    updatedAt: Date | null;
 }

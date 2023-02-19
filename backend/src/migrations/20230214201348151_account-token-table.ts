@@ -33,15 +33,14 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
             type: 'varchar(1000)',
             notNull: true
         },
-        refresh_token_retry_count: {
-            type: 'smallint',
-            notNull: true,
-            default: '0'
-        },
         created_at: {
             type: 'timestamp',
             notNull: true,
             default: pgm.func('current_timestamp')
+        },
+        updated_at: {
+            type: 'timestamp',
+            notNull: false
         },
     });
 }

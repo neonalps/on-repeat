@@ -54,6 +54,13 @@ const getById = async (accountTokenId: number): Promise<AccountToken | null> => 
     return toDto(accountTokenDao);
 };
 
+const updateAccessToken = async (accountTokenId: number, newAccessToken: string, newAccessTokenExpiresAt: Date): Promise<boolean> => {
+    validateNotNull(accountTokenId, "accountTokenId");
+    validateNotBlank(newAccessToken, "newAccessToken");
+
+    return mapper.updateAccessToken(accountTokenId, encrypt(newAccessToken), newAccessTokenExpiresAt);
+}
+
 const toDto = (dao: AccountTokenDao): AccountToken => {
     return {
          ...dao,
