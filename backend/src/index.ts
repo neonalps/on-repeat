@@ -2,7 +2,7 @@ import fastify from "fastify";
 import { getNodeEnv, getServerHost, getServerPort, getCryptoKey } from "@src/config";
 import logger from "@log/logger";
 import router from "@router/router";
-import scheduler from '@jobs/scheduler';
+import scheduler from '@src/job/scheduler';
 import { getAuthorizeUrl } from "./oauth/spotify";
 
 const start = async () =>  {

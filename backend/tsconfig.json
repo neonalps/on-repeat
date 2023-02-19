@@ -12,7 +12,7 @@
             "@db/*": ["src/db/*"],
             "@http/*": ["src/http/*"],
             "@log/*": ["src/log/*"],
-            "@jobs/*": ["src/jobs/*"],
+            "@jobs/*": ["src/job/*"],
             "@oauth/*": ["src/oauth/*"],
             "@provider/*": ["src/provider/*"],
             "@router/*": ["src/router/*"],
