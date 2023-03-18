@@ -3,13 +3,14 @@ import { getNodeEnv, getServerHost, getServerPort, getCryptoKey } from "@src/con
 import logger from "@log/logger";
 import router from "@router/router";
 import scheduler from '@src/job/scheduler';
-import { getAuthorizeUrl } from "./oauth/spotify";
+import { getAuthorizeUrl, getRecentlyPlayedTracks } from "./oauth/spotify";
+import { getSpotifyPlayedTracks } from "./provider/played-tracks";
 
 const start = async () =>  {
   const server = fastify();
   await router.registerHandlers(server);
 
-  server.listen({ host: getServerHost(), port: getServerPort() }, (err, address) => {
+  server.listen({ host: getServerHost(), port: getServerPort() }, async (err, address) => {
     if (err) {
       logger.error(err);
       process.exit(1);

@@ -2,7 +2,7 @@ import { validateNotBlank, validateNotNull } from "@src/util/validation";
 import { OAUTH_PROVIDER_GOOGLE, OAUTH_PROVIDER_SPOTIFY } from "./constants";
 import { exchangeCodeForToken, getUserProfile } from "./spotify";
 
-const retrieveOauthToken = async (dto: RetrieveOauthTokenDto): Promise<OauthTokenResponse> => {
+const retrieveOauthToken = (dto: RetrieveOauthTokenDto): Promise<OauthTokenResponse> => {
     validateNotNull(dto, "dto");
     validateNotBlank(dto.provider, "dto.provider");
     validateNotBlank(dto.code, "dto.code");
@@ -19,16 +19,16 @@ const retrieveOauthToken = async (dto: RetrieveOauthTokenDto): Promise<OauthToke
     }
 };
 
-const retrieveIdentityInformation = async (accessToken: string): Promise<SpotifyUserProfile> => {
+const retrieveIdentityInformation = (accessToken: string): Promise<SpotifyUserProfile> => {
     validateNotBlank(accessToken, "accessToken");
     return getUserProfile(accessToken);
 };
 
-const retrieveSpotifyOauthToken = async (dto: RetrieveOauthTokenDto): Promise<OauthTokenResponse> => {
+const retrieveSpotifyOauthToken = (dto: RetrieveOauthTokenDto): Promise<OauthTokenResponse> => {
     return exchangeCodeForToken(dto.code);
 };
 
-const retrieveGoogleOauthToken = async (dto: RetrieveOauthTokenDto): Promise<OauthTokenResponse> => {
+const retrieveGoogleOauthToken = (dto: RetrieveOauthTokenDto): Promise<OauthTokenResponse> => {
     return exchangeCodeForToken(dto.code);
 };
 
