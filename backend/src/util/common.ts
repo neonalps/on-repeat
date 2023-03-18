@@ -1,7 +1,7 @@
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 const charactersLength = characters.length;
 
-export const getQueryString = (params: Record<string, string>): string => {
+export const getQueryString = (params: Record<string, any>): string => {
     return new URLSearchParams(params).toString();
 };
 
@@ -12,3 +12,5 @@ export const generateRandomString = (size: number) => {
     }
     return result.join("");
 };
+
+export const removeNull = <T> (item: T): boolean => item !== null;

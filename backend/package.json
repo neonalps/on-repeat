@@ -17,7 +17,6 @@
     "@types/jsonwebtoken": "^9.0.1",
     "@types/node": "^18.11.18",
     "@types/node-cron": "^3.0.7",
-    "@types/qs": "^6.9.7",
     "@types/uuid": "^9.0.0",
     "@typescript-eslint/eslint-plugin": "^5.48.1",
     "@typescript-eslint/parser": "^5.48.1",
@@ -39,7 +38,6 @@
     "pg": "^8.8.0",
     "pino": "^8.8.0",
     "postgres": "^3.3.3",
-    "qs": "^6.11.0",
     "undici": "^5.16.0",
     "uuid": "^9.0.0"
   }
