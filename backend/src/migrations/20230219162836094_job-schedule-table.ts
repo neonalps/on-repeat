@@ -18,15 +18,15 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
             notNull: true,
         },
         scheduled_after: {
-            type: 'timestamp',
+            type: 'timestamptz',
             notNull: true,
         },
         started_at: {
-            type: 'timestamp',
+            type: 'timestamptz',
             notNull: false,
         },
         finished_at: {
-            type: 'timestamp',
+            type: 'timestamptz',
             notNull: false,
         },
         error_message: {
@@ -34,7 +34,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
             notNull: false,
         },
         created_at: {
-            type: 'timestamp',
+            type: 'timestamptz',
             notNull: true,
             default: pgm.func('current_timestamp'),
         },

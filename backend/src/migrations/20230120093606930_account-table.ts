@@ -7,10 +7,10 @@ export const shorthands: ColumnDefinitions | undefined = undefined;
 
 export async function up(pgm: MigrationBuilder): Promise<void> {
     pgm.createTable(TABLE_NAME, {
-        id: {
+        id: 'id',
+        public_id: {
             type: 'varchar(36)',
             notNull: true,
-            primaryKey: true
         },
         hashed_email: {
             type: 'varchar(1000)',
@@ -26,7 +26,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
             notNull: true
         },
         created_at: {
-            type: 'timestamp',
+            type: 'timestamptz',
             notNull: true,
             default: pgm.func('current_timestamp')
         }

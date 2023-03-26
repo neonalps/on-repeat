@@ -3,33 +3,34 @@ import { MigrationBuilder, ColumnDefinitions } from 'node-pg-migrate';
 
 export const shorthands: ColumnDefinitions | undefined = undefined;
 
-const TABLE_NAME = "track_provider";
+const TABLE_NAME = "music_provider_track";
 
 export async function up(pgm: MigrationBuilder): Promise<void> {
     pgm.createTable(TABLE_NAME, {
         id: 'id',
-        name: {
-            type: 'varchar(1000)',
-            notNull: true
-        },
-        display_name: {
-            type: 'varchar(1000)',
-            notNull: true
-        },
-        enabled: {
-            type: 'boolean',
-            notNull: true
-        },
-        oauth_client_id: {
+        music_provider_id: {
             type: 'integer',
+            notNull: true,
+            references: `"music_provider"`,
+        },
+        track_id: {
+            type: 'integer',
+            notNull: true,
+            references: `"track"`,
+        },
+        music_provider_track_id: {
+            type: 'varchar(100)',
+            notNull: true,
+        },
+        music_provider_track_uri: {
+            type: 'varchar(1000)',
             notNull: false,
-            references: `"oauth_client"`
         },
         created_at: {
-            type: 'timestamp',
+            type: 'timestamptz',
             notNull: true,
-            default: pgm.func('current_timestamp')
-        }
+            default: pgm.func('current_timestamp'),
+        },
     });
 }
 
