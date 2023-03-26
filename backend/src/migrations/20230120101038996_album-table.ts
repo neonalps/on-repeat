@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { MigrationBuilder, ColumnDefinitions } from 'node-pg-migrate';
 
-const TABLE_NAME = "oauth_client";
+const TABLE_NAME = "album";
 
 export const shorthands: ColumnDefinitions | undefined = undefined;
 
@@ -12,40 +12,28 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
             type: 'varchar(1000)',
             notNull: true
         },
-        client_id: {
-            type: 'varchar(1000)',
-            notNull: true
-        },
-        client_secret: {
-            type: 'varchar(1000)',
-            notNull: true
-        },
-        grant_type: {
+        type: {
             type: 'varchar(200)',
-            notNull: true
-        },
-        scope: {
-            type: 'varchar(1000)',
-            notNull: true
-        },
-        authorize_url: {
-            type: 'varchar(1000)',
             notNull: false
         },
-        authorize_redirect_url: {
-            type: 'varchar(1000)',
+        album_type: {
+            type: 'varchar(200)',
             notNull: false
         },
-        refresh_token_url: {
-            type: 'varchar(1000)',
-            notNull: true
+        album_group: {
+            type: 'varchar(200)',
+            notNull: false
         },
-        state_provider: {
-            type: 'varchar(1000)',
-            notNull: true
+        release_day: {
+            type: 'timestamp',
+            notNull: false
+        },
+        release_day_precision: {
+            type: 'varchar(200)',
+            notNull: false
         },
         created_at: {
-            type: 'timestamp',
+            type: 'timestamptz',
             notNull: true,
             default: pgm.func('current_timestamp')
         }

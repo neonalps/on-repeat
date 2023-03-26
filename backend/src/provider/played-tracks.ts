@@ -1,4 +1,6 @@
 import { getNewAccessToken, getRecentlyPlayedTracks } from "@src/oauth/spotify";
+import { validateNotNull } from "@src/util/validation";
+import playedTrackMapper from "./mapper";
 
 export const getSpotifyPlayedTracks = async (refreshToken: string): Promise<PlayedTrackDto[]> => {
     // TODO it's probably better to load the refresh token in here
@@ -8,4 +10,13 @@ export const getSpotifyPlayedTracks = async (refreshToken: string): Promise<Play
     // TODO here could be a looping logic to get all possible tracks
 
     return playedTracksResponse.playedTracks;
+};
+
+export const hasPlayedTrackAlreadyBeenProcessed = async (userId: number, musicProviderId: number, playedAt: Date): Promise<boolean> => {
+    validateNotNull(userId, "userId");
+    validateNotNull(musicProviderId, "musicProviderId");
+    validateNotNull(playedAt, "playedAt");
+
+    const playedTrack = await playedTrackMapper.getByUserIdAndMusicProviderIdAndPlayedAt(userId, musicProviderId, playedAt);
+    return playedTrack !== null;
 };

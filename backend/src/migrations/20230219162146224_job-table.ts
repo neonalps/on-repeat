@@ -13,7 +13,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
             notNull: true
         },
         account_id: {
-            type: 'varchar(36)',
+            type: 'varchar',
             notNull: true,
             references: `"account"`,
         },
@@ -26,12 +26,12 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
             notNull: true
         },
         created_at: {
-            type: 'timestamp',
+            type: 'timestamptz',
             notNull: true,
             default: pgm.func('current_timestamp')
         },
         updated_at: {
-            type: 'timestamp',
+            type: 'timestamptz',
             notNull: false,
         },
     });

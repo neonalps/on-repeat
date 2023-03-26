@@ -9,7 +9,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
     pgm.createTable(TABLE_NAME, {
         id: 'id',
         account_id: {
-            type: 'varchar(36)',
+            type: 'integer',
             notNull: true,
             references: `"account"`
         },
@@ -26,7 +26,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
             notNull: true
         },
         access_token_expires_at: {
-            type: 'timestamp',
+            type: 'timestamptz',
             notNull: true
         },
         refresh_token: {
@@ -34,12 +34,12 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
             notNull: true
         },
         created_at: {
-            type: 'timestamp',
+            type: 'timestamptz',
             notNull: true,
             default: pgm.func('current_timestamp')
         },
         updated_at: {
-            type: 'timestamp',
+            type: 'timestamptz',
             notNull: false
         },
     });

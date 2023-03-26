@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { MigrationBuilder, ColumnDefinitions } from 'node-pg-migrate';
 
-const TABLE_NAME = "record";
-
 export const shorthands: ColumnDefinitions | undefined = undefined;
+
+const TABLE_NAME = "music_provider";
 
 export async function up(pgm: MigrationBuilder): Promise<void> {
     pgm.createTable(TABLE_NAME, {
@@ -12,20 +12,12 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
             type: 'varchar(1000)',
             notNull: true
         },
-        type: {
-            type: 'varchar(200)',
-            notNull: false
-        },
-        release_day: {
-            type: 'timestamp',
-            notNull: false
-        },
-        release_day_precision: {
-            type: 'varchar(200)',
-            notNull: false
+        display_name: {
+            type: 'varchar(1000)',
+            notNull: true
         },
         created_at: {
-            type: 'timestamp',
+            type: 'timestamptz',
             notNull: true,
             default: pgm.func('current_timestamp')
         }

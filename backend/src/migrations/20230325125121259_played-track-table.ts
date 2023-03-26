@@ -1,39 +1,37 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { MigrationBuilder, ColumnDefinitions } from 'node-pg-migrate';
 
-const TABLE_NAME = "track";
-
 export const shorthands: ColumnDefinitions | undefined = undefined;
+
+const TABLE_NAME = "played_track";
 
 export async function up(pgm: MigrationBuilder): Promise<void> {
     pgm.createTable(TABLE_NAME, {
         id: 'id',
-        name: {
-            type: 'varchar(1000)',
-            notNull: true
-        },
-        album_id: {
+        account_id: {
             type: 'integer',
-            notNull: false,
-            references: `"album"`
+            notNull: true,
+            references: `"account"`,
         },
-        isrc: {
-            type: 'varchar(20)',
-            notNull: false,
-        },
-        disc_number: {
-            type: 'smallint',
-            notNull: false,
-        },
-        duration_ms: {
+        track_id: {
             type: 'integer',
-            notNull: false,
+            notNull: true,
+            references: `"track"`,
+        },
+        music_provider_id: {
+            type: 'integer',
+            notNull: true,
+            references: `"music_provider"`,
+        },
+        played_at: {
+            type: 'timestamptz',
+            notNull: true,
         },
         created_at: {
             type: 'timestamptz',
             notNull: true,
-            default: pgm.func('current_timestamp')
-        }
+            default: pgm.func('current_timestamp'),
+        },
     });
 }
 
