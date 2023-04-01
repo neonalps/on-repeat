@@ -4,8 +4,8 @@ class Album {
         name: string,
         albumType: string,
         albumGroup: string,
-        releaseDay: Date,
-        releaseDayPrecision: string,
+        releaseDate: Date,
+        releaseDatePrecision: string,
         createdAt: Date,
     ) {}
 }
@@ -15,8 +15,8 @@ class AlbumBuilder {
     public name!: string;
     public albumType!: string;
     public albumGroup!: string;
-    public releaseDay!: Date;
-    public releaseDayPrecision!: string;
+    public releaseDate!: Date;
+    public releaseDatePrecision!: string;
     public createdAt!: Date;
 
     setId(id: number) {
@@ -39,13 +39,13 @@ class AlbumBuilder {
         return this;
     }
 
-    setReleaseDay(releaseDay: Date) {
-        this.releaseDay = releaseDay;
+    setReleaseDate(releaseDate: Date) {
+        this.releaseDate = releaseDate;
         return this;
     }
 
-    setReleaseDayPrecision(releaseDayPrecision: string) {
-        this.releaseDayPrecision = releaseDayPrecision;
+    setReleaseDatePrecision(releaseDatePrecision: string) {
+        this.releaseDatePrecision = releaseDatePrecision;
         return this;
     }
 
@@ -60,8 +60,8 @@ class AlbumBuilder {
             this.name,
             this.albumType,
             this.albumGroup,
-            this.releaseDay,
-            this.releaseDayPrecision,
+            this.releaseDate,
+            this.releaseDatePrecision,
             this.createdAt,
         );
     }

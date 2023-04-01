@@ -1,5 +1,18 @@
+import { setEquals } from "@src/util/collection";
 import { validateNotBlank, validateNotNull } from "@src/util/validation";
 import mapper from "./mapper";
+
+const areUpdateablePropertiesEqual = (first: TrackDao, second: TrackDao): boolean => {
+    validateNotNull(first, "firstTrack");
+    validateNotNull(second, "secondTrack");
+
+    return first.getName() === second.getName()
+        && first.getAlbumId() === second.getAlbumId()
+        && first.getIsrc() === second.getIsrc()
+        && setEquals(first.getArtistIds(), second.getArtistIds())
+        && first.getDiscNumber() === second.getDiscNumber()
+        && first.getDurationMs() === second.getDurationMs();
+};
 
 const create = async (dto: CreateTrackDto): Promise<TrackDao | null> => {
     validateNotNull(dto, "createTrackDto");
@@ -29,6 +42,9 @@ const getById = async (id: number): Promise<TrackDao | null> => {
 };
 
 const service = {
+    areUpdateablePropertiesEqual,
     create,
     getById,
-}
+};
+
+export default service;

@@ -8,10 +8,10 @@ abstract class MusicProvider {
     }
 
     abstract processPlayedTracks(userId: number, playedTracks: PlayedTrackDto[]): Promise<void>;
-    abstract getTrackByProviderTrackId(providerTrackId: string): Promise<Track | null>;
-    abstract getArtistByProviderArtistId(providerArtistId: string): Promise<Artist | null>;
-    abstract getAlbumByProviderAlbumId(providerAlbumId: string): Promise<Album | null>;
-    abstract addTrackAndTrackProviderTrackIdRelation(trackId: number, providerTrackId: string): Promise<void>;
-    abstract addArtistAndTrackProviderArtistIdRelation(artistId: number, providerArtistId: string): Promise<void>;
-    abstract addAlbumAndTrackProviderAlbumIdRelation(albumId: number, providerAlbumId: string): Promise<void>;
+    abstract getTrackIdByProviderTrackId(providerTrackId: string): Promise<number | null>;
+    abstract getArtistIdByProviderArtistId(providerArtistId: string): Promise<number | null>;
+    abstract getAlbumIdByProviderAlbumId(providerAlbumId: string): Promise<number | null>;
+    abstract addTrackIdAndTrackProviderTrackIdRelation(trackId: number, providerTrackId: string): Promise<void>;
+    abstract addArtistIdAndTrackProviderArtistIdRelation(artistId: number, providerArtistId: string): Promise<void>;
+    abstract addAlbumIdAndTrackProviderAlbumIdRelation(albumId: number, providerAlbumId: string): Promise<void>;
 }
