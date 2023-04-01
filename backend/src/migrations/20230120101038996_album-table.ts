@@ -24,11 +24,11 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
             type: 'varchar(200)',
             notNull: false
         },
-        release_day: {
+        release_date: {
             type: 'timestamp',
             notNull: false
         },
-        release_day_precision: {
+        release_date_precision: {
             type: 'varchar(200)',
             notNull: false
         },

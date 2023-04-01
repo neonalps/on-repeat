@@ -1,9 +1,9 @@
-class Artist {
+class ArtistDao {
     private _id: number;
     private _name: string;
     private _createdAt: Date;
   
-    constructor(builder: ArtistBuilder) {
+    constructor(builder: ArtistDaoBuilder) {
       this._id = builder.id;
       this._name = builder.name;
       this._createdAt = builder.createdAt;
@@ -21,35 +21,35 @@ class Artist {
       return this._createdAt;
     }
   
-    public static get Builder(): ArtistBuilder {
-      return new ArtistBuilder();
+    public static get Builder(): ArtistDaoBuilder {
+      return new ArtistDaoBuilder();
     }
 
-    public static fromDao(dao: ArtistDao): Artist {
-      return this.Builder
-          .withId(dao.id)
-          .withName(dao.name)
-          .withCreatedAt(dao.createdAt)
-          .build();
-  }
+    public static fromDaoInterface(daoInterface: ArtistDaoInterface): ArtistDao {
+        return this.Builder
+            .withId(daoInterface.id)
+            .withName(daoInterface.name)
+            .withCreatedAt(daoInterface.createdAt)
+            .build();
+    }
   }
   
-  class ArtistBuilder {
+  class ArtistDaoBuilder {
     private _id!: number;
     private _name!: string;
     private _createdAt!: Date;
   
-    public withId(id: number): ArtistBuilder {
+    public withId(id: number): ArtistDaoBuilder {
       this._id = id;
       return this;
     }
   
-    public withName(name: string): ArtistBuilder {
+    public withName(name: string): ArtistDaoBuilder {
       this._name = name;
       return this;
     }
   
-    public withCreatedAt(createdAt: Date): ArtistBuilder {
+    public withCreatedAt(createdAt: Date): ArtistDaoBuilder {
       this._createdAt = createdAt;
       return this;
     }
@@ -66,8 +66,8 @@ class Artist {
       return this._createdAt;
     }
   
-    public build(): Artist {
-      return new Artist(this);
+    public build(): ArtistDao {
+      return new ArtistDao(this);
     }
   }
   

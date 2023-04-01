@@ -32,14 +32,14 @@ class SpotifyMusicProvider extends MusicProvider {
                     throw new Error("No track to process found");
                 }
 
-                let catalogueAlbumIds: number | null = null;
+                let catalogueAlbumId: number | null = null;
                 const albumToProcess = trackToProcess.album;
                 if (albumToProcess) {
-                    const storedAlbum = await this.getAlbumByProviderAlbumId(albumToProcess.id);
-                    catalogueAlbumIds = await catalogueService.upsertAlbum(storedAlbum, albumToProcess);
+                    const storedAlbumId = await this.getAlbumIdByProviderAlbumId(albumToProcess.id);
+                    catalogueAlbumId = await catalogueService.upsertAlbum(storedAlbumId, albumToProcess);
 
-                    if (!storedAlbum) {
-                        await this.addAlbumAndTrackProviderAlbumIdRelation(catalogueAlbumIds, albumToProcess.id);
+                    if (!storedAlbumId) {
+                        await this.addAlbumIdAndTrackProviderAlbumIdRelation(catalogueAlbumId, albumToProcess.id);
                     }
                 }
 
@@ -47,21 +47,26 @@ class SpotifyMusicProvider extends MusicProvider {
                 const artistsToProcess = trackToProcess.artists;
                 if (artistsToProcess && artistsToProcess.length > 0) {
                     for (const playedTrackArtist of artistsToProcess) {
-                        const storedArtist = await this.getArtistByProviderArtistId(playedTrackArtist.id);
-                        const catalogueArtistId = await catalogueService.upsertArtist(storedArtist, playedTrackArtist);
+                        const storedArtistId = await this.getArtistIdByProviderArtistId(playedTrackArtist.id);
+
+                        const artistToProcess = ArtistDao.Builder
+                            .withName(playedTrackArtist.name)
+                            .build();
+
+                        const catalogueArtistId = await catalogueService.upsertArtist(storedArtistId, artistToProcess);
                         catalogueArtistIds.push(catalogueArtistId);
 
-                        if (!storedArtist) {
-                            await this.addArtistAndTrackProviderArtistIdRelation(catalogueArtistId, playedTrackArtist.id);
+                        if (!storedArtistId) {
+                            await this.addArtistIdAndTrackProviderArtistIdRelation(catalogueArtistId, playedTrackArtist.id);
                         }
                     }
                 }
     
-                const storedTrack = await this.getTrackByProviderTrackId(trackToProcess.id);
-                const catalogueTrackId = await catalogueService.upsertTrack(storedTrack, trackToProcess, catalogueArtistIds, catalogueAlbumIds);
+                const storedTrackId = await this.getTrackIdByProviderTrackId(trackToProcess.id);
+                const catalogueTrackId = await catalogueService.upsertTrack(storedTrackId, trackToProcess, catalogueArtistIds, catalogueAlbumId);
 
-                if (!storedTrack) {
-                    await this.addTrackAndTrackProviderTrackIdRelation(catalogueTrackId, trackToProcess.id);
+                if (!storedTrackId) {
+                    await this.addTrackIdAndTrackProviderTrackIdRelation(catalogueTrackId, trackToProcess.id);
                 }
 
                 const playedTrackDto = new CreatePlayedTrackDtoBuilder()
@@ -69,6 +74,7 @@ class SpotifyMusicProvider extends MusicProvider {
                     .setMusicProviderId(this.id)
                     .setTrackId(catalogueTrackId)
                     .setPlayedAt(playedAt)
+                    .setExcludeFromStatistics(false)
                     .build();
     
                 await createPlayedTrack(playedTrackDto);
@@ -78,27 +84,27 @@ class SpotifyMusicProvider extends MusicProvider {
         }
     }
 
-    async getTrackByProviderTrackId(providerTrackId: string): Promise<Track> {
+    async getTrackIdByProviderTrackId(providerTrackId: string): Promise<number | null> {
         throw new Error("Method not implemented.");
     }
 
-    async getArtistByProviderArtistId(providerArtistId: string): Promise<Artist> {
+    async getArtistIdByProviderArtistId(providerArtistId: string): Promise<number | null> {
         throw new Error("Method not implemented.");
     }
     
-    async getAlbumByProviderAlbumId(providerAlbumId: string): Promise<Album> {
+    async getAlbumIdByProviderAlbumId(providerAlbumId: string): Promise<number | null> {
         throw new Error("Method not implemented.");
     }
 
-    async addTrackAndTrackProviderTrackIdRelation(trackId: number, providerTrackId: string): Promise<void> {
+    async addTrackIdAndTrackProviderTrackIdRelation(trackId: number, providerTrackId: string): Promise<void> {
         throw new Error("Method not implemented.");
     }
 
-    async addArtistAndTrackProviderArtistIdRelation(artistId: number, providerArtistId: string): Promise<void> {
+    async addArtistIdAndTrackProviderArtistIdRelation(artistId: number, providerArtistId: string): Promise<void> {
         throw new Error("Method not implemented.");
     }
 
-    async addAlbumAndTrackProviderAlbumIdRelation(albumId: number, providerAlbumId: string): Promise<void> {
+    async addAlbumIdAndTrackProviderAlbumIdRelation(albumId: number, providerAlbumId: string): Promise<void> {
         throw new Error("Method not implemented.");
     }
     

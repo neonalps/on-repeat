@@ -3,14 +3,16 @@ class CreatePlayedTrackDto {
     private trackId!: number;
     private musicProviderId!: number;
     private playedAt!: Date;
+    private excludeFromStatistics!: boolean;
 
     constructor(
         accountId: number,
         trackId: number,
         musicProviderId: number,
         playedAt: Date,
+        excludeFromStatistics: boolean,
     ) {}
-
+    
     public getAccountId() {
         return this.accountId;
     }
@@ -26,6 +28,10 @@ class CreatePlayedTrackDto {
     public getPlayedAt() {
         return this.playedAt;
     }
+
+    public shouldExcludeFromStatistics() {
+        return this.excludeFromStatistics;
+    }
 }
 
 class CreatePlayedTrackDtoBuilder {
@@ -33,6 +39,7 @@ class CreatePlayedTrackDtoBuilder {
     public trackId!: number;
     public musicProviderId!: number;
     public playedAt!: Date;
+    public excludeFromStatistics!: boolean;
 
     setAccountId(accountId: number) {
         this.accountId = accountId;
@@ -54,12 +61,18 @@ class CreatePlayedTrackDtoBuilder {
         return this;
     }
 
+    setExcludeFromStatistics(excludeFromStatistics: boolean) {
+        this.excludeFromStatistics = excludeFromStatistics;
+        return this;
+    }
+
     build() {
         return new CreatePlayedTrackDto(
             this.accountId,
             this.trackId,
             this.musicProviderId,
             this.playedAt,
+            this.excludeFromStatistics,
         )
     }
 }
