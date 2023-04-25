@@ -1,17 +1,21 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { MigrationBuilder, ColumnDefinitions } from 'node-pg-migrate';
 
-const TABLE_NAME = "job_schedule";
+const TABLE_NAME = "account_jobs_schedules";
 
 export const shorthands: ColumnDefinitions | undefined = undefined;
 
 export async function up(pgm: MigrationBuilder): Promise<void> {
     pgm.createTable(TABLE_NAME, {
         id: 'id',
-        job_id: {
+        public_id: {
+            type: 'varchar(36)',
+            notNull: true,
+        },
+        account_job_id: {
             type: 'integer',
             notNull: true,
-            references: `"job"`,
+            references: `"account_jobs"`,
         },
         state: {
             type: 'varchar(100)',

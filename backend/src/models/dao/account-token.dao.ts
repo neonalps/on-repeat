@@ -1,11 +1,11 @@
-interface AccountTokenDao {
+interface AccountTokenDaoInterface {
     id: number;
-    accountId: string;
+    accountId: number;
     oauthProvider: string;
     scope: string;
-    accessToken: string;
+    encryptedAccessToken: string;
     accessTokenExpiresAt: Date;
-    refreshToken: string;
+    encryptedRefreshToken: string;
     createdAt: Date;
     updatedAt: Date | null;
 }

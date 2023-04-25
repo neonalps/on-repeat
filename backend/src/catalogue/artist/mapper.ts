@@ -1,58 +1,49 @@
 import sql from "@src/db/db";
 
-const create = async (artist: CreateArtistDto): Promise<number> => {
-    const result = await sql`
-        insert into artist
-            (name, created_at)
-        values
-            (${ artist.name }, now())
-        returning id
-    `;
+export class ArtistMapper {
 
-    return result[0].id;
-};
-
-const getById = async (id: number): Promise<ArtistDao | null> => {
-    const result = await sql<ArtistDaoInterface[]>`
-        select
-            id,
-            name,
-            created_at
-        from
-            artist
-        where
-            id = ${ id }
-    `;
-
-    if (!result || result.length === 0) {
-        return null;
-    }
-
-    const item = result[0];
-
-    return ArtistDao.fromDaoInterface(item);
-};
-
-const update = async (id: number, dto: UpdateArtistDto): Promise<number | null> => {
-    const result = await sql`
-        update artist set
-            name = ${dto.name}
-        where
-            id = ${ id }
-        returning id
+    constructor() {}
+    
+    public async create(artist: CreateArtistDto): Promise<number> {
+        const result = await sql`
+            insert into artist
+                (name, created_at)
+            values
+                (${ artist.name }, now())
+            returning id
         `;
     
-    if (!result || result.length === 0) {
-        return null;
+        return result[0].id;
     }
 
-    return result[0].id;
-};
+    public async getById(id: number): Promise<ArtistDao | null> {
+        const result = await sql<ArtistDaoInterface[]>`
+            select
+                id,
+                name,
+                created_at
+            from
+                artist
+            where
+                id = ${ id }
+        `;
+    
+        if (!result || result.length === 0) {
+            return null;
+        }
+    
+        const item = result[0];
+    
+        return ArtistDao.fromDaoInterface(item);
+    }
 
-const mapper = {
-    create,
-    getById,
-    update,
-};
-
-export default mapper;
+    public async update(id: number, dto: UpdateArtistDto): Promise<void> {
+        await sql`
+            update artist set
+                name = ${dto.name}
+            where
+                id = ${ id }
+            `;
+    }
+    
+}

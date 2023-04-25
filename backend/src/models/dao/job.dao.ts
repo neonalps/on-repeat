@@ -1,8 +1,6 @@
-interface JobDao {
+export interface JobDaoInterface {
     id: number;
     name: string;
-    accountId: string;
-    intervalSeconds: number;
     enabled: boolean;
     createdAt: Date;
     updatedAt: Date | null;

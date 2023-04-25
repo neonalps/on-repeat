@@ -1,3 +1,3 @@
 interface CreateAccessTokenDto {
-    userId: string;
+    accountId: string;
 }

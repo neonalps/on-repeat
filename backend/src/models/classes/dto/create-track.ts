@@ -1,98 +1,125 @@
-class CreateTrackDto {
-    private name!: string;
-    private artistIds!: Set<number>;
-    private albumId!: number;
-    private isrc!: string;
-    private discNumber!: number;
-    private durationMs!: number;
+import { TrackDao } from "../dao/track";
 
-    constructor(
-        name: string,
-        artistIds: Set<number>,
-        albumId: number,
-        isrc: string,
-        discNumber: number,
-        durationMs: number,
-    ) {
-        this.name = name;
-        this.artistIds = artistIds;
-        this.albumId = albumId;
-        this.isrc = isrc;
-        this.discNumber = discNumber;
-        this.durationMs = durationMs;
+export class CreateTrackDto {
+    private _name!: string;
+    private _artistIds!: Set<number>;
+    private _albumId!: number | null;
+    private _isrc!: string | null;
+    private _discNumber!: number | null;
+    private _durationMs!: number | null;
+
+    constructor(builder: CreateTrackDtoBuilder) {
+        this._name = builder.name;
+        this._artistIds = new Set(builder.artistIds);
+        this._albumId = builder.albumId;
+        this._isrc = builder.isrc;
+        this._discNumber = builder.discNumber;
+        this._durationMs = builder.durationMs;
     }
 
-    public getName() {
-        return this.name;
+    public get name(): string {
+        return this._name;
     }
 
-    public getArtistIds() {
-        return this.artistIds;
+    public get artistIds(): Set<number> {
+        return new Set(this._artistIds);
     }
 
-    public getAlbumId() {
-        return this.albumId;
+    public get albumId(): number | null {
+        return this._albumId;
     }
 
-    public getIsrc() {
-        return this.isrc;
+    public get isrc(): string | null {
+        return this._isrc;
     }
 
-    public getDiscNumber() {
-        return this.discNumber;
+    public get discNumber(): number | null {
+        return this._discNumber;
     }
 
-    public getDurationMs() {
-        return this.durationMs;
+    public get durationMs(): number | null {
+        return this._durationMs;
+    }
+
+    public static get Builder(): CreateTrackDtoBuilder {
+        return new CreateTrackDtoBuilder();
+    }
+
+    public static createFromTrackDao(dao: TrackDao): CreateTrackDto {
+        return this.Builder
+            .withName(dao.name)
+            .withArtistIds(dao.artistIds)
+            .withAlbumId(dao.albumId)
+            .withIsrc(dao.isrc)
+            .withDiscNumber(dao.discNumber)
+            .withDurationMs(dao.durationMs)
+            .build();
     }
 }
 
 class CreateTrackDtoBuilder {
-    private name!: string;
-    private artistIds!: Set<number>;
-    private albumId!: number;
-    private isrc!: string;
-    private discNumber!: number;
-    private durationMs!: number;
+    private _name!: string;
+    private _artistIds!: Set<number>;
+    private _albumId!: number | null;
+    private _isrc!: string | null;
+    private _discNumber!: number | null;
+    private _durationMs!: number | null;
 
-    public setName(name: string) {
-        this.name = name;
+    public withName(name: string): CreateTrackDtoBuilder {
+        this._name = name;
         return this;
     }
 
-    public setArtistIds(artistIds: Set<number>) {
-        this.artistIds = artistIds;
+    public withArtistIds(artistIds: Set<number>): CreateTrackDtoBuilder {
+        this._artistIds = artistIds;
         return this;
     }
 
-    public setAlbumId(albumId: number) {
-        this.albumId = albumId;
+    public withAlbumId(albumId: number | null): CreateTrackDtoBuilder {
+        this._albumId = albumId;
         return this;
     }
 
-    public setIsrc(isrc: string) {
-        this.isrc = isrc;
+    public withIsrc(isrc: string | null): CreateTrackDtoBuilder {
+        this._isrc = isrc;
         return this;
     }
 
-    public setDiscNumber(discNumber: number) {
-        this.discNumber = discNumber;
+    public withDiscNumber(discNumber: number | null): CreateTrackDtoBuilder {
+        this._discNumber = discNumber;
         return this;
     }
 
-    public setDurationMs(durationMs: number) {
-        this.durationMs = durationMs;
+    public withDurationMs(durationMs: number | null): CreateTrackDtoBuilder {
+        this._durationMs = durationMs;
         return this;
     }
 
-    build() {
-        return new CreateTrackDto(
-            this.name,
-            this.artistIds,
-            this.albumId,
-            this.isrc,
-            this.discNumber,
-            this.durationMs,
-        )
+    public get name(): string {
+        return this._name;
+    }
+
+    public get artistIds(): Set<number> {
+        return new Set(this._artistIds);
+    }
+
+    public get albumId(): number | null {
+        return this._albumId;
+    }
+
+    public get isrc(): string | null {
+        return this._isrc;
+    }
+
+    public get discNumber(): number | null {
+        return this._discNumber;
+    }
+
+    public get durationMs(): number | null {
+        return this._durationMs;
+    }
+
+    build(): CreateTrackDto {
+        return new CreateTrackDto(this);
     }
 }

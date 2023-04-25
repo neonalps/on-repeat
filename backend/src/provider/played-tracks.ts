@@ -12,11 +12,11 @@ export const getSpotifyPlayedTracks = async (refreshToken: string): Promise<Play
     return playedTracksResponse.playedTracks;
 };
 
-export const hasPlayedTrackAlreadyBeenProcessed = async (userId: number, musicProviderId: number, playedAt: Date): Promise<boolean> => {
-    validateNotNull(userId, "userId");
+export const hasPlayedTrackAlreadyBeenProcessed = async (accountId: number, musicProviderId: number, playedAt: Date): Promise<boolean> => {
+    validateNotNull(accountId, "accountId");
     validateNotNull(musicProviderId, "musicProviderId");
     validateNotNull(playedAt, "playedAt");
 
-    const playedTrack = await playedTrackMapper.getByUserIdAndMusicProviderIdAndPlayedAt(userId, musicProviderId, playedAt);
+    const playedTrack = await playedTrackMapper.getByAccountIdAndMusicProviderIdAndPlayedAt(accountId, musicProviderId, playedAt);
     return playedTrack !== null;
 };

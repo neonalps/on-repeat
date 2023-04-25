@@ -1,50 +1,30 @@
-import { setEquals } from "@src/util/collection";
-import { validateNotBlank, validateNotNull } from "@src/util/validation";
-import mapper from "./mapper";
+import { TrackDao } from "@src/models/classes/dao/track";
+import { CreateTrackDto } from "@src/models/classes/dto/create-track";
+import { validateNotBlank, validateNotEmpty, validateNotNull } from "@src/util/validation";
+import { requireNonNull } from "@src/util/common";
+import { TrackMapper } from "./mapper";
 
-const areUpdateablePropertiesEqual = (first: TrackDao, second: TrackDao): boolean => {
-    validateNotNull(first, "firstTrack");
-    validateNotNull(second, "secondTrack");
+export class TrackService {
 
-    return first.getName() === second.getName()
-        && first.getAlbumId() === second.getAlbumId()
-        && first.getIsrc() === second.getIsrc()
-        && setEquals(first.getArtistIds(), second.getArtistIds())
-        && first.getDiscNumber() === second.getDiscNumber()
-        && first.getDurationMs() === second.getDurationMs();
-};
-
-const create = async (dto: CreateTrackDto): Promise<TrackDao | null> => {
-    validateNotNull(dto, "createTrackDto");
-    validateNotBlank(dto.getName(), "createTrackDto.name");
-    validateNotNull(dto.getArtistIds(), "createTrackDto.artistIds");
-
-    const createdTrackId = await mapper.create(dto);
-
-    for (const artistId of dto.getArtistIds().values()) {
-        await mapper.createTrackArtistRelation(createdTrackId, artistId);
+    private readonly mapper: TrackMapper;
+    
+    constructor(mapper: TrackMapper) {
+        this.mapper = requireNonNull(mapper);
     }
 
-    return getById(createdTrackId);
-};
+    public async create(dto: CreateTrackDto): Promise<TrackDao | null> {
+        validateNotNull(dto, "createTrackDto");
+        validateNotBlank(dto.name, "createTrackDto.name");
+        validateNotEmpty(dto.artistIds, "createTrackDto.artistIds");
+    
+        const createdTrackId = await this.mapper.create(dto);
+        return this.getById(createdTrackId);
+    };
 
-const getById = async (id: number): Promise<TrackDao | null> => {
-    validateNotNull(id, "id");
-
-    const track = await mapper.getById(id);
-    if (!track) {
-        return null;
+    public async getById(id: number): Promise<TrackDao | null> {
+        validateNotNull(id, "id");
+    
+        return this.mapper.getById(id);
     }
 
-    const trackArtistIds = await mapper.getTrackArtistIds(track.getId());
-    track.setArtistIds(new Set(trackArtistIds));
-    return track;
-};
-
-const service = {
-    areUpdateablePropertiesEqual,
-    create,
-    getById,
-};
-
-export default service;
+}

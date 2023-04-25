@@ -6,19 +6,7 @@
         ],
         "types": ["node", "jest"],
         "paths": {
-            "@src/*": ["src/*"],
-            "@auth/*": ["src/auth/*"],
-            "@config/*": ["src/config/*"],
-            "@db/*": ["src/db/*"],
-            "@http/*": ["src/http/*"],
-            "@log/*": ["src/log/*"],
-            "@jobs/*": ["src/job/*"],
-            "@oauth/*": ["src/oauth/*"],
-            "@provider/*": ["src/provider/*"],
-            "@router/*": ["src/router/*"],
-            "@sec/*": ["src/sec/*"],
-            "@user/*": ["src/user/*"],
-            "@util/*": ["src/util/*"]
+            "@src/*": ["src/*"]
         },
         "baseUrl": ".",
         "module": "commonjs",

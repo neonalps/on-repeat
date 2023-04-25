@@ -1,45 +1,39 @@
 import { validateNotBlank, validateNotNull } from "@src/util/validation";
-import mapper from "./mapper";
+import { ArtistMapper } from "./mapper";
+import { requireNonNull } from "@src/util/common";
 
-const areUpdateablePropertiesEqual = (first: ArtistDao, second: ArtistDao): boolean => {
-    validateNotNull(first, "firstArtist");
-    validateNotNull(second, "secondArtist");
+export class ArtistService {
 
-    return first.name === second.name;
-};
+    private readonly mapper: ArtistMapper;
 
-const create = async (dto: CreateArtistDto): Promise<ArtistDao | null> => {
-    validateNotNull(dto, "createArtistDto");
-    validateNotBlank(dto.name, "createArtistDto.name");
-
-    const createdArtistId = await mapper.create(dto);
-    return getById(createdArtistId);
-};
-
-const getById = async (id: number): Promise<ArtistDao | null> => {
-    validateNotNull(id, "id");
-
-    const artist = await mapper.getById(id);
-    if (!artist) {
-        return null;
+    constructor(mapper: ArtistMapper) {
+        this.mapper = requireNonNull(mapper);
     }
 
-    return artist;
-};
+    public async create(dto: CreateArtistDto): Promise<ArtistDao | null> {
+        validateNotNull(dto, "createArtistDto");
+        validateNotBlank(dto.name, "createArtistDto.name");
+    
+        const createdArtistId = await this.mapper.create(dto);
+        return this.getById(createdArtistId);
+    }
 
-const update = async (id: number, dto: UpdateArtistDto): Promise<boolean> => {
-    validateNotNull(id, "id");
-    validateNotNull(dto, "dto");
+    public async getById(id: number): Promise<ArtistDao | null> {
+        validateNotNull(id, "id");
+    
+        const artist = await this.mapper.getById(id);
+        if (!artist) {
+            return null;
+        }
+    
+        return artist;
+    }
 
-    const updatedArtistId = await mapper.update(id, dto);
-    return updatedArtistId !== null && updatedArtistId === id;
-};
+    public async update(id: number, dto: UpdateArtistDto): Promise<void> {
+        validateNotNull(id, "id");
+        validateNotNull(dto, "dto");
+    
+        await this.mapper.update(id, dto);
+    }
 
-const service = {
-    areUpdateablePropertiesEqual,
-    create,
-    getById,
-    update,
-};
-
-export default service;
+}

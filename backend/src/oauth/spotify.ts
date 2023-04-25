@@ -1,160 +1,183 @@
-import { getSpotifyClientId, getSpotifyClientSecret, getSpotifyRedirectUrl } from "@src/config";
 import { AUTHORIZATION, CONTENT_TYPE, HEADER, HTTP_STATUS } from "@src/http/constants";
-import { generateRandomString, getQueryString, removeNull } from "@src/util/common";
+import { generateRandomString, getQueryString, removeNull, requireNonNull } from "@src/util/common";
 import { OAUTH_GRANT_TYPE_AUTHORIZATION_CODE, OAUTH_GRANT_TYPE_REFRESH_TOKEN, OAUTH_RESPONSE_TYPE_CODE } from "./constants";
 import http from "@src/http/index";
+import { validateNotBlank, validateNotNull } from "@src/util/validation";
 
-const OAUTH_AUTHORIZE_URL = 'https://accounts.spotify.com/authorize';
-const OAUTH_TOKEN_URL = 'https://accounts.spotify.com/api/token';
-const OAUTH_USER_PROFILE_URL = 'https://api.spotify.com/v1/me';
-const OAUTH_RECENTLY_PLAYED_TRACKS_URL = 'https://api.spotify.com/v1/me/player/recently-played';
+export interface SpotifyClientConfig {
+    clientId: string;
+    clientSecret: string;
+    redirectUrl: string;
+    authorizeUrl: string;
+    tokenUrl: string;
+    userProfileUrl: string;
+    recentlyPlayedTracksUrl: string;
+}
 
-const OAUTH_SCOPE_EMAIL = "user-read-private user-read-email";
-const OAUTH_SCOPE_RECENTLY_PLAYED = "user-read-recently-played";
+export class SpotifyClient {
 
-const OAUTH_STATE_PARAM_LENGTH = 12;
+    private static OAUTH_SCOPE_EMAIL = "user-read-private user-read-email";
+    private static OAUTH_SCOPE_RECENTLY_PLAYED = "user-read-recently-played";
+    private static  OAUTH_STATE_PARAM_LENGTH = 12;
 
-const clientId = getSpotifyClientId();
-const clientSecret = getSpotifyClientSecret();
-const redirectUrl = getSpotifyRedirectUrl();
+    private config: SpotifyClientConfig;
 
-export const getAuthorizeUrl = (): string => {
-    const state = generateRandomString(OAUTH_STATE_PARAM_LENGTH);
+    constructor(config: SpotifyClientConfig) {
+        this.config = requireNonNull(config);
 
-    const params = {
-        state,
-        response_type: OAUTH_RESPONSE_TYPE_CODE,
-        client_id: clientId,
-        scope: OAUTH_SCOPE_EMAIL,
-        redirect_uri: redirectUrl
-    };
-    return `${OAUTH_AUTHORIZE_URL}?${getQueryString(params)}`;
-};
-
-export const exchangeCodeForToken = async (code: string): Promise<OauthTokenResponse> => {
-    const response = await http.post<OauthTokenResponseDto>(OAUTH_TOKEN_URL, {
-        headers: { 
-            [HEADER.ACCEPT]: CONTENT_TYPE.JSON,
-            [HEADER.AUTHORIZATION]: `${AUTHORIZATION.BASIC} ${getAuthHeader(clientId, clientSecret)}`,
-            [HEADER.CONTENT_TYPE]: CONTENT_TYPE.FORM_URLENCODED,
-        },
-        body: getCodeExchangeParams(code)
-    });
-
-    if (response.statusCode !== HTTP_STATUS.OK) {
-        // TODO improve error handling (create extended error class?)
-        throw new Error("something went wrong while exchanging code for token");
+        this.validateConfig(this.config);
     }
 
-    const responseBody = response.body;
+    public getAuthorizeUrl(): string {
+        const state = generateRandomString(SpotifyClient.OAUTH_STATE_PARAM_LENGTH);
 
-    // TODO check whether response body is present
+        const params = {
+            state,
+            response_type: OAUTH_RESPONSE_TYPE_CODE,
+            client_id: this.config.clientId,
+            scope: SpotifyClient.OAUTH_SCOPE_EMAIL,
+            redirect_uri: this.config.redirectUrl
+        };
+    
+        return `${this.config.authorizeUrl}?${getQueryString(params)}`;
+    }
 
-    return {
-        accessToken: responseBody.access_token,
-        refreshToken: responseBody.refresh_token,
-        expiresIn: responseBody.expires_in,
-        scope: responseBody.scope,
-        tokenType: responseBody.token_type,
-    };
-};
+    public async exchangeCodeForToken(code: string): Promise<OauthTokenResponse> {
+        validateNotBlank(code, "code");
 
-export const getUserProfile = async (accessToken: string): Promise<SpotifyUserProfile> => {
-    const response = await http.get<GetUserProfileResponseDto>(OAUTH_USER_PROFILE_URL, {
-        headers: { 
-            [HEADER.ACCEPT]: CONTENT_TYPE.JSON,
-            [HEADER.AUTHORIZATION]: `${AUTHORIZATION.BEARER} ${accessToken}`,
-            [HEADER.CONTENT_TYPE]: CONTENT_TYPE.JSON,
+        const response = await http.post<OauthTokenResponseDto>(this.config.tokenUrl, {
+            headers: { 
+                [HEADER.ACCEPT]: CONTENT_TYPE.JSON,
+                [HEADER.AUTHORIZATION]: `${AUTHORIZATION.BASIC} ${this.getAuthHeaderValue()}`,
+                [HEADER.CONTENT_TYPE]: CONTENT_TYPE.FORM_URLENCODED,
+            },
+            body: this.getCodeExchangeParams(code)
+        });
+    
+        if (response.statusCode !== HTTP_STATUS.OK) {
+            throw new Error("something went wrong while exchanging code for token");
         }
-    });
-
-    if (response.statusCode !== HTTP_STATUS.OK) {
-        // TODO improve error handling (create extended error class?)
-        throw new Error("something went wrong while getting the user profile");
+    
+        const responseBody = response.body;
+    
+        return {
+            accessToken: responseBody.access_token,
+            refreshToken: responseBody.refresh_token,
+            expiresIn: responseBody.expires_in,
+            scope: responseBody.scope,
+            tokenType: responseBody.token_type,
+        };
     }
 
-    const responseBody = response.body;
+    public async getUserProfile(accessToken: string): Promise<SpotifyUserProfile> {
+        validateNotBlank(accessToken, "accessToken");
 
-    // TODO check whether response body is present
-
-    return {
-        id: responseBody.id,
-        email: responseBody.email,
-        displayName: responseBody.display_name,
-        href: responseBody.href,
-    };
-};
-
-export const getNewAccessToken = async (refreshToken: string): Promise<RefreshTokenResponse> => {
-    const response = await http.post<OauthTokenResponseDto>(OAUTH_TOKEN_URL, {
-        headers: { 
-            [HEADER.ACCEPT]: CONTENT_TYPE.JSON,
-            [HEADER.AUTHORIZATION]: `${AUTHORIZATION.BASIC} ${getAuthHeader(clientId, clientSecret)}`,
-            [HEADER.CONTENT_TYPE]: CONTENT_TYPE.FORM_URLENCODED,
-        },
-        body: getRefreshTokenParams(refreshToken)
-    });
-
-    if (response.statusCode !== HTTP_STATUS.OK) {
-        console.error(response.body);
-        // TODO improve error handling (create extended error class?)
-        throw new Error("something went wrong while getting new access token");
-    }
-
-    const responseBody = response.body;
-
-    return {
-        accessToken: responseBody.access_token,
-        expiresIn: responseBody.expires_in,
-        scope: responseBody.scope,
-        tokenType: responseBody.token_type,
-    };
-};
-
-export const getRecentlyPlayedTracks = async (accessToken: string, limit: number, before?: number): Promise<PlayedTracksResponse> => {
-    const queryParams: Record<string, any> = { limit };
-
-    if (before) {
-        queryParams['before'] = before;
-    }
-
-    const queryString = getQueryString(queryParams);
-    const url = `${OAUTH_RECENTLY_PLAYED_TRACKS_URL}?${queryString}`;
-    const response = await http.get<RecentlyPlayedTracksResponseDto>(url, {
-        headers: { 
-            [HEADER.ACCEPT]: CONTENT_TYPE.JSON,
-            [HEADER.AUTHORIZATION]: `${AUTHORIZATION.BEARER} ${accessToken}`,
-            [HEADER.CONTENT_TYPE]: CONTENT_TYPE.JSON,
+        const response = await http.get<GetUserProfileResponseDto>(this.config.userProfileUrl, {
+            headers: { 
+                [HEADER.ACCEPT]: CONTENT_TYPE.JSON,
+                [HEADER.AUTHORIZATION]: `${AUTHORIZATION.BEARER} ${accessToken}`,
+                [HEADER.CONTENT_TYPE]: CONTENT_TYPE.JSON,
+            }
+        });
+    
+        if (response.statusCode !== HTTP_STATUS.OK) {
+            throw new Error("something went wrong while getting the user profile");
         }
-    });
-
-    if (response.statusCode !== HTTP_STATUS.OK) {
-        // TODO improve error handling (create extended error class?)
-        throw new Error("something went wrong while getting the recently played tracks");
+    
+        const responseBody = response.body;
+    
+        return {
+            id: responseBody.id,
+            email: responseBody.email,
+            displayName: responseBody.display_name,
+            href: responseBody.href,
+        };
     }
 
-    const responseBody = response.body;
-    return parseRecentlyPlayedTracksResponse(responseBody);
-};
+    public async getNewAccessToken(refreshToken: string): Promise<RefreshTokenResponse> {
+        validateNotBlank(refreshToken, "refreshToken");
 
-export const getAuthHeader = (id: string, secret: string): string => {
-    return Buffer.from(`${id}:${secret}`, 'utf8').toString('base64');
-};
+        const response = await http.post<OauthTokenResponseDto>(this.config.tokenUrl, {
+            headers: { 
+                [HEADER.ACCEPT]: CONTENT_TYPE.JSON,
+                [HEADER.AUTHORIZATION]: `${AUTHORIZATION.BASIC} ${this.getAuthHeaderValue()}`,
+                [HEADER.CONTENT_TYPE]: CONTENT_TYPE.FORM_URLENCODED,
+            },
+            body: this.getRefreshTokenParams(refreshToken)
+        });
+    
+        if (response.statusCode !== HTTP_STATUS.OK) {
+            throw new Error("something went wrong while getting new access token");
+        }
+    
+        const responseBody = response.body;
+    
+        return {
+            accessToken: responseBody.access_token,
+            expiresIn: responseBody.expires_in,
+            scope: responseBody.scope,
+            tokenType: responseBody.token_type,
+        };
+    }
 
-const getCodeExchangeParams = (code: string): string => {
-    return getQueryString({
-        code,
-        grant_type: OAUTH_GRANT_TYPE_AUTHORIZATION_CODE,
-        redirect_uri: redirectUrl,
-    });
-};
+    public async getRecentlyPlayedTracks (accessToken: string, limit: number, before?: number): Promise<PlayedTracksResponse> {
+        validateNotBlank(accessToken, "accessToken");
+        validateNotNull(limit, "limit");
 
-const getRefreshTokenParams = (refreshToken: string): string => {
-    return getQueryString({
-        refresh_token: refreshToken,
-        grant_type: OAUTH_GRANT_TYPE_REFRESH_TOKEN,
-    });
-};
+        const queryParams: Record<string, any> = { limit };
+    
+        if (before) {
+            queryParams['before'] = before;
+        }
+    
+        const queryString = getQueryString(queryParams);
+        const url = `${this.config.recentlyPlayedTracksUrl}?${queryString}`;
+        const response = await http.get<RecentlyPlayedTracksResponseDto>(url, {
+            headers: { 
+                [HEADER.ACCEPT]: CONTENT_TYPE.JSON,
+                [HEADER.AUTHORIZATION]: `${AUTHORIZATION.BEARER} ${accessToken}`,
+                [HEADER.CONTENT_TYPE]: CONTENT_TYPE.JSON,
+            }
+        });
+    
+        if (response.statusCode !== HTTP_STATUS.OK) {
+            throw new Error("something went wrong while getting the recently played tracks");
+        }
+    
+        const responseBody = response.body;
+        return parseRecentlyPlayedTracksResponse(responseBody);
+    }
+
+    private validateConfig(config: SpotifyClientConfig): void {
+        validateNotBlank(config.clientId, "config.clientId");
+        validateNotBlank(config.clientSecret, "config.clientSecret");
+        validateNotBlank(config.redirectUrl, "config.redirectUrl");
+        validateNotBlank(config.authorizeUrl, "config.authorizeUrl");
+        validateNotBlank(config.recentlyPlayedTracksUrl, "config.recentlyPlayedTracksUrl");
+        validateNotBlank(config.userProfileUrl, "config.userProfileUrl");
+        validateNotBlank(config.tokenUrl, "config.tokenUrl");
+    }
+
+    private getAuthHeaderValue(): string {
+        return Buffer.from(`${this.config.clientId}:${this.config.clientSecret}`, 'utf8').toString('base64');
+    };
+
+
+    private getCodeExchangeParams(code: string): string {
+        return getQueryString({
+            code,
+            grant_type: OAUTH_GRANT_TYPE_AUTHORIZATION_CODE,
+            redirect_uri: this.config.redirectUrl,
+        });
+    };
+
+    private getRefreshTokenParams(refreshToken: string): string {
+        return getQueryString({
+            refresh_token: refreshToken,
+            grant_type: OAUTH_GRANT_TYPE_REFRESH_TOKEN,
+        });
+    };
+}
 
 const parseRecentlyPlayedTracksResponse = (response: RecentlyPlayedTracksResponseDto): PlayedTracksResponse => {
     if (!response) {
