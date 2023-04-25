@@ -1,9 +1,11 @@
 import { v4 as uuidv4 } from 'uuid';
 
-const getUuid = (): string => {
-    return uuidv4();
-};
+export class UuidSource {
 
-export {
-    getUuid,
-};
+    constructor() {}
+
+    public getRandomUuid(): string {
+        return uuidv4();
+    }
+
+}

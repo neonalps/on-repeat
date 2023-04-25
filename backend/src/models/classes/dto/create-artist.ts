@@ -13,7 +13,11 @@ class CreateArtistDto {
       return new CreateArtistDtoBuilder();
     }
 
-    public static createFromArtistDao(dao: ArtistDao): CreateArtistDto {
+    public static createFromArtistDao(dao: ArtistDao): CreateArtistDto | null {
+        if (!dao) {
+          return null;
+        }
+
         return this.Builder
             .withName(dao.name)
             .build();

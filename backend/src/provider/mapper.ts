@@ -43,7 +43,7 @@ const getById = async (id: number): Promise<PlayedTrackDao | null> => {
         .build();
 };
 
-const getByUserIdAndMusicProviderIdAndPlayedAt = async (userId: number, musicProviderId: number, playedAt: Date): Promise<PlayedTrackDao | null> => {
+const getByAccountIdAndMusicProviderIdAndPlayedAt = async (accountId: number, musicProviderId: number, playedAt: Date): Promise<PlayedTrackDao | null> => {
     const result = await sql<PlayedTrackDaoInterface[]>`
         select
             id,
@@ -55,7 +55,7 @@ const getByUserIdAndMusicProviderIdAndPlayedAt = async (userId: number, musicPro
         from
             played_track
         where
-            account_id = ${ userId }
+            account_id = ${ accountId }
             and music_provider_id = ${ musicProviderId }
             and played_at = ${ playedAt }
     `;
@@ -79,7 +79,7 @@ const getByUserIdAndMusicProviderIdAndPlayedAt = async (userId: number, musicPro
 const mapper = {
     create,
     getById,
-    getByUserIdAndMusicProviderIdAndPlayedAt,
+    getByAccountIdAndMusicProviderIdAndPlayedAt,
 };
 
 export default mapper;

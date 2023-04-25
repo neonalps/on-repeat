@@ -3,7 +3,7 @@ import { MigrationBuilder, ColumnDefinitions } from 'node-pg-migrate';
 
 export const shorthands: ColumnDefinitions | undefined = undefined;
 
-const TABLE_NAME = "music_provider_artist";
+const TABLE_NAME = "music_provider_artists";
 
 export async function up(pgm: MigrationBuilder): Promise<void> {
     pgm.createTable(TABLE_NAME, {

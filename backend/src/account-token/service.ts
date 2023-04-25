@@ -1,77 +1,101 @@
-import mapper from "./mapper";
+import { AccountTokenMapper } from "./mapper";
 import { validateNotBlank, validateNotNull } from "@src/util/validation";
-import { decrypt, encrypt } from "@src/sec/service";
+import { CryptoService } from "@src/crypto/service";
+import { requireNonNull } from "@src/util/common";
+import { CreateAccountTokenDto } from "@src/models/classes/dto/create-account-token";
+import { CreateSecureAccountTokenDto } from "@src/models/classes/dto/create-secure-account-token";
+import { AccountTokenDao } from "@src/models/classes/dao/account-token";
+import { SecureAccountTokenDao } from "@src/models/classes/dao/secure-account-token";
 
-const create = async (accountToken: CreateAccountTokenDto): Promise<AccountToken | null> => {
-    validateNotNull(accountToken, "accountToken");
-    validateNotBlank(accountToken.accountId, "accountToken.accountId");
-    validateNotBlank(accountToken.oauthProvider, "accountToken.oauthProvider");
-    validateNotBlank(accountToken.scope, "accountToken.scope");
-    validateNotBlank(accountToken.accessToken, "accountToken.accessToken");
-    validateNotNull(accountToken.accessTokenExpiresAt, "accountToken.accessTokenExpiresAt");
-    validateNotBlank(accountToken.refreshToken, "accountToken.refreshToken");
+export class AccountTokenService {
 
-    const accountTokenId = await mapper.create({
-        ...accountToken,
-        accessToken: encrypt(accountToken.accessToken),
-        refreshToken: encrypt(accountToken.refreshToken)
-    });
+    private readonly mapper: AccountTokenMapper;
+    private readonly cryptoService: CryptoService;
 
-    if (!accountTokenId) {
-        throw new Error("Failed to create account token");
+    constructor(mapper: AccountTokenMapper, cryptoService: CryptoService) {
+        this.mapper = requireNonNull(mapper);
+        this.cryptoService = requireNonNull(cryptoService);
     }
 
-    return getById(accountTokenId);
-};
+    public async create(dto: CreateAccountTokenDto): Promise<AccountTokenDao | null> {
+        validateNotNull(dto, "dto");
+        validateNotNull(dto.accountId, "dto.accountId");
+        validateNotBlank(dto.oauthProvider, "dto.oauthProvider");
+        validateNotBlank(dto.scope, "dto.scope");
+        validateNotBlank(dto.accessToken, "dto.accessToken");
+        validateNotNull(dto.accessTokenExpiresAt, "dto.accessTokenExpiresAt");
+        validateNotBlank(dto.refreshToken, "dto.refreshToken");
 
-const deleteByAccountIdAndOauthProviderAndScope = async (accountId: string, oauthProvider: string, scope: string): Promise<void> => {
+        const encryptedAccessToken = this.cryptoService.encrypt(dto.accessToken);
+        const encryptedRefreshToken = this.cryptoService.encrypt(dto.refreshToken);
 
-};
-
-const getByAccountIdAndOauthProviderAndScope = async (accountId: string, oauthProvider: string, scope: string): Promise<AccountToken | null> => {
-    validateNotBlank(accountId, "accountId");
-    validateNotBlank(oauthProvider, "oauthProvider");
-    validateNotBlank(scope, "scope");
-
-    const accountTokenDao = await mapper.getByAccountIdAndOauthProviderAndScope(accountId, oauthProvider, scope);
-
-    if (!accountTokenDao) {
-        return null;
+        const secureAccountToken = CreateSecureAccountTokenDto.Builder
+            .withAccountId(dto.accountId)
+            .withOauthProvider(dto.oauthProvider)
+            .withScope(dto.scope)
+            .withEncryptedAccessToken(encryptedAccessToken)
+            .withAccessTokenExpiresAt(dto.accessTokenExpiresAt)
+            .withEncryptedRefreshToken(encryptedRefreshToken)
+            .build();
+    
+        const accountTokenId = await this.mapper.create(secureAccountToken);
+    
+        if (!accountTokenId) {
+            throw new Error("Failed to create account token");
+        }
+    
+        return this.getById(accountTokenId);
+    }
+    
+    public async deleteByAccountIdAndOauthProviderAndScope(accountId: string, oauthProvider: string, scope: string): Promise<void> {
+        // TODO implement
+    }
+    
+    public async getByAccountIdAndOauthProviderAndScope(accountId: string, oauthProvider: string, scope: string): Promise<AccountTokenDao | null> {
+        validateNotBlank(accountId, "accountId");
+        validateNotBlank(oauthProvider, "oauthProvider");
+        validateNotBlank(scope, "scope");
+    
+        const secureAccountTokenDao = await this.mapper.getByAccountIdAndOauthProviderAndScope(accountId, oauthProvider, scope);
+    
+        if (!secureAccountTokenDao) {
+            return null;
+        }
+    
+        return this.toAccountTokenDao(secureAccountTokenDao);
+    }
+    
+    public async getById(accountTokenId: number): Promise<AccountTokenDao | null> {
+        validateNotNull(accountTokenId, "accountTokenId");
+    
+        const secureAccountTokenDao = await this.mapper.getById(accountTokenId);
+    
+        if (!secureAccountTokenDao) {
+            return null;
+        }
+    
+        return this.toAccountTokenDao(secureAccountTokenDao);
+    }
+    
+    public async updateAccessToken(accountTokenId: number, newAccessToken: string, newAccessTokenExpiresAt: Date): Promise<boolean> {
+        // TODO implement
     }
 
-    return toDto(accountTokenDao);
-};
+    private toAccountTokenDao(accountTokenDao: SecureAccountTokenDao): AccountTokenDao {
+        const accessToken = this.cryptoService.decrypt(accountTokenDao.encryptedAccessToken);
+        const refreshToken = this.cryptoService.decrypt(accountTokenDao.encryptedRefreshToken);
 
-const getById = async (accountTokenId: number): Promise<AccountToken | null> => {
-    validateNotNull(accountTokenId, "accountTokenId");
-
-    const accountTokenDao = await mapper.getById(accountTokenId);
-
-    if (!accountTokenDao) {
-        return null;
+        return AccountTokenDao.Builder
+            .withId(accountTokenDao.id)
+            .withAccountId(accountTokenDao.accountId)
+            .withOauthProvider(accountTokenDao.oauthProvider)
+            .withScope(accountTokenDao.scope)
+            .withAccessToken(accessToken)
+            .withAccessTokenExpiresAt(accountTokenDao.accessTokenExpiresAt)
+            .withRefreshToken(refreshToken)
+            .withCreatedAt(accountTokenDao.createdAt)
+            .withUpdatedAt(accountTokenDao.updatedAt)
+            .build();
     }
 
-    return toDto(accountTokenDao);
-};
-
-const updateAccessToken = async (accountTokenId: number, newAccessToken: string, newAccessTokenExpiresAt: Date): Promise<boolean> => {
-    validateNotNull(accountTokenId, "accountTokenId");
-    validateNotBlank(newAccessToken, "newAccessToken");
-
-    return mapper.updateAccessToken(accountTokenId, encrypt(newAccessToken), newAccessTokenExpiresAt);
 }
-
-const toDto = (dao: AccountTokenDao): AccountToken => {
-    return {
-         ...dao,
-         accessToken: decrypt(dao.accessToken),
-         refreshToken: decrypt(dao.refreshToken),
-    };
-};
-
-const service = {
-    create,
-    getByAccountIdAndOauthProviderAndScope,
-};
-
-export default service;

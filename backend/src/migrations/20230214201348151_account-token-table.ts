@@ -21,7 +21,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
             type: 'varchar(1000)',
             notNull: true
         },
-        access_token: {
+        encrypted_access_token: {
             type: 'varchar(1000)',
             notNull: true
         },
@@ -29,7 +29,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
             type: 'timestamptz',
             notNull: true
         },
-        refresh_token: {
+        encrypted_refresh_token: {
             type: 'varchar(1000)',
             notNull: true
         },

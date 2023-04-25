@@ -14,3 +14,11 @@ export const generateRandomString = (size: number) => {
 };
 
 export const removeNull = <T> (item: T): boolean => item !== null;
+
+export const requireNonNull = <T> (arg: T): T => {
+    if (arg === null || arg === undefined) {
+        throw new Error(`null argument passed to requireNonNull`);
+    }
+
+    return arg;
+}

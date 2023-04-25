@@ -1,3 +1,4 @@
+import { SpotifyClientConfig } from "@src/oauth/spotify";
 import dotenv from "dotenv";
 import * as env from "env-var";
 
@@ -15,6 +16,20 @@ const authTokenSigningKey = env.get("AUTH_TOKEN_SIGNING_KEY").required().asStrin
 const spotifyClientId = env.get("SPOTIFY_CLIENT_ID").required().asString();
 const spotifyClientSecret = env.get("SPOTIFY_CLIENT_SECRET").required().asString();
 const spotifyRedirectUrl = env.get("SPOTIFY_REDIRECT_URL").required().asString();
+const spotifyAuthorizeUrl = env.get("SPOTIFY_AUTHORIZE_URL").required().asString();
+const spotifyTokenUrl = env.get("SPOTIFY_TOKEN_URL").required().asString();
+const spotifyUserProfileUrl = env.get("SPOTIFY_USER_PROFILE_URL").required().asString();
+const spotifyRecentlyPlayedUrl = env.get("SPOTIFY_RECENTLY_PLAYED_TRACKS_URL").required().asString();
+
+const spotifyClientConfig: SpotifyClientConfig = {
+    clientId: spotifyClientId,
+    clientSecret: spotifyClientSecret,
+    redirectUrl: spotifyRedirectUrl,
+    authorizeUrl: spotifyAuthorizeUrl,
+    tokenUrl: spotifyTokenUrl,
+    userProfileUrl: spotifyUserProfileUrl,
+    recentlyPlayedTracksUrl: spotifyRecentlyPlayedUrl,
+};
 
 export const getNodeEnv = () => nodeEnv;
 export const getCryptoKey = () => cryptoKey;
@@ -25,6 +40,4 @@ export const getAccessTokenValiditySeconds = () => accessTokenValiditySeconds;
 export const getAuthTokenAudience = () => authTokenAudience;
 export const getAuthTokenIssuer = () => authTokenIssuer;
 export const getAuthTokenSigningKey = () => authTokenSigningKey;
-export const getSpotifyClientId = () => spotifyClientId;
-export const getSpotifyClientSecret = () => spotifyClientSecret;
-export const getSpotifyRedirectUrl = () => spotifyRedirectUrl;
+export const getSpotifyClientConfig = () => spotifyClientConfig;

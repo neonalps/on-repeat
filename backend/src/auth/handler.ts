@@ -3,9 +3,9 @@ import service from "./service";
 
 const createAuthTokenDtoJsonSchema   = {
     type: 'object',
-    required: ['userId'],
+    required: ['accountId'],
     properties: {
-        userId: { type: 'string' }
+        accountId: { type: 'string' }
     }
 };
 
@@ -15,7 +15,7 @@ const createAuthTokenSchema: FastifySchema = {
 
 const createAuthTokenHandler = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
     const body = request.body as CreateAccessTokenDto;
-    const signedAccessToken = service.createSignedAccessToken(body.userId);
+    const signedAccessToken = service.createSignedAccessToken(body.accountId);
 
     reply
         .code(201)

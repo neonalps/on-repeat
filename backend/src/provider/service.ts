@@ -21,10 +21,10 @@ export const getPlayedTrackById = async (id: number): Promise<PlayedTrackDto | n
 
 export const createPlayedTrack = async (dto: CreatePlayedTrackDto): Promise<PlayedTrackDto | null> => {
     validateNotNull(dto, "createPlayedTrackDto");
-    validateNotNull(dto.getTrackId(), "createPlayedTrackDto.trackId");
-    validateNotNull(dto.getAccountId(), "createPlayedTrackDto.accountId");
-    validateNotNull(dto.getMusicProviderId(), "createPlayedTrackDto.musicProviderId");
-    validateNotNull(dto.getPlayedAt(), "createPlayedTrackDto.playedAt");
+    validateNotNull(dto.trackId, "createPlayedTrackDto.trackId");
+    validateNotNull(dto.accountId, "createPlayedTrackDto.accountId");
+    validateNotNull(dto.musicProviderId, "createPlayedTrackDto.musicProviderId");
+    validateNotNull(dto.playedAt, "createPlayedTrackDto.playedAt");
 
     const createdPlayedTrackId = await mapper.create(dto);
     return getPlayedTrackById(createdPlayedTrackId);

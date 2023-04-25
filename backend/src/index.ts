@@ -5,6 +5,7 @@ import router from "@router/router";
 import scheduler from '@src/job/scheduler';
 import { getAuthorizeUrl, getRecentlyPlayedTracks } from "./oauth/spotify";
 import { getSpotifyPlayedTracks } from "./provider/played-tracks";
+import { DependencyHelper } from "./di/helper";
 
 const start = async () =>  {
   const server = fastify();
@@ -20,7 +21,9 @@ const start = async () =>  {
     if (getNodeEnv() === "development") {
       console.log(`🎵 Spotify Authorize URL: ${getAuthorizeUrl()}`);
     }
-    
+
+    DependencyHelper.initDependencies();
+
     scheduler.run();
   });
 };

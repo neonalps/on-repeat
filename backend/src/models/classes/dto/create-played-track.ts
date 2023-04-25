@@ -1,78 +1,96 @@
 class CreatePlayedTrackDto {
-    private accountId!: number;
-    private trackId!: number;
-    private musicProviderId!: number;
-    private playedAt!: Date;
-    private excludeFromStatistics!: boolean;
+    private _accountId!: number;
+    private _trackId!: number;
+    private _musicProviderId!: number;
+    private _playedAt!: Date;
+    private _includeInStatistics!: boolean;
 
-    constructor(
-        accountId: number,
-        trackId: number,
-        musicProviderId: number,
-        playedAt: Date,
-        excludeFromStatistics: boolean,
-    ) {}
+    constructor(builder: CreatePlayedTrackDtoBuilder) {
+        this._accountId = builder.accountId;
+        this._trackId = builder.trackId;
+        this._musicProviderId = builder.musicProviderId;
+        this._playedAt = builder.playedAt;
+        this._includeInStatistics = builder.includeInStatistics;
+    }
     
-    public getAccountId() {
-        return this.accountId;
+    public get accountId(): number {
+        return this._accountId;
     }
 
-    public getTrackId() {
-        return this.trackId;
+    public get trackId(): number {
+        return this._trackId;
     }
 
-    public getMusicProviderId() {
-        return this.musicProviderId;
+    public get musicProviderId(): number {
+        return this._musicProviderId;
     }
 
-    public getPlayedAt() {
-        return this.playedAt;
+    public get playedAt(): Date {
+        return this._playedAt;
     }
 
-    public shouldExcludeFromStatistics() {
-        return this.excludeFromStatistics;
+    public get includeInStatistics(): boolean {
+        return this._includeInStatistics;
+    }
+
+    public static get Builder(): CreatePlayedTrackDtoBuilder {
+        return new CreatePlayedTrackDtoBuilder();
     }
 }
 
 class CreatePlayedTrackDtoBuilder {
-    public accountId!: number;
-    public trackId!: number;
-    public musicProviderId!: number;
-    public playedAt!: Date;
-    public excludeFromStatistics!: boolean;
+    private _accountId!: number;
+    private _trackId!: number;
+    private _musicProviderId!: number;
+    private _playedAt!: Date;
+    private _includeInStatistics!: boolean;
 
-    setAccountId(accountId: number) {
-        this.accountId = accountId;
+    withAccountId(accountId: number): CreatePlayedTrackDtoBuilder {
+        this._accountId = accountId;
         return this;
     }
 
-    setTrackId(trackId: number) {
-        this.trackId = trackId;
+    withTrackId(trackId: number): CreatePlayedTrackDtoBuilder {
+        this._trackId = trackId;
         return this;
     }
 
-    setMusicProviderId(musicProviderId: number) {
-        this.musicProviderId = musicProviderId;
+    withMusicProviderId(musicProviderId: number): CreatePlayedTrackDtoBuilder {
+        this._musicProviderId = musicProviderId;
         return this;
     }
 
-    setPlayedAt(playedAt: Date) {
-        this.playedAt = playedAt;
+    withPlayedAt(playedAt: Date): CreatePlayedTrackDtoBuilder {
+        this._playedAt = playedAt;
         return this;
     }
 
-    setExcludeFromStatistics(excludeFromStatistics: boolean) {
-        this.excludeFromStatistics = excludeFromStatistics;
+    withIncludeInStatistics(includeInStatistics: boolean): CreatePlayedTrackDtoBuilder {
+        this._includeInStatistics = includeInStatistics; 
         return this;
     }
 
-    build() {
-        return new CreatePlayedTrackDto(
-            this.accountId,
-            this.trackId,
-            this.musicProviderId,
-            this.playedAt,
-            this.excludeFromStatistics,
-        )
+    public get accountId(): number {
+        return this._accountId;
+    }
+
+    public get trackId(): number {
+        return this._trackId;
+    }
+
+    public get musicProviderId(): number {
+        return this._musicProviderId;
+    }
+
+    public get playedAt(): Date {
+        return this._playedAt;
+    }
+
+    public get includeInStatistics(): boolean {
+        return this._includeInStatistics;
+    }
+
+    build(): CreatePlayedTrackDto {
+        return new CreatePlayedTrackDto(this);
     }
 }

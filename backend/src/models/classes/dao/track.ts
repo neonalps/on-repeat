@@ -1,135 +1,163 @@
-class TrackDao {
-    private id!: number;
-    private name!: string;
-    private albumId!: number | null;
-    private artistIds!: Set<number>;
-    private isrc!: string | null;
-    private discNumber!: number | null;
-    private durationMs!: number | null;
-    private createdAt!: Date;
+import { setEquals } from "@src/util/collection";
 
-    constructor(
-        id: number,
-        name: string,
-        albumId: number | null,
-        artistIds: Set<number> | null,
-        isrc: string | null,
-        discNumber: number | null,
-        durationMs: number | null,
-        createdAt: Date,
-    ) {
-        this.id = id;
-        this.name = name;
-        this.albumId = albumId;
-        this.setArtistIds(artistIds);
-        this.isrc = isrc;
-        this.discNumber = discNumber;
-        this.durationMs = durationMs;
-        this.createdAt = createdAt;
+export class TrackDao {
+    private _id!: number;
+    private _name!: string;
+    private _artistIds!: Set<number>;
+    private _albumId!: number | null;
+    private _isrc!: string | null;
+    private _discNumber!: number | null;
+    private _durationMs!: number | null;
+    private _createdAt!: Date;
+
+    constructor(builder: TrackDaoBuilder) {
+        this._id = builder.id;
+        this._name = builder.name;
+        this._artistIds = new Set(builder.artistIds);
+        this._albumId = builder.albumId;
+        this._isrc = builder.isrc;
+        this._discNumber = builder.discNumber;
+        this._durationMs = builder.durationMs;
+        this._createdAt = builder.createdAt;
     }
 
-    public setArtistIds(artistIds: Set<number> | null) {
-        if (!artistIds) {
-            this.artistIds = new Set();
-            return;
+    public get id(): number {
+        return this._id;
+    }
+
+    public get name(): string {
+        return this._name;
+    }
+
+    public get artistIds(): Set<number> {
+        return new Set(this._artistIds);
+    }
+
+    public get albumId(): number | null {
+        return this._albumId;
+    }
+
+    public get isrc(): string | null {
+        return this._isrc;
+    }
+
+    public get discNumber(): number | null {
+        return this._discNumber;
+    }
+
+    public get durationMs(): number | null {
+        return this._durationMs;
+    }
+
+    public get createdAt(): Date {
+        return this._createdAt;
+    }
+
+    public areUpdateablePropertiesEqual(other: TrackDao): boolean {
+        if (this === other) {
+            return true;
         }
 
-        this.artistIds = artistIds;
+        if (other === null) {
+            return false;
+        }
+
+        return this.name === other.name
+            && this.albumId === other.albumId
+            && this.isrc === other.isrc
+            && setEquals(this.artistIds, other.artistIds)
+            && this.discNumber === other.discNumber
+            && this.durationMs === other.durationMs;
     }
 
-    public getId(): number {
-        return this.id;
-    }
-
-    public getName(): string {
-        return this.name;
-    }
-
-    public getAlbumId(): number | null {
-        return this.albumId;
-    }
-
-    public getArtistIds(): Set<number> {
-        return this.artistIds;
-    }
-
-    public getIsrc(): string | null {
-        return this.isrc;
-    }
-
-    public getDiscNumber(): number | null {
-        return this.discNumber;
-    }
-
-    public getDurationMs(): number | null {
-        return this.durationMs;
-    }
-
-    public getCreatedAt(): Date {
-        return this.createdAt;
+    public static get Builder(): TrackDaoBuilder {
+        return new TrackDaoBuilder();
     }
 }
 
 class TrackDaoBuilder {
-    private id!: number;
-    private name!: string;
-    private albumId!: number | null;
-    private artistIds!: Set<number> | null;
-    private isrc!: string | null;
-    private discNumber!: number | null;
-    private durationMs!: number | null;
-    private createdAt!: Date;
+    private _id!: number;
+    private _name!: string;
+    private _artistIds!: Set<number>;
+    private _albumId!: number | null;
+    private _isrc!: string | null;
+    private _discNumber!: number | null;
+    private _durationMs!: number | null;
+    private _createdAt!: Date;
 
-    setId(id: number) {
-        this.id = id;
+    public withId(id: number): TrackDaoBuilder {
+        this._id = id;
         return this;
     }
 
-    setName(name: string) {
-        this.name = name;
+    public withName(name: string): TrackDaoBuilder {
+        this._name = name;
         return this;
     }
 
-    setAlbumId(albumId: number | null) {
-        this.albumId = albumId;
+    public withArtistIds(artistIds: Set<number>): TrackDaoBuilder {
+        this._artistIds = artistIds;
         return this;
     }
 
-    setArtistIds(artistIds: Set<number> | null) {
-        this.artistIds = artistIds;
+    public withAlbumId(albumId: number | null): TrackDaoBuilder {
+        this._albumId = albumId;
         return this;
     }
 
-    setIsrc(isrc: string | null) {
-        this.isrc = isrc;
+    public withIsrc(isrc: string | null): TrackDaoBuilder {
+        this._isrc = isrc;
         return this;
     }
 
-    setDiscNumber(discNumber: number | null) {
-        this.discNumber = discNumber;
+    public withDiscNumber(discNumber: number | null): TrackDaoBuilder {
+        this._discNumber = discNumber;
         return this;
     }
 
-    setDurationMs(durationMs: number | null) {
-        this.durationMs = durationMs;
+    public withDurationMs(durationMs: number | null): TrackDaoBuilder {
+        this._durationMs = durationMs;
         return this;
     }
 
-    setCreatedAt(createdAt: Date) {
-        this.createdAt = createdAt;
+    public withCreatedAt(createdAt: Date): TrackDaoBuilder {
+        this._createdAt = createdAt;
         return this;
     }
 
-    build() {
-        return new TrackDao(
-            this.id,
-            this.name,
-            this.albumId,
-            this.artistIds,
-            this.isrc,
-            this.discNumber,
-            this.durationMs,
-            this.createdAt,
-        )
+    public get id(): number {
+        return this._id;
+    }
+
+    public get name(): string {
+        return this._name;
+    }
+
+    public get artistIds(): Set<number> {
+        return new Set(this._artistIds);
+    }
+
+    public get albumId(): number | null {
+        return this._albumId;
+    }
+
+    public get isrc(): string | null {
+        return this._isrc;
+    }
+
+    public get discNumber(): number | null {
+        return this._discNumber;
+    }
+
+    public get durationMs(): number | null {
+        return this._durationMs;
+    }
+
+    public get createdAt(): Date {
+        return this._createdAt;
+    }
+
+    build(): TrackDao {
+        return new TrackDao(this);
     }
 }

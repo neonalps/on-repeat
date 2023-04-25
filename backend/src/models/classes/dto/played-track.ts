@@ -1,60 +1,112 @@
-class PlayedTrackDto {
-    constructor(
-        id: number,
-        accountId: number,
-        trackId: number,
-        musicProviderId: number,
-        playedAt: Date,
-        createdAt: Date,
-    ) {}
-}
-
-class PlayedTrackDtoBuilder {
-    public id!: number;
-    public accountId!: number;
-    public trackId!: number;
-    public musicProviderId!: number;
-    public playedAt!: Date;
-    public createdAt!: Date;
-
-    setId(id: number) {
-        this.id = id;
-        return this;
+export class PlayedTrackDto {
+    private _id!: number;
+    private _accountId!: number;
+    private _trackId!: number;
+    private _musicProviderId!: number;
+    private _playedAt!: Date;
+    private _createdAt!: Date;
+ 
+    constructor(builder: PlayedTrackDtoBuilder) {
+       this._id = builder.id;
+       this._accountId = builder.accountId;
+       this._trackId = builder.trackId;
+       this._musicProviderId = builder.musicProviderId;
+       this._playedAt = builder.playedAt;
+       this._createdAt = builder.createdAt;
     }
-
-    setAccountId(accountId: number) {
-        this.accountId = accountId;
-        return this;
+ 
+    public get id(): number {
+       return this._id;
     }
-
-    setTrackId(trackId: number) {
-        this.trackId = trackId;
-        return this;
+ 
+    public get accountId(): number {
+       return this._accountId;
     }
-
-    setMusicProviderId(musicProviderId: number) {
-        this.musicProviderId = musicProviderId;
-        return this;
+ 
+    public get trackId(): number {
+       return this._trackId;
     }
-
-    setPlayedAt(playedAt: Date) {
-        this.playedAt = playedAt;
-        return this;
+ 
+    public get musicProviderId(): number {
+       return this._musicProviderId;
     }
-
-    setCreatedAt(createdAt: Date) {
-        this.createdAt = createdAt;
-        return this;
+ 
+    public get playedAt(): Date {
+       return this._playedAt;
     }
-
-    build() {
-        return new PlayedTrackDto(
-            this.id,
-            this.accountId,
-            this.trackId,
-            this.musicProviderId,
-            this.playedAt,
-            this.createdAt,
-        )
+ 
+    public get createdAt(): Date {
+       return this._createdAt;
     }
-}
+ 
+    public static get Builder(): PlayedTrackDtoBuilder {
+       return new PlayedTrackDtoBuilder();
+    }
+ }
+ 
+ class PlayedTrackDtoBuilder {
+    private _id!: number;
+    private _accountId!: number;
+    private _trackId!: number;
+    private _musicProviderId!: number;
+    private _playedAt!: Date;
+    private _createdAt!: Date;
+ 
+    public withId(id: number): PlayedTrackDtoBuilder {
+       this._id = id;
+       return this;
+    }
+ 
+    public withAccountId(accountId: number): PlayedTrackDtoBuilder {
+       this._accountId = accountId;
+       return this;
+    }
+ 
+    public withTrackId(trackId: number): PlayedTrackDtoBuilder {
+       this._trackId = trackId;
+       return this;
+    }
+ 
+    public withMusicProviderId(musicProviderId: number): PlayedTrackDtoBuilder {
+       this._musicProviderId = musicProviderId;
+       return this;
+    }
+ 
+    public withPlayedAt(playedAt: Date): PlayedTrackDtoBuilder {
+       this._playedAt = playedAt;
+       return this;
+    }
+ 
+    public withCreatedAt(createdAt: Date): PlayedTrackDtoBuilder {
+       this._createdAt = createdAt;
+       return this;
+    }
+ 
+    public get id(): number {
+       return this._id;
+    }
+ 
+    public get accountId(): number {
+       return this._accountId;
+    }
+ 
+    public get trackId(): number {
+       return this._trackId;
+    }
+ 
+    public get musicProviderId(): number {
+       return this._musicProviderId;
+    }
+ 
+    public get playedAt(): Date {
+       return this._playedAt;
+    }
+ 
+    public get createdAt(): Date {
+       return this._createdAt;
+    }
+ 
+    build(): PlayedTrackDto {
+       return new PlayedTrackDto(this);
+    }
+ }

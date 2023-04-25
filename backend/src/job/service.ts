@@ -1,66 +1,34 @@
-import { validateNotBlank } from "@src/util/validation";
-import mapper from "./mapper";
-import userService from "@src/user/service";
+import { validateNotBlank, validateNotNull } from "@src/util/validation";
+import { JobMapper } from "./mapper";
+import { requireNonNull } from "@src/util/common";
+import { JobDao } from "@src/models/classes/dao/job";
+import { CreateJobDto } from "@src/models/classes/dto/create-job";
 
-const create = async (accountId: string, name: string, intervalSeconds: number, enabled: boolean): Promise<Job> => {
-    validateNotBlank(name, "name");
-    validateNotBlank(accountId, "accountId");
+export class JobService {
 
-    const account = await userService.getById(accountId);
-    if (account === null) {
-        throw new Error(`account with ID ${accountId} does not exist`);
+    private readonly mapper: JobMapper;
+
+    constructor(mapper: JobMapper) {
+        this.mapper = requireNonNull(mapper);
     }
 
-    const job = await mapper.create({
-        accountId,
-        name,
-        intervalSeconds,
-        enabled,
-    });
-
-    if (!job) {
-        throw new Error("failed to create job");
+    public async create(dto: CreateJobDto): Promise<JobDao | null> {
+        validateNotNull(dto, "dto");
+        validateNotBlank(dto.name, "dto.name");
+        validateNotNull(dto.enabled, "dto.enabled");
+    
+        const createdJobId = await this.mapper.create(dto);
+        return this.getById(createdJobId);
+    }
+    
+    public async getAllEnabled(): Promise<JobDao[]> {
+        return this.mapper.getAllEnabled();
     }
 
-    return toDto(job, account);
-};
+    public async getById(id: number): Promise<JobDao | null> {
+        validateNotNull(id, "id");
 
-const getAllEnabled = async (): Promise<Job[]> => {
-    const enabledJobs = await mapper.getAllEnabled();
-
-    if (!enabledJobs || enabledJobs.length === 0) {
-        return [];
+        return this.mapper.getById(id);
     }
 
-    const result: Job[] = [];
-    for (const job of enabledJobs) {
-        const account = await userService.getById(job.accountId);
-
-        if (account === null) {
-            continue;
-        }
-
-        result.push(toDto(job, account));
-    }
-
-    return result;
-};
-
-const toDto = (dao: JobDao, account: User): Job => {
-    return {
-        id: dao.id,
-        account,
-        name: dao.name,
-        intervalSeconds: dao.intervalSeconds,
-        enabled: dao.enabled,
-        createdAt: dao.createdAt,
-        updatedAt:dao.updatedAt,
-    }
-};
-
-const service = {
-    create,
-    getAllEnabled,
-};
-
-export default service;
+}

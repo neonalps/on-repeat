@@ -12,15 +12,6 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
             type: 'varchar(100)',
             notNull: true
         },
-        account_id: {
-            type: 'varchar',
-            notNull: true,
-            references: `"account"`,
-        },
-        interval_seconds: {
-            type: 'integer',
-            notNull: false
-        },
         enabled: {
             type: 'boolean',
             notNull: true
