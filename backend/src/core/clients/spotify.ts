@@ -1,8 +1,8 @@
 import { AUTHORIZATION, CONTENT_TYPE, HEADER, HTTP_STATUS } from "@src/http/constants";
 import { generateRandomString, getQueryString, removeNull, requireNonNull } from "@src/util/common";
-import { OAUTH_GRANT_TYPE_AUTHORIZATION_CODE, OAUTH_GRANT_TYPE_REFRESH_TOKEN, OAUTH_RESPONSE_TYPE_CODE } from "./constants";
+import { OAUTH_GRANT_TYPE_AUTHORIZATION_CODE, OAUTH_GRANT_TYPE_REFRESH_TOKEN, OAUTH_RESPONSE_TYPE_CODE } from "../oauth/constants";
 import http from "@src/http/index";
-import { validateNotBlank, validateNotNull } from "@src/util/validation";
+import { validateNotBlank } from "@src/util/validation";
 
 export interface SpotifyClientConfig {
     clientId: string;
@@ -25,7 +25,7 @@ export class SpotifyClient {
     constructor(config: SpotifyClientConfig) {
         this.config = requireNonNull(config);
 
-        this.validateConfig(this.config);
+        this.validateConfig();
     }
 
     public getAuthorizeUrl(): string {
@@ -120,10 +120,17 @@ export class SpotifyClient {
         };
     }
 
-    public async getRecentlyPlayedTracks (accessToken: string, limit: number, before?: number): Promise<PlayedTracksResponse> {
-        validateNotBlank(accessToken, "accessToken");
-        validateNotNull(limit, "limit");
+    public async getRecentlyPlayedTracks(refreshToken: string): Promise<PlayedTrackDto[]> {
+        // TODO add in mem cache for access tokens
+        const token = await this.getNewAccessToken(refreshToken);
+        const playedTracksResponse = await this.fetchRecentlyPlayedTracksBatch(token.accessToken, 30);
+    
+        // TODO here could be a looping logic to get all possible tracks
+    
+        return playedTracksResponse.playedTracks;
+    }
 
+    private async fetchRecentlyPlayedTracksBatch(accessToken: string, limit: number, before?: number): Promise<PlayedTracksResponse> {
         const queryParams: Record<string, any> = { limit };
     
         if (before) {
@@ -148,14 +155,14 @@ export class SpotifyClient {
         return parseRecentlyPlayedTracksResponse(responseBody);
     }
 
-    private validateConfig(config: SpotifyClientConfig): void {
-        validateNotBlank(config.clientId, "config.clientId");
-        validateNotBlank(config.clientSecret, "config.clientSecret");
-        validateNotBlank(config.redirectUrl, "config.redirectUrl");
-        validateNotBlank(config.authorizeUrl, "config.authorizeUrl");
-        validateNotBlank(config.recentlyPlayedTracksUrl, "config.recentlyPlayedTracksUrl");
-        validateNotBlank(config.userProfileUrl, "config.userProfileUrl");
-        validateNotBlank(config.tokenUrl, "config.tokenUrl");
+    private validateConfig(): void {
+        validateNotBlank(this.config.clientId, "config.clientId");
+        validateNotBlank(this.config.clientSecret, "config.clientSecret");
+        validateNotBlank(this.config.redirectUrl, "config.redirectUrl");
+        validateNotBlank(this.config.authorizeUrl, "config.authorizeUrl");
+        validateNotBlank(this.config.recentlyPlayedTracksUrl, "config.recentlyPlayedTracksUrl");
+        validateNotBlank(this.config.userProfileUrl, "config.userProfileUrl");
+        validateNotBlank(this.config.tokenUrl, "config.tokenUrl");
     }
 
     private getAuthHeaderValue(): string {

@@ -1,11 +1,13 @@
-import { FastifyInstance } from "fastify";
-import helloRegistrar from "@router/handlers/hello";
+import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import authHandler from "@src/auth/handler";
 import oauthHandler from "@src/oauth/handler";
 
+export abstract class RouteHandler {
+    abstract handle(request: FastifyRequest, reply: FastifyReply): void;
+}
+
 const handlerProvider = async () => {
     return [
-        helloRegistrar,
         authHandler,
         oauthHandler,
     ];

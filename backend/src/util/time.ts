@@ -1,18 +1,14 @@
-const getNow = (): Date => {
-    return new Date();
-};
-
-const getNowPlusSeconds = (seconds: number): Date => {
-    const now = getNow();
-    return new Date(now.getTime() + seconds * 1000);
-}
-
-const getCurrentUnixTimestamp = (): number => {
-    return Math.floor(Date.now() / 1000);
-};
-
-export {
-    getCurrentUnixTimestamp,
-    getNow,
-    getNowPlusSeconds,
+export class TimeSource {
+    public getNow(): Date {
+        return new Date();
+    };
+    
+    public getNowPlusSeconds(seconds: number = 0): Date {
+        const now = this.getNow();
+        return new Date(now.getTime() + seconds * 1000);
+    }
+    
+    public getCurrentUnixTimestamp(): number {
+        return Math.floor(Date.now() / 1000);
+    };
 }

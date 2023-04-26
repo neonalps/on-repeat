@@ -3,7 +3,7 @@ import { getNodeEnv, getServerHost, getServerPort, getCryptoKey } from "@src/con
 import logger from "@log/logger";
 import router from "@router/router";
 import scheduler from '@src/job/scheduler';
-import { getAuthorizeUrl, getRecentlyPlayedTracks } from "./oauth/spotify";
+import { getAuthorizeUrl, getRecentlyPlayedTracks } from "./core/clients/spotify";
 import { getSpotifyPlayedTracks } from "./provider/played-tracks";
 import { DependencyHelper } from "./di/helper";
 

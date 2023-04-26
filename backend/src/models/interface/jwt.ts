@@ -1,4 +1,4 @@
-interface Jwt {
+export interface Jwt {
     iss: string;
     aud: string;
     sub: string;

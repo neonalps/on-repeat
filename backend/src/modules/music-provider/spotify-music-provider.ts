@@ -1,17 +1,27 @@
-import catalogueService from "@src/catalogue/service";
 import { validateNotNull } from "@src/util/validation";
 import { MusicProvider } from "./abstract-music-provider";
-import { hasPlayedTrackAlreadyBeenProcessed } from "./played-tracks";
-import { createPlayedTrack } from "./service";
 import { TrackDao } from "@src/models/classes/dao/track";
-
-const PROVIDER_ID = 1;
-const PROVIDER_NAME = "spotify";
+import { MusicProviderMapper } from "./mapper";
+import { CatalogueService } from "@src/catalogue/service";
+import { PlayedTrackService } from "@src/played-tracks/service";
+import { requireNonNull } from "@src/util/common";
 
 export class SpotifyMusicProvider extends MusicProvider {
+
+    private static readonly PROVIDER_ID = 1;
+    private static readonly PROVIDER_NAME = "spotify";
+
+    private readonly catalogueService: CatalogueService;
+    private readonly playedTrackService: PlayedTrackService;
     
-    constructor() {
-        super(PROVIDER_ID, PROVIDER_NAME);
+    constructor(
+        mapper: MusicProviderMapper, 
+        catalogueService: CatalogueService,
+        playedTrackService: PlayedTrackService,
+    ) {
+        super(SpotifyMusicProvider.PROVIDER_ID, SpotifyMusicProvider.PROVIDER_NAME, mapper);
+        this.catalogueService = requireNonNull(catalogueService);
+        this.playedTrackService = requireNonNull(playedTrackService);
     }
 
     public async processPlayedTracks(accountId: number, playedTracks: PlayedTrackDto[]): Promise<void> {
@@ -25,7 +35,7 @@ export class SpotifyMusicProvider extends MusicProvider {
                     throw new Error("No playedAt timestamp found");
                 }
 
-                if (await hasPlayedTrackAlreadyBeenProcessed(accountId, this.providerId, playedAt)) {
+                if (await this.playedTrackService.hasPlayedTrackAlreadyBeenProcessed(accountId, this.providerId, playedAt)) {
                     continue;
                 }
 
@@ -51,7 +61,7 @@ export class SpotifyMusicProvider extends MusicProvider {
                     .withIncludeInStatistics(true)
                     .build();
     
-                await createPlayedTrack(playedTrackDto);
+                await this.playedTrackService.create(playedTrackDto);
             } catch (ex) {
                 // TOOD log
             }
@@ -61,7 +71,7 @@ export class SpotifyMusicProvider extends MusicProvider {
     private async processAlbum(albumToProcess: AlbumDto): Promise<number> {
         const storedAlbum = await this.getAlbumIdByProviderAlbumId(albumToProcess.id);
         const storedAlbumId = storedAlbum !== null ? storedAlbum.albumId : null;
-        const catalogueAlbumId = await catalogueService.upsertAlbum(storedAlbumId, albumToProcess);
+        const catalogueAlbumId = await this.catalogueService.upsertAlbum(storedAlbumId, albumToProcess);
 
         if (!storedAlbumId) {
             await this.addMusicProviderAlbumRelation(catalogueAlbumId, albumToProcess.id, albumToProcess.uri);
@@ -84,7 +94,7 @@ export class SpotifyMusicProvider extends MusicProvider {
                 .withName(artistToProcess.name)
                 .build();
 
-            const catalogueArtistId = await catalogueService.upsertArtist(storedArtistId, artist);
+            const catalogueArtistId = await this.catalogueService.upsertArtist(storedArtistId, artist);
             catalogueArtistIds.add(catalogueArtistId);
 
             if (!storedArtistId) {
@@ -99,11 +109,10 @@ export class SpotifyMusicProvider extends MusicProvider {
         const storedTrackId = storedTrack !== null ? storedTrack.trackId : null;
 
         const track = TrackDao.Builder
-            .wi
             .withArtistIds(catalogueArtistIds)
-            .withAlbumId(catalogueAlbumId)
+            .withAlbumId(catalogueAlbumId);
 
-        const catalogueTrackId = await catalogueService.upsertTrack(storedTrackId, trackToProcess);
+        const catalogueTrackId = await this.catalogueService.upsertTrack(storedTrackId, trackToProcess);
 
         if (!storedTrackId) {
             await this.addMusicProviderTrackRelation(catalogueTrackId, trackToProcess.id, trackToProcess.href);

@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyReply, FastifyRequest, FastifySchema } from "fastify";
 import { OAUTH_PROVIDERS, OAUTH_PROVIDER_SPOTIFY } from "./constants";
 import service from "./service";
-import { exchangeCodeForToken } from "./spotify";
+import { exchangeCodeForToken } from "../clients/spotify";
 import userService from "@user/service";
 import accountTokenService from "@src/account-token/service";
 import { getNowPlusSeconds } from "@src/util/time";
