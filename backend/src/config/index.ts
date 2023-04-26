@@ -1,3 +1,4 @@
+import { TokenConfig } from "@src/auth/service";
 import { SpotifyClientConfig } from "@src/oauth/spotify";
 import dotenv from "dotenv";
 import * as env from "env-var";
@@ -31,6 +32,13 @@ const spotifyClientConfig: SpotifyClientConfig = {
     recentlyPlayedTracksUrl: spotifyRecentlyPlayedUrl,
 };
 
+const tokenConfig: TokenConfig = {
+    accessTokenValiditySeconds,
+    audience: authTokenAudience,
+    issuer: authTokenIssuer,
+    signingKey: authTokenSigningKey,
+};
+
 export const getNodeEnv = () => nodeEnv;
 export const getCryptoKey = () => cryptoKey;
 export const getDbConnectionUrl = () => dbConnectionUrl;
@@ -41,3 +49,4 @@ export const getAuthTokenAudience = () => authTokenAudience;
 export const getAuthTokenIssuer = () => authTokenIssuer;
 export const getAuthTokenSigningKey = () => authTokenSigningKey;
 export const getSpotifyClientConfig = () => spotifyClientConfig;
+export const getTokenConfig = () => tokenConfig;

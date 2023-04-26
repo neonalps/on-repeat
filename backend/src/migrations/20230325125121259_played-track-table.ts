@@ -27,6 +27,10 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
             type: 'timestamptz',
             notNull: true,
         },
+        include_in_statistics: {
+            type: 'boolean',
+            notNull: true,
+        },
         created_at: {
             type: 'timestamptz',
             notNull: true,

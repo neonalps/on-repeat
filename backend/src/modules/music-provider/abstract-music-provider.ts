@@ -1,30 +1,36 @@
 import { validateNotBlank, validateNotNull } from "@src/util/validation";
-import musicProviderMapper from "./music-provider-mapper";
+import { MusicProviderMapper } from "./mapper";
+import { requireNonNull } from "@src/util/common";
 
 export abstract class MusicProvider {
-    protected providerId: number;
-    protected providerName: string;
+    protected readonly providerId: number;
+    protected readonly providerName: string;
+    protected readonly mapper: MusicProviderMapper;
 
-    constructor(id: number, name: string) {
-        this.providerId = id;
-        this.providerName = name;
+    constructor(id: number, name: string, mapper: MusicProviderMapper) {
+        this.providerId = requireNonNull(id);
+        this.providerName = requireNonNull(name);
+        this.mapper = requireNonNull(mapper);
     }
 
     public abstract processPlayedTracks(accountId: number, playedTracks: PlayedTrackDto[]): Promise<void>;
 
     public getTrackByProviderTrackId(providerTrackId: string): Promise<MusicProviderTrackDao | null> {
         validateNotBlank(providerTrackId, "providerTrackId");
-        return musicProviderMapper.getTrackByProviderTrackId(this.providerId, providerTrackId);
+
+        return this.mapper.getTrackByProviderTrackId(this.providerId, providerTrackId);
     }
 
     public getArtistByProviderArtistId(providerArtistId: string): Promise<MusicProviderArtistDao | null> {
         validateNotBlank(providerArtistId, "providerArtistId");
-        return musicProviderMapper.getArtistByProviderArtistId(this.providerId, providerArtistId);
+
+        return this.mapper.getArtistByProviderArtistId(this.providerId, providerArtistId);
     }
 
     public getAlbumIdByProviderAlbumId(providerAlbumId: string): Promise<MusicProviderAlbumDao | null> {
         validateNotBlank(providerAlbumId, "providerAlbumId");
-        return musicProviderMapper.getAlbumByProviderAlbumId(this.providerId, providerAlbumId);
+
+        return this.mapper.getAlbumByProviderAlbumId(this.providerId, providerAlbumId);
     }
 
     public addMusicProviderTrackRelation(trackId: number, musicProviderTrackId: string, musicProviderTrackUri: string | null): Promise<void> {
@@ -38,7 +44,7 @@ export abstract class MusicProvider {
             .withMusicProviderTrackUri(musicProviderTrackUri)
             .build();
 
-        return musicProviderMapper.addMusicProviderTrackRelation(dto);
+        return this.mapper.addMusicProviderTrackRelation(dto);
     } 
   
     public addMusicProviderArtistRelation(artistId: number, musicProviderArtistId: string, musicProviderArtistUri: string | null): Promise<void> {
@@ -52,7 +58,7 @@ export abstract class MusicProvider {
             .withMusicProviderArtistUri(musicProviderArtistUri)
             .build();
             
-        return musicProviderMapper.addMusicProviderArtistRelation(dto);
+        return this.mapper.addMusicProviderArtistRelation(dto);
     }
 
     public addMusicProviderAlbumRelation(albumId: number, musicProviderAlbumId: string, musicProviderAlbumUri: string | null): Promise<void> {
@@ -66,6 +72,6 @@ export abstract class MusicProvider {
             .withMusicProviderAlbumUri(musicProviderAlbumUri)
             .build();
 
-        return musicProviderMapper.addMusicProviderAlbumRelation(dto);
+        return this.mapper.addMusicProviderAlbumRelation(dto);
     }
 }

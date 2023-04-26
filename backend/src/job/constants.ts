@@ -1,8 +1,0 @@
-export const JOB_FETCH_SPOTIFY_RECENTLY_PLAYED = "FETCH_SPOTIFY_RECENTLY_PLAYED";
-
-export const JOB_STATE: Record<string, string> = {
-    READY: 'READY',
-    RUNNING: 'RUNNING',
-    SUCCEEDED: 'SUCCEEDED',
-    FAILED: 'FAILED',
-};

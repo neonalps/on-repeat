@@ -1,19 +1,36 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { MigrationBuilder, ColumnDefinitions } from 'node-pg-migrate';
 
-const TABLE_NAME = "job";
+const TABLE_NAME = "account_tokens";
 
 export const shorthands: ColumnDefinitions | undefined = undefined;
 
 export async function up(pgm: MigrationBuilder): Promise<void> {
     pgm.createTable(TABLE_NAME, {
         id: 'id',
-        name: {
+        account_id: {
+            type: 'integer',
+            notNull: true,
+            references: `"account"`
+        },
+        oauth_provider: {
             type: 'varchar(100)',
             notNull: true
         },
-        enabled: {
-            type: 'boolean',
+        scope: {
+            type: 'varchar(1000)',
+            notNull: true
+        },
+        encrypted_access_token: {
+            type: 'varchar(1000)',
+            notNull: true
+        },
+        access_token_expires_at: {
+            type: 'timestamptz',
+            notNull: true
+        },
+        encrypted_refresh_token: {
+            type: 'varchar(1000)',
             notNull: true
         },
         created_at: {
@@ -23,7 +40,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
         },
         updated_at: {
             type: 'timestamptz',
-            notNull: false,
+            notNull: false
         },
     });
 }

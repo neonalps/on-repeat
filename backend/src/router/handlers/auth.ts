@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyReply, FastifyRequest, FastifySchema } from "fastify";
 import service from "./service";
 
-const createAuthTokenDtoJsonSchema   = {
+const createAuthTokenDtoJsonSchema = {
     type: 'object',
     required: ['accountId'],
     properties: {
