@@ -14,6 +14,8 @@ class DependencyManager {
     }
 
     public register(key: Dependencies, instance: any): void {
+        validateNotNull(instance, "instance");
+
         this.dependencies.set(key, instance);
     }
 

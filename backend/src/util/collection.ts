@@ -5,8 +5,13 @@ export const setEquals = <T> (first: Set<T>, second: Set<T>): boolean => {
         return false;
     }
 
-    // primitive comparison
-    if (["number", "string", "boolean", "symbol", "bigint"].includes(typeof first)) {
+    if (first.size === 0) {
+        return true;
+    }
+
+    // primitive comparison on the first element
+    const [firstElememnt] = first;
+    if (["number", "string", "boolean", "symbol", "bigint"].includes(typeof firstElememnt)) {
         return [...first].every(item => second.has(item));
     }
 

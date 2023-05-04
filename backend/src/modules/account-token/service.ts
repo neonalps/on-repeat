@@ -1,6 +1,6 @@
 import { AccountTokenMapper } from "./mapper";
 import { validateNotBlank, validateNotNull } from "@src/util/validation";
-import { CryptoService } from "@src/crypto/service";
+import { CryptoService } from "@src/modules/crypto/service";
 import { requireNonNull } from "@src/util/common";
 import { CreateAccountTokenDto } from "@src/models/classes/dto/create-account-token";
 import { CreateSecureAccountTokenDto } from "@src/models/classes/dto/create-secure-account-token";
@@ -51,8 +51,8 @@ export class AccountTokenService {
         // TODO implement
     }
     
-    public async getByAccountIdAndOauthProviderAndScope(accountId: string, oauthProvider: string, scope: string): Promise<AccountTokenDao | null> {
-        validateNotBlank(accountId, "accountId");
+    public async getByAccountIdAndOauthProviderAndScope(accountId: number, oauthProvider: string, scope: string): Promise<AccountTokenDao | null> {
+        validateNotNull(accountId, "accountId");
         validateNotBlank(oauthProvider, "oauthProvider");
         validateNotBlank(scope, "scope");
     
@@ -77,7 +77,7 @@ export class AccountTokenService {
         return this.toAccountTokenDao(secureAccountTokenDao);
     }
     
-    public async updateAccessToken(accountTokenId: number, newAccessToken: string, newAccessTokenExpiresAt: Date): Promise<boolean> {
+    public async updateAccessToken(accountTokenId: number, newAccessToken: string, newAccessTokenExpiresAt: Date): Promise<void> {
         // TODO implement
     }
 

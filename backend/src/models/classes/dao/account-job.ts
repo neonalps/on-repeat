@@ -5,6 +5,7 @@ export class AccountJobDao {
     private _accountId!: number;
     private _jobId!: number;
     private _intervalSeconds!: number;
+    private _failureCount!: number;
     private _enabled!: boolean;
     private _createdAt!: Date;
     private _updatedAt!: Date | null;
@@ -14,6 +15,7 @@ export class AccountJobDao {
        this._accountId = builder.accountId;
        this._jobId = builder.jobId;
        this._intervalSeconds = builder.intervalSeconds;
+       this._failureCount = builder.failureCount;
        this._enabled = builder.enabled;
        this._createdAt = builder.createdAt;
        this._updatedAt = builder.updatedAt;
@@ -33,6 +35,10 @@ export class AccountJobDao {
  
     public get intervalSeconds(): number {
        return this._intervalSeconds;
+    }
+
+    public get failureCount(): number {
+      return this._failureCount;
     }
  
     public get enabled(): boolean {
@@ -61,6 +67,7 @@ export class AccountJobDao {
             .withAccountId(item.accountId)
             .withJobId(item.jobId)
             .withIntervalSeconds(item.intervalSeconds)
+            .withFailureCount(item.failureCount)
             .withEnabled(item.enabled)
             .withCreatedAt(item.createdAt)
             .withUpdatedAt(item.updatedAt)
@@ -73,6 +80,7 @@ export class AccountJobDao {
     private _accountId!: number;
     private _jobId!: number;
     private _intervalSeconds!: number;
+    private _failureCount!: number;
     private _enabled!: boolean;
     private _createdAt!: Date;
     private _updatedAt!: Date | null;
@@ -96,6 +104,11 @@ export class AccountJobDao {
        this._intervalSeconds = intervalSeconds;
        return this;
     }
+
+    public withFailureCount(failureCount: number): AccountJobDaoBuilder {
+      this._failureCount = failureCount;
+      return this;
+   }
  
     public withEnabled(enabled: boolean): AccountJobDaoBuilder {
        this._enabled = enabled;
@@ -126,6 +139,10 @@ export class AccountJobDao {
  
     public get intervalSeconds(): number {
        return this._intervalSeconds;
+    }
+
+    public get failureCount(): number {
+      return this._failureCount;
     }
  
     public get enabled(): boolean {

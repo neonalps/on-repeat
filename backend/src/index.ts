@@ -1,15 +1,21 @@
 import fastify from "fastify";
-import { getNodeEnv, getServerHost, getServerPort, getCryptoKey } from "@src/config";
-import logger from "@log/logger";
-import router from "@router/router";
-import scheduler from '@src/job/scheduler';
-import { getAuthorizeUrl, getRecentlyPlayedTracks } from "./core/clients/spotify";
-import { getSpotifyPlayedTracks } from "./provider/played-tracks";
-import { DependencyHelper } from "./di/helper";
+import { getNodeEnv, getServerHost, getServerPort } from "@src/config";
+import logger from "@src/log/logger";
+import { DependencyHelper } from "@src/di/helper";
+import { RouterHelper } from "@src/router/helper";
+import { testDbConnection } from "@src/db/db";
+import dependencyManager from "@src/di/manager";
+import { Scheduler } from "@src/modules/scheduler/scheduler";
+import { Dependencies } from "@src/di/dependencies";
+import { JobRepository } from "./modules/job/repository";
 
 const start = async () =>  {
   const server = fastify();
-  await router.registerHandlers(server);
+  
+  await testDbConnection();
+  DependencyHelper.initDependencies();
+  JobRepository.initJobs();
+  RouterHelper.registerRoutes(server);
 
   server.listen({ host: getServerHost(), port: getServerPort() }, async (err, address) => {
     if (err) {
@@ -17,13 +23,8 @@ const start = async () =>  {
       process.exit(1);
     }
     logger.info(`Server listening at ${address}, environment: ${getNodeEnv()}`);
-    
-    if (getNodeEnv() === "development") {
-      console.log(`🎵 Spotify Authorize URL: ${getAuthorizeUrl()}`);
-    }
 
-    DependencyHelper.initDependencies();
-
+    const scheduler = dependencyManager.get<Scheduler>(Dependencies.Scheduler);
     scheduler.run();
   });
 };

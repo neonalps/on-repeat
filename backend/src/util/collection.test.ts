@@ -53,8 +53,4 @@ describe('Util - collection', () => {
         expect(setEquals(input.first, input.second)).toBe(false);
     }
   });
-
-  test('return true when comparing set equals for equal objects', () => {
-    
-  });
 });

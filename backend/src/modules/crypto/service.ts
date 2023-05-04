@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { KeyProvider } from '@src/crypto/key-provider';
+import { KeyProvider } from '@src/modules/crypto/key-provider';
 
 export class CryptoService {
 

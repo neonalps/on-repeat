@@ -22,6 +22,5 @@
     },
     "exclude": [
         "jest.config.js",
-        "src/**/*.test.ts"
     ]
 }

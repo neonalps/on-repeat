@@ -24,6 +24,11 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
             type: 'integer',
             notNull: false
         },
+        failure_count: {
+            type: 'integer',
+            notNull: false,
+            default: 0,
+        },
         enabled: {
             type: 'boolean',
             notNull: true

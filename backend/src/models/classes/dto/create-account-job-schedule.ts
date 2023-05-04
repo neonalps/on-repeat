@@ -3,6 +3,7 @@ export class CreateAccountJobScheduleDto {
     private _accountJobId!: number;
     private _state!: string;
     private _scheduledAfter!: Date;
+    private _scheduledAt!: Date | null;
     private _startedAt!: Date | null;
     private _finishedAt!: Date | null;
     private _errorMessage!: string | null;
@@ -12,6 +13,7 @@ export class CreateAccountJobScheduleDto {
        this._accountJobId = builder.accountJobId;
        this._state = builder.state;
        this._scheduledAfter = builder.scheduledAfter;
+       this._scheduledAt = builder.scheduledAt;
        this._startedAt = builder.startedAt;
        this._finishedAt = builder.finishedAt;
        this._errorMessage = builder.errorMessage;
@@ -31,6 +33,10 @@ export class CreateAccountJobScheduleDto {
  
     public get scheduledAfter(): Date {
        return this._scheduledAfter;
+    }
+
+    public get scheduledAt(): Date | null {
+       return this._scheduledAt;
     }
  
     public get startedAt(): Date | null {
@@ -55,6 +61,7 @@ export class CreateAccountJobScheduleDto {
     private _accountJobId!: number;
     private _state!: string;
     private _scheduledAfter!: Date;
+    private _scheduledAt!: Date | null;
     private _startedAt!: Date | null;
     private _finishedAt!: Date | null;
     private _errorMessage!: string | null;
@@ -77,6 +84,11 @@ export class CreateAccountJobScheduleDto {
     public withScheduledAfter(scheduledAfter: Date): CreateAccountJobScheduleDtoBuilder {
        this._scheduledAfter = scheduledAfter;
        return this;
+    }
+
+    public withScheduledAt(scheduledAt: Date | null): CreateAccountJobScheduleDtoBuilder {
+      this._scheduledAt = scheduledAt;
+      return this;
     }
  
     public withStartedAt(startedAt: Date | null): CreateAccountJobScheduleDtoBuilder {
@@ -108,6 +120,10 @@ export class CreateAccountJobScheduleDto {
  
     public get scheduledAfter(): Date {
        return this._scheduledAfter;
+    }
+
+    public get scheduledAt(): Date | null {
+      return this._scheduledAt;
     }
  
     public get startedAt(): Date | null {

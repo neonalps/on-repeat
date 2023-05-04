@@ -8,4 +8,8 @@ const sql = postgres(getDbConnectionUrl(), {
     }
 });
 
+export const testDbConnection = async () => {
+    await sql`select 1`
+};
+
 export default sql;

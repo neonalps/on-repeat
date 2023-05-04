@@ -17,7 +17,6 @@ export class AuthService {
     private readonly tokenConfig: TokenConfig;
     private readonly timeSource: TimeSource;
 
-    private static readonly SCOPE_USER = "user";
     private static readonly TOKEN_TYPE_ACCESS = "ACCESS";
 
     constructor(tokenConfig: TokenConfig, timeSource: TimeSource) {
@@ -27,12 +26,12 @@ export class AuthService {
         this.validateConfig();
     }
 
-    public createSignedAccessToken(subject: string): string {
-        const accessToken = this.issueAccessToken(subject);
+    public createSignedAccessToken(subject: string, scopes: Set<string>): string {
+        const accessToken = this.issueAccessToken(subject, scopes);
         return this.signToken(accessToken.convertToJwt());
     }
     
-    private issueAccessToken(subject: string): AuthToken {
+    private issueAccessToken(subject: string, scopes: Set<string>): AuthToken {
         const now = this.timeSource.getCurrentUnixTimestamp();
         const expiresAt = now + this.tokenConfig.accessTokenValiditySeconds;
 
@@ -40,7 +39,7 @@ export class AuthService {
             .withTokenType(AuthService.TOKEN_TYPE_ACCESS)
             .withIssuer(this.tokenConfig.issuer)
             .withSubject(subject)
-            .withScopes(new Set([AuthService.SCOPE_USER]))
+            .withScopes(scopes)
             .withIssuedAt(now)
             .withNotBefore(now)
             .withExpiresAt(expiresAt)

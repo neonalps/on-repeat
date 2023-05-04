@@ -1,3 +1,0 @@
-interface CreateAccessTokenDto {
-    accountId: string;
-}

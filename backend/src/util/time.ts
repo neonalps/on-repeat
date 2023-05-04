@@ -4,8 +4,11 @@ export class TimeSource {
     };
     
     public getNowPlusSeconds(seconds: number = 0): Date {
-        const now = this.getNow();
-        return new Date(now.getTime() + seconds * 1000);
+        return this.addSeconds(this.getNow(), seconds);
+    }
+
+    public addSeconds(from: Date, seconds: number = 0): Date {
+        return new Date(from.getTime() + seconds * 1000);
     }
     
     public getCurrentUnixTimestamp(): number {

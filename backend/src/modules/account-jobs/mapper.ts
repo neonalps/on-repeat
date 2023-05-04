@@ -10,14 +10,14 @@ export class AccountJobMapper {
     public async create(accountJob: CreateAccountJobDto): Promise<number> {
         const result = await sql`
             insert into account_jobs
-                (account_id, job_id, interval_seconds, enabled, created_at, updated_at)
+                (account_id, job_id, interval_seconds, failure_count, enabled, created_at, updated_at)
             values
-                (${ accountJob.accountId }, ${ accountJob.jobId }, ${ accountJob.intervalSeconds }, ${ accountJob.enabled }, now(), null)
+                (${ accountJob.accountId }, ${ accountJob.jobId }, ${ accountJob.intervalSeconds }, 0, ${ accountJob.enabled }, now(), null)
             returning id
         `;
     
         return result[0].id;
-    };
+    }
 
     public async getById(id: number): Promise<AccountJobDao | null> {
         const result = await sql<AccountJobDaoInterface[]>`
@@ -26,6 +26,7 @@ export class AccountJobMapper {
                 account_id,
                 job_id,
                 interval_seconds,
+                failure_count,
                 enabled,
                 created_at,
                 updated_at
@@ -40,6 +41,39 @@ export class AccountJobMapper {
         }
     
         return AccountJobDao.fromDaoInterface(result[0]);
+    }
+
+    public async increaseFailureCount(id: number): Promise<void> {
+        await sql`update account_jobs set
+                     failure_count = failure_count + 1, 
+                     updated_at = now() 
+                   where 
+                     id = ${ id }`;
+    }
+
+    public async resetFailureCount(id: number): Promise<void> {
+        await sql`update account_jobs set 
+                     failure_count = 0, 
+                     updated_at = now() 
+                   where
+                     id = ${ id }`;
+    }
+
+    public async enableAccountJob(id: number): Promise<void> {
+        await sql`update account_jobs set 
+                    enabled = true, 
+                    failure_count = 0, 
+                    updated_at = now() 
+                  where
+                    id = ${ id }`;
+    }
+
+    public async disableAccountJob(id: number): Promise<void> {
+        await sql`update account_jobs set
+                     enabled = false, 
+                     updated_at = now() 
+                  where
+                     id = ${ id }`;
     }
     
 }

@@ -26,6 +26,7 @@ export class AccountJobScheduleService {
             .withState(JobStatus.READY.toString())
             .withScheduledAfter(scheduledAfter)
             .withStartedAt(null)
+            .withScheduledAt(null)
             .withFinishedAt(null)
             .withErrorMessage(null)
             .build();
@@ -45,16 +46,10 @@ export class AccountJobScheduleService {
         return this.mapper.getById(id);
     }
 
-    public async markScheduled(scheduleId: number): Promise<void> {
-        validateNotNull(scheduleId, "scheduleId");
+    public async scheduleBatch(batchSize: number): Promise<Set<number>> {
+        validateNotNull(batchSize, "batchSize");
 
-        await this.mapper.markScheduled(scheduleId, JobStatus.SCHEDULED.toString());
-    }
-
-    public async markBatchScheduled(scheduleIds: Set<number>): Promise<void> {
-        validateNotNull(scheduleIds, "scheduleIds");
-
-        await this.mapper.markBatchScheduled(scheduleIds, JobStatus.SCHEDULED.toString());
+        return this.mapper.scheduleBatch(batchSize);
     }
 
     public async markStarted(scheduleId: number): Promise<void> {
@@ -66,13 +61,13 @@ export class AccountJobScheduleService {
     public async markSucceeded(scheduleId: number): Promise<void> {
         validateNotNull(scheduleId, "scheduleId");
 
-        await this.mapper.markFinished(scheduleId, JobStatus.SUCEEDED.toString(), null);
+        await this.mapper.markFinished(scheduleId, JobStatus.SUCCEEDED.toString(), null);
     }
 
-    public async markFailed(scheduleId: number, errorMessage: string): Promise<void> {
+    public async markFailed(scheduleId: number, reason: string): Promise<void> {
         validateNotNull(scheduleId, "scheduleId");
 
-        await this.mapper.markFinished(scheduleId, JobStatus.FAILED.toString(), errorMessage);
+        await this.mapper.markFinished(scheduleId, JobStatus.FAILED.toString(), reason);
     }
 
 }

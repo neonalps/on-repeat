@@ -34,4 +34,22 @@ export class AccountJobService {
         return this.mapper.getById(id);
     }
 
+    public async increaseFailureCount(id: number): Promise<void> {
+        validateNotNull(id, "id");
+
+        await this.mapper.increaseFailureCount(id);
+    }
+
+    public async resetFailureCount(id: number): Promise<void> {
+        validateNotNull(id, "id");
+
+        await this.mapper.resetFailureCount(id);
+    }
+
+    public async disableAccountJob(id: number): Promise<void> {
+        validateNotNull(id, "id");
+
+        await this.mapper.disableAccountJob(id);
+    }
+
 }

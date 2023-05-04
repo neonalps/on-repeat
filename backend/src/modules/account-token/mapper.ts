@@ -31,7 +31,7 @@ export class AccountTokenMapper {
                 created_at,
                 updated_at
             from
-                account_token
+                account_tokens
             where
                 id = ${ accountTokenId }
         `;
@@ -43,20 +43,20 @@ export class AccountTokenMapper {
         return SecureAccountTokenDao.fromDaoInterface(result[0]);
     }
     
-    public async getByAccountIdAndOauthProviderAndScope(accountId: string, oauthProvider: string, scope: string): Promise<SecureAccountTokenDao | null> {
+    public async getByAccountIdAndOauthProviderAndScope(accountId: number, oauthProvider: string, scope: string): Promise<SecureAccountTokenDao | null> {
         const result = await sql<AccountTokenDaoInterface[]>`
             select
                 id,
                 account_id,
                 oauth_provider,
                 scope,
-                access_token,
+                encrypted_access_token,
                 access_token_expires_at,
-                refresh_token,
+                encrypted_refresh_token,
                 created_at,
                 updated_at
             from
-                account_token
+                account_tokens
             where
                 account_id = ${ accountId }
                 and oauth_provider = ${ oauthProvider }
