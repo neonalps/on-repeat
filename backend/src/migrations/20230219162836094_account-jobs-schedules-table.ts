@@ -2,6 +2,7 @@
 import { MigrationBuilder, ColumnDefinitions } from 'node-pg-migrate';
 
 const TABLE_NAME = "account_jobs_schedules";
+const IDX_SCHEDULED_AFTER = "idx_account_jobs_schedule_scheduled_after";
 
 export const shorthands: ColumnDefinitions | undefined = undefined;
 
@@ -25,6 +26,10 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
             type: 'timestamptz',
             notNull: true,
         },
+        scheduled_at: {
+            type: 'timestamptz',
+            notNull: false,
+        },
         started_at: {
             type: 'timestamptz',
             notNull: false,
@@ -43,8 +48,12 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
             default: pgm.func('current_timestamp'),
         },
     });
+
+    pgm.addIndex(TABLE_NAME, 'scheduled_after', { name: IDX_SCHEDULED_AFTER });
 }
 
 export async function down(pgm: MigrationBuilder): Promise<void> {
+    pgm.dropIndex(TABLE_NAME, 'scheduöed_after', { name: IDX_SCHEDULED_AFTER });
+
     pgm.dropTable(TABLE_NAME);
 }

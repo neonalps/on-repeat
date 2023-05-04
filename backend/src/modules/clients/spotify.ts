@@ -2,7 +2,8 @@ import { AUTHORIZATION, CONTENT_TYPE, HEADER, HTTP_STATUS } from "@src/http/cons
 import { generateRandomString, getQueryString, removeNull, requireNonNull } from "@src/util/common";
 import { OAUTH_GRANT_TYPE_AUTHORIZATION_CODE, OAUTH_GRANT_TYPE_REFRESH_TOKEN, OAUTH_RESPONSE_TYPE_CODE } from "../oauth/constants";
 import http from "@src/http/index";
-import { validateNotBlank } from "@src/util/validation";
+import { validateNotBlank, validateNotNull } from "@src/util/validation";
+import { PlayedTrackDao } from "@src/models/classes/dao/played-track";
 
 export interface SpotifyClientConfig {
     clientId: string;
@@ -16,11 +17,10 @@ export interface SpotifyClientConfig {
 
 export class SpotifyClient {
 
-    private static OAUTH_SCOPE_EMAIL = "user-read-private user-read-email";
-    private static OAUTH_SCOPE_RECENTLY_PLAYED = "user-read-recently-played";
-    private static  OAUTH_STATE_PARAM_LENGTH = 12;
+    public static OAUTH_SCOPE_EMAIL = "user-read-private user-read-email";
+    private static OAUTH_STATE_PARAM_LENGTH = 12;
 
-    private config: SpotifyClientConfig;
+    private readonly config: SpotifyClientConfig;
 
     constructor(config: SpotifyClientConfig) {
         this.config = requireNonNull(config);
@@ -120,10 +120,13 @@ export class SpotifyClient {
         };
     }
 
-    public async getRecentlyPlayedTracks(refreshToken: string): Promise<PlayedTrackDto[]> {
-        // TODO add in mem cache for access tokens
-        const token = await this.getNewAccessToken(refreshToken);
-        const playedTracksResponse = await this.fetchRecentlyPlayedTracksBatch(token.accessToken, 30);
+    public async getRecentlyPlayedTracks(accountId: number, accessToken: string, lastSeenPlayedTrack: PlayedTrackDao | null): Promise<PlayedTrackDto[]> {
+        validateNotNull(accountId, "accountId");
+        validateNotBlank(accessToken, "accessToken");
+
+        const initialRequestSize = lastSeenPlayedTrack === null ? 50 : 5;
+
+        const playedTracksResponse = await this.fetchRecentlyPlayedTracksBatch(accessToken, initialRequestSize);
     
         // TODO here could be a looping logic to get all possible tracks
     

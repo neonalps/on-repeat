@@ -1,38 +1,64 @@
 import { validateNotBlank, validateNotNull } from "@src/util/validation";
-import { getUuid } from "@src/util/uuid";
 import { AccountMapper } from "./mapper";
 import { requireNonNull } from "@src/util/common";
 import { AccountDao } from "@src/models/classes/dao/account";
 import { CreateAccountDto } from "@src/models/classes/dto/create-account";
 import { CreateSecureAccountDto } from "@src/models/classes/dto/create-secure-account";
-import { CryptoService } from "@src/crypto/service";
+import { CryptoService } from "@src/modules/crypto/service";
+import { UuidSource } from "@src/util/uuid";
+
+export interface GetOrCreateAccountResponse {
+    account: AccountDao | null;
+    wasCreated: boolean;
+}
 
 export class AccountService {
 
     private readonly mapper: AccountMapper;
     private readonly cryptoService: CryptoService;
+    private readonly uuidSource: UuidSource;
 
-    constructor(mapper: AccountMapper, cryptoService: CryptoService) {
+    constructor(
+        mapper: AccountMapper, 
+        cryptoService: CryptoService, 
+        uuidSource: UuidSource,
+    ) {
         this.mapper = requireNonNull(mapper);
         this.cryptoService = requireNonNull(cryptoService);
+        this.uuidSource = requireNonNull(uuidSource);
     }
 
-    public async getOrCreate(email: string): Promise<AccountDao | null> {
+    public async getOrCreate(email: string): Promise<GetOrCreateAccountResponse> {
         validateNotBlank(email, "email");
     
         const existingUser = await this.getByEmail(email);
     
         if (existingUser) {
-            return existingUser;
+            return {
+                account: existingUser,
+                wasCreated: false,
+            };
         }
     
         const account: CreateAccountDto = CreateAccountDto.Builder
-            .withPublicId(getUuid())
+            .withPublicId(this.uuidSource.getRandomUuid())
             .withEmail(email)
             .withEnabled(true)
             .build();
     
-        return this.create(account);
+        const createdAccount = await this.create(account);
+
+        if (createdAccount === null) {
+            return {
+                account: null,
+                wasCreated: false,
+            };
+        }
+
+        return {
+            account: createdAccount,
+            wasCreated: true,
+        };
     };
     
     public async create(dto: CreateAccountDto): Promise<AccountDao | null> {

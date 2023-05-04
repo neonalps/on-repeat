@@ -33,12 +33,12 @@ export class CatalogueService {
         }
     
         if (!storedTrack.areUpdateablePropertiesEqual(trackToProcess)) {
-            const updateTrackDto = UpdateTrackDto.createFromTrackDao(trackToProcess);
-            const updateSuccess = await this.trackService.update(storedTrack.id, updateTrackDto);
+            //const updateTrackDto = UpdateTrackDto.createFromTrackDao(trackToProcess);
+            //const updateSuccess = await this.trackService.update(storedTrack.id, updateTrackDto);
     
-            if (!updateSuccess) {
-                logger.warn("failed to update track", storedTrack.id, trackToProcess);
-            }
+            //if (!updateSuccess) {
+                //logger.warn("failed to update track", storedTrack.id, trackToProcess);
+            //}
         }
     
         return storedTrack.id;
@@ -69,10 +69,11 @@ export class CatalogueService {
             throw new Error("Error during upsert artist");
         }
     
-        if (!this.artistService.areUpdateablePropertiesEqual(storedArtist, artistToProcess)) {
+        // TODO FIX
+        /*if (!this.artistService.areUpdateablePropertiesEqual(storedArtist, artistToProcess)) {
             const updateArtistDto = UpdateArtistDto.createFromArtistDao(artistToProcess);
             await this.artistService.update(storedArtist.id, updateArtistDto);
-        }
+        }*/
     
         return storedArtist.id;
     }

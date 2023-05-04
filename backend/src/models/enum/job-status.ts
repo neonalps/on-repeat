@@ -1,7 +1,7 @@
 export enum JobStatus {
-    READY,
-    SCHEDULED,
-    STARTED,
-    SUCEEDED,
-    FAILED,
+    READY = "READY",
+    SCHEDULED = "SCHEDULED",
+    STARTED = "STARTED",
+    SUCCEEDED = "SUCCEEDED",
+    FAILED = "FAILED",
 }

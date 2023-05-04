@@ -1,5 +1,5 @@
-import { TokenConfig } from "@src/auth/service";
-import { SpotifyClientConfig } from "@src/oauth/spotify";
+import { TokenConfig } from "@src/modules/auth/service";
+import { SpotifyClientConfig } from "@src/modules/clients/spotify";
 import dotenv from "dotenv";
 import * as env from "env-var";
 

@@ -4,6 +4,7 @@ export interface AccountJobScheduleDaoInterface {
     accountJobId: number;
     state: string;
     scheduledAfter: Date;
+    scheduledAt: Date | null;
     startedAt: Date | null;
     finishedAt: Date | null;
     errorMessage: string | null;

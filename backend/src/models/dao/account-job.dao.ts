@@ -3,6 +3,7 @@ export interface AccountJobDaoInterface {
     accountId: number;
     jobId: number;
     intervalSeconds: number;
+    failureCount: number;
     enabled: boolean;
     createdAt: Date;
     updatedAt: Date | null;

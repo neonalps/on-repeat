@@ -2,26 +2,43 @@ import { validateNotNull } from "@src/util/validation";
 import { MusicProvider } from "./abstract-music-provider";
 import { TrackDao } from "@src/models/classes/dao/track";
 import { MusicProviderMapper } from "./mapper";
-import { CatalogueService } from "@src/catalogue/service";
-import { PlayedTrackService } from "@src/played-tracks/service";
+import { CatalogueService } from "@src/modules/catalogue/service";
+import { PlayedTrackService } from "@src/modules/played-tracks/service";
 import { requireNonNull } from "@src/util/common";
+import { SpotifyClient } from "@src/modules/clients/spotify";
 
 export class SpotifyMusicProvider extends MusicProvider {
 
+    private static readonly OAUTH_SCOPE_EMAIL_AND_RECENTLY_PLAYED = "user-read-private user-read-email user-read-recently-played";
     private static readonly PROVIDER_ID = 1;
     private static readonly PROVIDER_NAME = "spotify";
 
     private readonly catalogueService: CatalogueService;
     private readonly playedTrackService: PlayedTrackService;
+    private readonly spotifyClient: SpotifyClient;
     
     constructor(
         mapper: MusicProviderMapper, 
         catalogueService: CatalogueService,
         playedTrackService: PlayedTrackService,
+        spotifyClient: SpotifyClient,
     ) {
         super(SpotifyMusicProvider.PROVIDER_ID, SpotifyMusicProvider.PROVIDER_NAME, mapper);
         this.catalogueService = requireNonNull(catalogueService);
         this.playedTrackService = requireNonNull(playedTrackService);
+        this.spotifyClient = requireNonNull(spotifyClient);
+    }
+
+    public static get oauthProviderId(): string {
+        return SpotifyMusicProvider.PROVIDER_NAME;
+    }
+
+    public static get oauthScopeRecentlyPlayed(): string {
+        return SpotifyMusicProvider.OAUTH_SCOPE_EMAIL_AND_RECENTLY_PLAYED;
+    }
+
+    public async fetchAndProcessRecentlyPlayedTracks(accountId: number, accessToken: string): Promise<void> {
+
     }
 
     public async processPlayedTracks(accountId: number, playedTracks: PlayedTrackDto[]): Promise<void> {
@@ -108,11 +125,13 @@ export class SpotifyMusicProvider extends MusicProvider {
         const storedTrack = await this.getTrackByProviderTrackId(trackToProcess.id);
         const storedTrackId = storedTrack !== null ? storedTrack.trackId : null;
 
+        // TODO fix
         const track = TrackDao.Builder
             .withArtistIds(catalogueArtistIds)
-            .withAlbumId(catalogueAlbumId);
+            .withAlbumId(catalogueAlbumId)
+            .build();
 
-        const catalogueTrackId = await this.catalogueService.upsertTrack(storedTrackId, trackToProcess);
+        const catalogueTrackId = await this.catalogueService.upsertTrack(storedTrackId, track);
 
         if (!storedTrackId) {
             await this.addMusicProviderTrackRelation(catalogueTrackId, trackToProcess.id, trackToProcess.href);
