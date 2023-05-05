@@ -74,6 +74,10 @@ export class JobHelper {
         }
     }
 
+    public async isJobProcessingEnabled(): Promise<boolean> {
+        return true;
+    }
+
     public async getConfiguredBatchSize(): Promise<number> {
         return JobHelper.BATCH_SIZE;
     }
