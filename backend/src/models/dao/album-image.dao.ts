@@ -1,4 +1,4 @@
-interface AlbumImageDaoInterface {
+export interface AlbumImageDaoInterface {
     id: number;
     height: number;
     width: number;

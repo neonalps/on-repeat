@@ -44,7 +44,6 @@ export class Scheduler {
             return;
         }
 
-        console.log('schedule cylce starting...');
         const batchSize = await this.jobHelper.getConfiguredBatchSize();
         const scheduledAccountJobIds = await this.jobHelper.scheduleBatch(batchSize);
 

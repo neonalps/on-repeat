@@ -1,9 +1,15 @@
-import { AUTHORIZATION, CONTENT_TYPE, HEADER, HTTP_STATUS } from "@src/http/constants";
-import { generateRandomString, getQueryString, removeNull, requireNonNull } from "@src/util/common";
-import { OAUTH_GRANT_TYPE_AUTHORIZATION_CODE, OAUTH_GRANT_TYPE_REFRESH_TOKEN, OAUTH_RESPONSE_TYPE_CODE } from "../oauth/constants";
 import http from "@src/http/index";
+import { AUTHORIZATION, CONTENT_TYPE, HEADER, HTTP_STATUS } from "@src/http/constants";
+import { generateRandomString, getQueryString, requireNonNull } from "@src/util/common";
+import { OAUTH_GRANT_TYPE_AUTHORIZATION_CODE, OAUTH_GRANT_TYPE_REFRESH_TOKEN, OAUTH_RESPONSE_TYPE_CODE } from "@src/modules/oauth/constants";
 import { validateNotBlank, validateNotNull } from "@src/util/validation";
-import { PlayedTrackDao } from "@src/models/classes/dao/played-track";
+import { SpotifyRecentlyPlayedTracksResponseDto, SpotifyRecentlyPlayedTracksApiResponseDto } from "./api-types";
+import { SpotifyApiResponseConverter } from "@src/modules/music-provider/spotify/api-response-converter";
+import { OauthTokenResponse } from "@src/models/dto/oauth-token-response";
+import { SpotifyUserProfile } from "@src/models/dto/user-profile";
+import { RefreshTokenResponse } from "@src/models/dto/refresh-token-response";
+import { OauthTokenResponseDto } from "@src/models/interface/oauth-token-response.dto";
+import { GetUserProfileResponseDto } from "@src/models/interface/get-user-profile-response.dto";
 
 export interface SpotifyClientConfig {
     clientId: string;
@@ -18,6 +24,7 @@ export interface SpotifyClientConfig {
 export class SpotifyClient {
 
     public static OAUTH_SCOPE_EMAIL = "user-read-private user-read-email";
+    
     private static OAUTH_STATE_PARAM_LENGTH = 12;
 
     private readonly config: SpotifyClientConfig;
@@ -120,20 +127,14 @@ export class SpotifyClient {
         };
     }
 
-    public async getRecentlyPlayedTracks(accountId: number, accessToken: string, lastSeenPlayedTrack: PlayedTrackDao | null): Promise<PlayedTrackDto[]> {
-        validateNotNull(accountId, "accountId");
+    public async getRecentlyPlayedTracks(accessToken: string, requestSize: number, before?: number): Promise<SpotifyRecentlyPlayedTracksResponseDto> {
         validateNotBlank(accessToken, "accessToken");
+        validateNotNull(requestSize, "requestSize");
 
-        const initialRequestSize = lastSeenPlayedTrack === null ? 50 : 5;
-
-        const playedTracksResponse = await this.fetchRecentlyPlayedTracksBatch(accessToken, initialRequestSize);
-    
-        // TODO here could be a looping logic to get all possible tracks
-    
-        return playedTracksResponse.playedTracks;
+        return this.fetchRecentlyPlayedTracksBatch(accessToken, requestSize, before);
     }
 
-    private async fetchRecentlyPlayedTracksBatch(accessToken: string, limit: number, before?: number): Promise<PlayedTracksResponse> {
+    private async fetchRecentlyPlayedTracksBatch(accessToken: string, limit: number, before?: number): Promise<SpotifyRecentlyPlayedTracksResponseDto> {
         const queryParams: Record<string, any> = { limit };
     
         if (before) {
@@ -142,7 +143,7 @@ export class SpotifyClient {
     
         const queryString = getQueryString(queryParams);
         const url = `${this.config.recentlyPlayedTracksUrl}?${queryString}`;
-        const response = await http.get<RecentlyPlayedTracksResponseDto>(url, {
+        const response = await http.get<SpotifyRecentlyPlayedTracksApiResponseDto>(url, {
             headers: { 
                 [HEADER.ACCEPT]: CONTENT_TYPE.JSON,
                 [HEADER.AUTHORIZATION]: `${AUTHORIZATION.BEARER} ${accessToken}`,
@@ -154,8 +155,7 @@ export class SpotifyClient {
             throw new Error("something went wrong while getting the recently played tracks");
         }
     
-        const responseBody = response.body;
-        return parseRecentlyPlayedTracksResponse(responseBody);
+        return SpotifyApiResponseConverter.convertRecentlyPlayedTracksApiResponse(response.body);
     }
 
     private validateConfig(): void {
@@ -188,93 +188,3 @@ export class SpotifyClient {
         });
     };
 }
-
-const parseRecentlyPlayedTracksResponse = (response: RecentlyPlayedTracksResponseDto): PlayedTracksResponse => {
-    if (!response) {
-        throw new Error("No recently played tracks response passed");
-    }
-
-    return {
-        href: response.href,
-        playedTracks: parseRecentlyPlayedTrackList(response.items),
-        cursors: response.cursors,
-        next: response.next,
-        limit: response.limit,
-    };
-};
-
-const parseRecentlyPlayedTrackList = (playedTracks: SpotifyPlayedTrackDto[]): PlayedTrackDto[] => {
-    if (!playedTracks || playedTracks.length === 0) {
-        return [];
-    }
-
-    return playedTracks
-            .map(convertRecentlyPlayedTrack)
-            .filter(removeNull);
-};
-
-const convertRecentlyPlayedTrack = (item: SpotifyPlayedTrackDto): PlayedTrackDto => {
-    return {
-        playedAt: item.played_at,
-        track: convertPlayedTrack(item.track),
-    };
-};
-
-const convertPlayedTrack = (item: SpotifyTrackDto): TrackDto => {
-    return {
-        id: item.id,
-        name: item.name,
-        artists: convertArtistList(item.artists),
-        album: convertAlbum(item.album),
-        href: item.href,
-        externalIds: item.external_ids,
-        externalUrls: item.external_urls,
-        explicit: item.explicit,
-        durationMs: item.duration_ms,
-        discNumber: item.disc_number,
-    };
-};
-
-const convertArtistList = (items: SpotifyArtistDto[]): ArtistDto[] => {
-    return items
-            .map(convertArtist)
-            .filter(removeNull);
-};
-
-const convertArtist = (item: SpotifyArtistDto): ArtistDto => {
-    return {
-        id: item.id,
-        name: item.name,
-        type: item.type,
-        uri: item.uri,
-        href: item.href,
-        externalUrls: item.external_urls,
-    };
-};
-
-const convertAlbum = (item: SpotifyAlbumDto): AlbumDto => {
-    return {
-        id: item.id,
-        name: item.name,
-        href: item.href,
-        externalUrls: item.external_urls,
-        totalTracks: item.total_tracks,
-        artists: convertArtistList(item.artists),
-        albumGroup: item.album_group,
-        albumType: item.album_type,
-        images: item.images,
-        isPlayable: item.is_playable,
-        releaseDate: convertReleaseDate(item.release_date),
-        releaseDatePrecision: item.release_date_precision,
-        type: item.type,
-        uri: item.uri,
-    }
-};
-
-const convertReleaseDate = (releaseDate: string): Date | null => {
-    if (!releaseDate || releaseDate.indexOf("-") < 0) {
-        return null;
-    }
-
-    return new Date(Date.parse(releaseDate));
-};

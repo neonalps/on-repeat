@@ -1,4 +1,5 @@
 import fastify from "fastify";
+
 import { getNodeEnv, getServerHost, getServerPort } from "@src/config";
 import logger from "@src/log/logger";
 import { DependencyHelper } from "@src/di/helper";
@@ -7,7 +8,7 @@ import { testDbConnection } from "@src/db/db";
 import dependencyManager from "@src/di/manager";
 import { Scheduler } from "@src/modules/scheduler/scheduler";
 import { Dependencies } from "@src/di/dependencies";
-import { JobRepository } from "./modules/job/repository";
+import { JobRepository } from "@src/modules/job/repository";
 
 const start = async () =>  {
   const server = fastify();
@@ -15,6 +16,7 @@ const start = async () =>  {
   await testDbConnection();
   DependencyHelper.initDependencies();
   JobRepository.initJobs();
+  RouterHelper.registerJwtParser(server);
   RouterHelper.registerRoutes(server);
 
   server.listen({ host: getServerHost(), port: getServerPort() }, async (err, address) => {

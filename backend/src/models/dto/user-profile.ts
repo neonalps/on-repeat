@@ -1,4 +1,4 @@
-interface SpotifyUserProfile {
+export interface SpotifyUserProfile {
     id: string;
     email: string;
     displayName?: string;

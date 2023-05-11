@@ -1,3 +1,3 @@
-interface OauthCodeResponseQueryParams {
+export interface OauthCodeResponseQueryParams {
     code: string;
 }

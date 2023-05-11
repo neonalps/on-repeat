@@ -1,6 +1,7 @@
 import sql from '@src/db/db';
 import { AccountDao } from '@src/models/classes/dao/account';
 import { CreateSecureAccountDto } from '@src/models/classes/dto/create-secure-account';
+import { AccountDaoInterface } from '@src/models/dao/account.dao';
 
 export class AccountMapper {
 

@@ -1,4 +1,8 @@
 import sql from "@src/db/db";
+import { ArtistDao } from "@src/models/classes/dao/artist";
+import { CreateArtistDto } from "@src/models/classes/dto/create-artist";
+import { UpdateArtistDto } from "@src/models/classes/dto/update-artist";
+import { ArtistDaoInterface } from "@src/models/dao/artist.dao";
 
 export class ArtistMapper {
 
@@ -7,9 +11,9 @@ export class ArtistMapper {
     public async create(artist: CreateArtistDto): Promise<number> {
         const result = await sql`
             insert into artist
-                (name, created_at)
+                (name, created_at, updated_at)
             values
-                (${ artist.name }, now())
+                (${ artist.name }, now(), null)
             returning id
         `;
     
@@ -21,7 +25,8 @@ export class ArtistMapper {
             select
                 id,
                 name,
-                created_at
+                created_at,
+                updated_at
             from
                 artist
             where
@@ -40,7 +45,8 @@ export class ArtistMapper {
     public async update(id: number, dto: UpdateArtistDto): Promise<void> {
         await sql`
             update artist set
-                name = ${dto.name}
+                name = ${dto.name},
+                updated_at = now()
             where
                 id = ${ id }
             `;

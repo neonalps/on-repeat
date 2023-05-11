@@ -2,6 +2,7 @@ import { requireNonNull } from "@src/util/common";
 import { PlayedTrackMapper } from "./mapper";
 import { validateNotNull } from "@src/util/validation";
 import { PlayedTrackDao } from "@src/models/classes/dao/played-track";
+import { CreatePlayedTrackDto } from "@src/models/classes/dto/create-played-track";
 
 export class PlayedTrackService {
 

@@ -1,6 +1,9 @@
 import { validateNotBlank, validateNotNull } from "@src/util/validation";
 import { ArtistMapper } from "./mapper";
 import { requireNonNull } from "@src/util/common";
+import { ArtistDao } from "@src/models/classes/dao/artist";
+import { CreateArtistDto } from "@src/models/classes/dto/create-artist";
+import { UpdateArtistDto } from "@src/models/classes/dto/update-artist";
 
 export class ArtistService {
 
@@ -15,6 +18,7 @@ export class ArtistService {
         validateNotBlank(dto.name, "createArtistDto.name");
     
         const createdArtistId = await this.mapper.create(dto);
+
         return this.getById(createdArtistId);
     }
 
@@ -22,6 +26,7 @@ export class ArtistService {
         validateNotNull(id, "id");
     
         const artist = await this.mapper.getById(id);
+        
         if (!artist) {
             return null;
         }

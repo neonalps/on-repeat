@@ -1,4 +1,4 @@
-interface ArtistDto {
+export interface ArtistDto {
     id: string;
     name: string;
     type: string;

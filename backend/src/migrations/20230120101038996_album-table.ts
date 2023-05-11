@@ -10,33 +10,37 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
         id: 'id',
         name: {
             type: 'varchar(1000)',
-            notNull: true
-        },
-        type: {
-            type: 'varchar(200)',
-            notNull: false
+            notNull: true,
         },
         album_type: {
             type: 'varchar(200)',
-            notNull: false
+            notNull: false,
         },
         album_group: {
             type: 'varchar(200)',
-            notNull: false
+            notNull: false,
+        },
+        total_tracks: {
+            type: 'integer',
+            notNull: false,
         },
         release_date: {
             type: 'timestamp',
-            notNull: false
+            notNull: false,
         },
         release_date_precision: {
             type: 'varchar(200)',
-            notNull: false
+            notNull: false,
         },
         created_at: {
             type: 'timestamptz',
             notNull: true,
-            default: pgm.func('current_timestamp')
-        }
+            default: pgm.func('current_timestamp'),
+        },
+        updated_at: {
+            type: 'timestamptz',
+            notNull: false,
+        },
     });
 }
 

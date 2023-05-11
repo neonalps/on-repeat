@@ -1,13 +1,12 @@
 import dependencyManager from "./manager";
 import { Dependencies } from "./dependencies";
-import { TrackMapper } from "@src/modules/catalogue/track/mapper";
-import { TrackService } from "@src/modules/catalogue/track/service";
-import { ArtistMapper } from "@src/modules/catalogue/artist/mapper";
-import { ArtistService } from "@src/modules/catalogue/artist/service";
-import { AlbumMapper } from "@src/modules/catalogue/album/mapper";
-import { AlbumService } from "@src/modules/catalogue/album/service";
+import { TrackMapper } from "@src/modules/track/mapper";
+import { TrackService } from "@src/modules/track/service";
+import { ArtistMapper } from "@src/modules/artist/mapper";
+import { ArtistService } from "@src/modules/artist/service";
+import { AlbumMapper } from "@src/modules/album/mapper";
+import { AlbumService } from "@src/modules/album/service";
 import { CatalogueService } from "@src/modules/catalogue/service";
-import { SpotifyClient } from "@src/modules/clients/spotify";
 import { getTokenConfig, getSpotifyClientConfig } from "@src/config";
 import { AccountMapper } from "@src/modules/account/mapper";
 import { AccountService } from "@src/modules/account/service";
@@ -23,12 +22,13 @@ import { Scheduler } from "@src/modules/scheduler/scheduler";
 import { AuthService } from "@src/modules/auth/service";
 import { TimeSource } from "@src/util/time";
 import { MusicProviderMapper } from "@src/modules/music-provider/mapper";
-import { SpotifyMusicProvider } from "@src/modules/music-provider/spotify-music-provider";
 import { PlayedTrackMapper } from "@src/modules/played-tracks/mapper";
 import { PlayedTrackService } from "@src/modules/played-tracks/service";
 import { JobHelper } from "@src/modules/job/helper";
 import { JobMapper } from "@src/modules/job/mapper";
 import { JobService } from "@src/modules/job/service";
+import { SpotifyClient } from "@src/modules/music-provider/spotify/client";
+import { SpotifyMusicProvider } from "@src/modules/music-provider/spotify/music-provider";
 
 export class DependencyHelper {
 
@@ -60,7 +60,7 @@ export class DependencyHelper {
         const jobHelper = new JobHelper(accountService, jobService, accountJobService, accountJobScheduleService, timeSource);
 
         const accountTokenMapper = new AccountTokenMapper();
-        const accountTokenService = new AccountTokenService(accountTokenMapper, cryptoService);
+        const accountTokenService = new AccountTokenService(accountTokenMapper, cryptoService, timeSource);
 
         const albumMapper = new AlbumMapper();
         const albumService = new AlbumService(albumMapper);
@@ -82,7 +82,7 @@ export class DependencyHelper {
 
         const musicProviderMapper = new MusicProviderMapper();
 
-        const spotifyMusicProvider = new SpotifyMusicProvider(musicProviderMapper, catalogueService, playedTrackService, spotifyClient);
+        const spotifyMusicProvider = new SpotifyMusicProvider(musicProviderMapper, accountTokenService, catalogueService, playedTrackService, spotifyClient, timeSource);
 
         const scheduler = new Scheduler(jobHelper);
 
@@ -92,8 +92,6 @@ export class DependencyHelper {
         dependencies.set(Dependencies.AccountJobService, accountJobService);
         dependencies.set(Dependencies.AccountJobScheduleService, accountJobScheduleService);
         dependencies.set(Dependencies.AccountTokenService, accountTokenService);
-        dependencies.set(Dependencies.AlbumService, albumService);
-        dependencies.set(Dependencies.ArtistService, artistService);
         dependencies.set(Dependencies.AuthService, authService);
         dependencies.set(Dependencies.CatalogueService, catalogueService);
         dependencies.set(Dependencies.CryptoService, cryptoService);
@@ -103,7 +101,6 @@ export class DependencyHelper {
         dependencies.set(Dependencies.Scheduler, scheduler);
         dependencies.set(Dependencies.SpotifyClient, spotifyClient);
         dependencies.set(Dependencies.SpotifyMusicProvider, spotifyMusicProvider);
-        dependencies.set(Dependencies.TrackService, trackService);
         dependencies.set(Dependencies.UuidSource, uuidSource);
 
         return dependencies;

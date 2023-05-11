@@ -1,4 +1,4 @@
-interface GetUserProfileResponseDto {
+export interface GetUserProfileResponseDto {
     country: string;
     display_name: string;
     email: string;

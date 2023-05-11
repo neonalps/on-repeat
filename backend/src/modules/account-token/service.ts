@@ -6,15 +6,20 @@ import { CreateAccountTokenDto } from "@src/models/classes/dto/create-account-to
 import { CreateSecureAccountTokenDto } from "@src/models/classes/dto/create-secure-account-token";
 import { AccountTokenDao } from "@src/models/classes/dao/account-token";
 import { SecureAccountTokenDao } from "@src/models/classes/dao/secure-account-token";
+import { TimeSource } from "@src/util/time";
 
 export class AccountTokenService {
 
+    private static readonly ACCOUNT_TOKEN_EXPIRATION_SAFETY_SECONDS = 5;
+
     private readonly mapper: AccountTokenMapper;
     private readonly cryptoService: CryptoService;
+    private readonly timeSource: TimeSource;
 
-    constructor(mapper: AccountTokenMapper, cryptoService: CryptoService) {
+    constructor(mapper: AccountTokenMapper, cryptoService: CryptoService, timeSource: TimeSource) {
         this.mapper = requireNonNull(mapper);
         this.cryptoService = requireNonNull(cryptoService);
+        this.timeSource = requireNonNull(timeSource);
     }
 
     public async create(dto: CreateAccountTokenDto): Promise<AccountTokenDao | null> {
@@ -23,18 +28,22 @@ export class AccountTokenService {
         validateNotBlank(dto.oauthProvider, "dto.oauthProvider");
         validateNotBlank(dto.scope, "dto.scope");
         validateNotBlank(dto.accessToken, "dto.accessToken");
-        validateNotNull(dto.accessTokenExpiresAt, "dto.accessTokenExpiresAt");
+        validateNotNull(dto.accessTokenExpiresIn, "dto.accessTokenExpiresIn");
         validateNotBlank(dto.refreshToken, "dto.refreshToken");
 
         const encryptedAccessToken = this.cryptoService.encrypt(dto.accessToken);
         const encryptedRefreshToken = this.cryptoService.encrypt(dto.refreshToken);
 
+        const accessTokenExpiresAt = this.getSafeTokenExpirationDate(dto.accessTokenExpiresIn);
+
+        const sortedScopes = AccountTokenService.getSortedScopes(dto.scope);
+
         const secureAccountToken = CreateSecureAccountTokenDto.Builder
             .withAccountId(dto.accountId)
             .withOauthProvider(dto.oauthProvider)
-            .withScope(dto.scope)
+            .withScope(sortedScopes)
             .withEncryptedAccessToken(encryptedAccessToken)
-            .withAccessTokenExpiresAt(dto.accessTokenExpiresAt)
+            .withAccessTokenExpiresAt(accessTokenExpiresAt)
             .withEncryptedRefreshToken(encryptedRefreshToken)
             .build();
     
@@ -47,16 +56,14 @@ export class AccountTokenService {
         return this.getById(accountTokenId);
     }
     
-    public async deleteByAccountIdAndOauthProviderAndScope(accountId: string, oauthProvider: string, scope: string): Promise<void> {
-        // TODO implement
-    }
-    
     public async getByAccountIdAndOauthProviderAndScope(accountId: number, oauthProvider: string, scope: string): Promise<AccountTokenDao | null> {
         validateNotNull(accountId, "accountId");
         validateNotBlank(oauthProvider, "oauthProvider");
         validateNotBlank(scope, "scope");
+
+        const sortedScopes = AccountTokenService.getSortedScopes(scope);
     
-        const secureAccountTokenDao = await this.mapper.getByAccountIdAndOauthProviderAndScope(accountId, oauthProvider, scope);
+        const secureAccountTokenDao = await this.mapper.getByAccountIdAndOauthProviderAndScope(accountId, oauthProvider, sortedScopes);
     
         if (!secureAccountTokenDao) {
             return null;
@@ -77,8 +84,23 @@ export class AccountTokenService {
         return this.toAccountTokenDao(secureAccountTokenDao);
     }
     
-    public async updateAccessToken(accountTokenId: number, newAccessToken: string, newAccessTokenExpiresAt: Date): Promise<void> {
-        // TODO implement
+    public async updateAccessToken(accountTokenId: number, newAccessToken: string, newAccessTokenExpiresIn: number): Promise<void> {
+        validateNotNull(accountTokenId, "accountTokenId");
+        validateNotBlank(newAccessToken, "newAccessToken");
+        validateNotNull(newAccessTokenExpiresIn, "newAccessTokenExpiresIn");
+
+        const newEncryptedAccessToken = this.cryptoService.encrypt(newAccessToken);
+        const newAccessTokenExpiresAt = this.getSafeTokenExpirationDate(newAccessTokenExpiresIn);
+
+        await this.mapper.updateAccessToken(accountTokenId, newEncryptedAccessToken, newAccessTokenExpiresAt);
+    }
+
+    private static getSortedScopes(scopes: string): string {
+        return scopes.split(" ").sort().join(" ");
+    }
+
+    private getSafeTokenExpirationDate(expiresIn: number): Date {
+        return this.timeSource.getNowPlusSeconds(expiresIn - AccountTokenService.ACCOUNT_TOKEN_EXPIRATION_SAFETY_SECONDS);
     }
 
     private toAccountTokenDao(accountTokenDao: SecureAccountTokenDao): AccountTokenDao {

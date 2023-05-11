@@ -33,6 +33,7 @@ export class OauthLoginRouteProvider implements RouteProvider<OauthLoginRequestD
             path: '/api/v1/oauth/login',
             schema: oauthLoginRequestSchema, 
             handler: this.oauthLoginHandler,
+            authenticated: false,
         };
     }
 

@@ -1,4 +1,4 @@
-interface AccountToken {
+export interface AccountToken {
     id: number;
     accountId: string;
     oauthProvider: string;

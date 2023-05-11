@@ -31,6 +31,7 @@ export class AuthRouteProvider implements RouteProvider<CreateAccessTokenRequest
             path: '/api/v1/auth/token',
             schema: createAuthTokenSchema, 
             handler: this.authHandler,
+            authenticated: false,
         };
     }
 

@@ -23,7 +23,7 @@ describe('Auth handler', () => {
             .withAccessToken(token)
             .build();
 
-        const actual = await authHandler.handle(input);
+        const actual = await authHandler.handle({ authenticated: false, account: null }, input);
         expect(actual).to.be.not.null;
         expect(actual.accessToken).to.equal(expectedResponse.accessToken);
     });

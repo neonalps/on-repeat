@@ -2,7 +2,7 @@ import { AuthService } from "@src/modules/auth/service";
 import { requireNonNull } from "@src/util/common";
 import { CreateAccessTokenResponseDto } from "@src/models/api/create-access-token-response";
 import { CreateAccessTokenRequestDto } from "@src/models/api/create-access-token";
-import { RouteHandler } from "../types";
+import { AuthenticationContext, RouteHandler } from "@src/router/types";
 
 export class AuthHandler implements RouteHandler<CreateAccessTokenRequestDto, CreateAccessTokenResponseDto> {
 
@@ -12,7 +12,7 @@ export class AuthHandler implements RouteHandler<CreateAccessTokenRequestDto, Cr
         this.authService = requireNonNull(authService);
     }
 
-    public async handle(dto: CreateAccessTokenRequestDto): Promise<CreateAccessTokenResponseDto> {
+    public async handle(_: AuthenticationContext, dto: CreateAccessTokenRequestDto): Promise<CreateAccessTokenResponseDto> {
         const token = this.authService.createSignedAccessToken(dto.accountId, new Set());
 
         return CreateAccessTokenResponseDto.Builder
