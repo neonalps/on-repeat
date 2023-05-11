@@ -2,7 +2,6 @@ import { AccountJobDao } from '@src/models/classes/dao/account-job';
 import { AccountJobScheduleDao } from '@src/models/classes/dao/account-job-schedule';
 import { JobDao } from '@src/models/classes/dao/job';
 import { requireNonNull } from '@src/util/common';
-import cron from 'node-cron';
 import { JobRepository } from '@src/modules/job/repository';
 import { JobHelper } from '@src/modules/job/helper';
 import logger from '@src/log/logger';
@@ -17,9 +16,9 @@ export interface JobExecutionContext {
 
 export class Scheduler {
 
-    private static readonly CRON_PATTERN_EVERY_MINUTE = '* * * * *';
-
     static readonly ERROR_CONTEXT_NULL = "Job execution context is null";
+
+    private static readonly SCHEDULE_INTERVAL_SECONDS = 10;
 
     private readonly jobHelper: JobHelper;
 
@@ -27,13 +26,24 @@ export class Scheduler {
         this.jobHelper = requireNonNull(jobHelper);
     }
 
-    public run(): void {
-        //cron.schedule(Scheduler.CRON_PATTERN_EVERY_MINUTE, () => {
+    public async run(): Promise<void> {
+        this.schedule();
+        this.scheduleNextRun();
+    }
+
+    private scheduleNextRun(): void {
+        setTimeout(() => {
             this.schedule();
-        //});
+            this.scheduleNextRun();
+        }, Scheduler.SCHEDULE_INTERVAL_SECONDS * 1000);
     }
 
     private async schedule(): Promise<void> {
+        const isSchedulingEnabled = await this.jobHelper.isJobProcessingEnabled();
+        if (!isSchedulingEnabled) {
+            return;
+        }
+
         const batchSize = await this.jobHelper.getConfiguredBatchSize();
         const scheduledAccountJobIds = await this.jobHelper.scheduleBatch(batchSize);
 

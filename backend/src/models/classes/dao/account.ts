@@ -1,3 +1,5 @@
+import { AccountDaoInterface } from "@src/models/dao/account.dao";
+
 export class AccountDao {
     private _id!: number;
     private _publicId!: string;

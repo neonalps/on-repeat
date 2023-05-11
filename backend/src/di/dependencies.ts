@@ -3,8 +3,6 @@ export enum Dependencies {
     AccountJobService,
     AccountJobScheduleService,
     AccountTokenService,
-    AlbumService,
-    ArtistService,
     AuthService,
     CatalogueService,
     CryptoService,
@@ -14,6 +12,5 @@ export enum Dependencies {
     Scheduler,
     SpotifyClient,
     SpotifyMusicProvider,
-    TrackService,
     UuidSource,
 };

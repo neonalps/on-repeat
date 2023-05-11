@@ -3,7 +3,7 @@ export class CreateAccountTokenDto {
    private _oauthProvider!: string;
    private _scope!: string;
    private _accessToken!: string;
-   private _accessTokenExpiresAt!: Date;
+   private _accessTokenExpiresIn!: number;
    private _refreshToken!: string;
 
    constructor(builder: CreateAccountTokenDtoBuilder) {
@@ -11,7 +11,7 @@ export class CreateAccountTokenDto {
       this._oauthProvider = builder.oauthProvider;
       this._scope = builder.scope;
       this._accessToken = builder.accessToken;
-      this._accessTokenExpiresAt = builder.accessTokenExpiresAt;
+      this._accessTokenExpiresIn = builder.accessTokenExpiresIn;
       this._refreshToken = builder.refreshToken;
    }
 
@@ -31,8 +31,8 @@ export class CreateAccountTokenDto {
       return this._accessToken;
    }
 
-   public get accessTokenExpiresAt(): Date {
-      return this._accessTokenExpiresAt;
+   public get accessTokenExpiresIn(): number {
+      return this._accessTokenExpiresIn;
    }
 
    public get refreshToken(): string {
@@ -49,7 +49,7 @@ class CreateAccountTokenDtoBuilder {
    private _oauthProvider!: string;
    private _scope!: string;
    private _accessToken!: string;
-   private _accessTokenExpiresAt!: Date;
+   private _accessTokenExpiresIn!: number;
    private _refreshToken!: string;
 
    public withAccountId(accountId: number): CreateAccountTokenDtoBuilder {
@@ -72,8 +72,8 @@ class CreateAccountTokenDtoBuilder {
       return this;
    }
 
-   public withAccessTokenExpiresAt(accessTokenExpiresAt: Date): CreateAccountTokenDtoBuilder {
-      this._accessTokenExpiresAt = accessTokenExpiresAt;
+   public withAccessTokenExpiresIn(accessTokenExpiresIn: number): CreateAccountTokenDtoBuilder {
+      this._accessTokenExpiresIn = accessTokenExpiresIn;
       return this;
    }
 
@@ -98,8 +98,8 @@ class CreateAccountTokenDtoBuilder {
       return this._accessToken;
    }
 
-   public get accessTokenExpiresAt(): Date {
-      return this._accessTokenExpiresAt;
+   public get accessTokenExpiresIn(): number {
+      return this._accessTokenExpiresIn;
    }
 
    public get refreshToken(): string {

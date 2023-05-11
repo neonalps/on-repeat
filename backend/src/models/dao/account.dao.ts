@@ -1,4 +1,4 @@
-interface AccountDaoInterface {
+export interface AccountDaoInterface {
     id: number;
     publicId: string;
     hashedEmail: string;

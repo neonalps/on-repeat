@@ -3,6 +3,7 @@ import { CreateTrackDto } from "@src/models/classes/dto/create-track";
 import { validateNotBlank, validateNotEmpty, validateNotNull } from "@src/util/validation";
 import { requireNonNull } from "@src/util/common";
 import { TrackMapper } from "./mapper";
+import { UpdateTrackDto } from "@src/models/classes/dto/update-track";
 
 export class TrackService {
 
@@ -18,6 +19,7 @@ export class TrackService {
         validateNotEmpty(dto.artistIds, "createTrackDto.artistIds");
     
         const createdTrackId = await this.mapper.create(dto);
+
         return this.getById(createdTrackId);
     };
 
@@ -25,6 +27,14 @@ export class TrackService {
         validateNotNull(id, "id");
     
         return this.mapper.getById(id);
+    }
+
+    public async update(id: number, dto: UpdateTrackDto): Promise<void> {
+        validateNotNull(id, "id");
+        validateNotNull(dto, "dto");
+        validateNotBlank(dto.name, "dto.name");
+
+        await this.mapper.update(id, dto);
     }
 
 }

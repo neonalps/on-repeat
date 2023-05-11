@@ -1,10 +1,11 @@
-interface AlbumDaoInterface {
+export interface AlbumDaoInterface {
     id: number;
     name: string;
-    type: string;
-    albumType: string;
-    albumGroup: string;
+    albumType: string | null;
+    albumGroup: string | null;
+    totalTracks: number | null;
     releaseDate: Date | null;
     releaseDatePrecision: string | null;
     createdAt: Date;
+    updatedAt: Date | null;
 }

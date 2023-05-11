@@ -1,5 +1,11 @@
 import { HttpMethod } from "@src/http/constants";
+import { AccountDao } from "@src/models/classes/dao/account";
 import { FastifySchema } from "fastify";
+
+export type AuthenticationContext = {
+    authenticated: boolean,
+    account: AccountDao | null,
+}
 
 export type RouteDefinition<S, T> = {
     name?: string,
@@ -7,9 +13,10 @@ export type RouteDefinition<S, T> = {
     method: HttpMethod,
     schema: FastifySchema,
     handler: RouteHandler<S, T>,
+    authenticated: boolean,
 }
 
-export type HandlerFunction<S, T> = (_: S) => Promise<T>;
+export type HandlerFunction<S, T> = (principal: AuthenticationContext, _: S) => Promise<T>;
 
 export interface RouteProvider<S, T> {
     provide: () => RouteDefinition<S, T>;

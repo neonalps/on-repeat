@@ -1,4 +1,13 @@
 import sql from "@src/db/db";
+import { MusicProviderAlbumDao } from "@src/models/classes/dao/music-provider-album";
+import { MusicProviderArtistDao } from "@src/models/classes/dao/music-provider-artist";
+import { MusicProviderTrackDao } from "@src/models/classes/dao/music-provider-track";
+import { CreateMusicProviderAlbumRelationDto } from "@src/models/classes/dto/create-music-provider-album-relation";
+import { CreateMusicProviderArtistRelationDto } from "@src/models/classes/dto/create-music-provider-artist-relation";
+import { CreateMusicProviderTrackRelationDto } from "@src/models/classes/dto/create-music-provider-track-relation";
+import { MusicProviderAlbumDaoInterface } from "@src/models/dao/music-provider-album.dao";
+import { MusicProviderArtistDaoInterface } from "@src/models/dao/music-provider-artist.dao";
+import { MusicProviderTrackDaoInterface } from "@src/models/dao/music-provider-track.dao";
 
 export class MusicProviderMapper {
 

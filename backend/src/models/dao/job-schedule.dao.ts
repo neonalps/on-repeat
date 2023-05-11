@@ -1,4 +1,4 @@
-interface JobScheduleDao {
+export interface JobScheduleDao {
     id: number;
     jobId: number;
     state: string;

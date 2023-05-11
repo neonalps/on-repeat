@@ -1,5 +1,6 @@
 import sql from "@src/db/db";
 import { PlayedTrackDao } from "@src/models/classes/dao/played-track";
+import { CreatePlayedTrackDto } from "@src/models/classes/dto/create-played-track";
 import { PlayedTrackDaoInterface } from "@src/models/dao/played-track.dao";
 
 export class PlayedTrackMapper {

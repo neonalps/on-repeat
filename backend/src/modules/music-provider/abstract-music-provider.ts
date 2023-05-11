@@ -1,11 +1,17 @@
 import { validateNotBlank, validateNotNull } from "@src/util/validation";
 import { MusicProviderMapper } from "./mapper";
 import { requireNonNull } from "@src/util/common";
+import { CreateMusicProviderArtistRelationDto } from "@src/models/classes/dto/create-music-provider-artist-relation";
+import { CreateMusicProviderTrackRelationDto } from "@src/models/classes/dto/create-music-provider-track-relation";
+import { CreateMusicProviderAlbumRelationDto } from "@src/models/classes/dto/create-music-provider-album-relation";
+import { MusicProviderTrackDao } from "@src/models/classes/dao/music-provider-track";
+import { MusicProviderArtistDao } from "@src/models/classes/dao/music-provider-artist";
+import { MusicProviderAlbumDao } from "@src/models/classes/dao/music-provider-album";
 
 export abstract class MusicProvider {
-    protected readonly providerId: number;
-    protected readonly providerName: string;
-    protected readonly mapper: MusicProviderMapper;
+    private readonly providerId: number;
+    private readonly providerName: string;
+    private readonly mapper: MusicProviderMapper;
 
     constructor(id: number, name: string, mapper: MusicProviderMapper) {
         this.providerId = requireNonNull(id);
@@ -13,7 +19,13 @@ export abstract class MusicProvider {
         this.mapper = requireNonNull(mapper);
     }
 
-    public abstract processPlayedTracks(accountId: number, playedTracks: PlayedTrackDto[]): Promise<void>;
+    public getProviderId(): number {
+        return this.providerId;
+    }
+
+    public getProviderName(): string {
+        return this.providerName;
+    }
 
     public getTrackByProviderTrackId(providerTrackId: string): Promise<MusicProviderTrackDao | null> {
         validateNotBlank(providerTrackId, "providerTrackId");

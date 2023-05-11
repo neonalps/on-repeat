@@ -7,11 +7,6 @@ import { CreateSecureAccountDto } from "@src/models/classes/dto/create-secure-ac
 import { CryptoService } from "@src/modules/crypto/service";
 import { UuidSource } from "@src/util/uuid";
 
-export interface GetOrCreateAccountResponse {
-    account: AccountDao | null;
-    wasCreated: boolean;
-}
-
 export class AccountService {
 
     private readonly mapper: AccountMapper;
@@ -28,16 +23,13 @@ export class AccountService {
         this.uuidSource = requireNonNull(uuidSource);
     }
 
-    public async getOrCreate(email: string): Promise<GetOrCreateAccountResponse> {
+    public async getOrCreate(email: string): Promise<AccountDao | null> {
         validateNotBlank(email, "email");
     
         const existingUser = await this.getByEmail(email);
     
         if (existingUser) {
-            return {
-                account: existingUser,
-                wasCreated: false,
-            };
+            return existingUser;
         }
     
         const account: CreateAccountDto = CreateAccountDto.Builder
@@ -49,16 +41,10 @@ export class AccountService {
         const createdAccount = await this.create(account);
 
         if (createdAccount === null) {
-            return {
-                account: null,
-                wasCreated: false,
-            };
+            return null;
         }
 
-        return {
-            account: createdAccount,
-            wasCreated: true,
-        };
+        return createdAccount;
     };
     
     public async create(dto: CreateAccountDto): Promise<AccountDao | null> {

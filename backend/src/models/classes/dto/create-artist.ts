@@ -1,4 +1,6 @@
-class CreateArtistDto {
+import { ArtistDao } from "@src/models/classes/dao/artist";
+
+export class CreateArtistDto {
     private _name: string;
   
     constructor(builder: CreateArtistDtoBuilder) {
@@ -31,11 +33,11 @@ class CreateArtistDto {
       this._name = name;
       return this;
     }
-  
+
     public get name(): string {
       return this._name;
     }
-  
+
     public build(): CreateArtistDto {
       return new CreateArtistDto(this);
     }

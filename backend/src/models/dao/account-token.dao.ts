@@ -1,4 +1,4 @@
-interface AccountTokenDaoInterface {
+export interface AccountTokenDaoInterface {
     id: number;
     accountId: number;
     oauthProvider: string;

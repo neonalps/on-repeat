@@ -1,23 +1,26 @@
 import sql from "@src/db/db";
 import { TrackDao } from "@src/models/classes/dao/track";
 import { CreateTrackDto } from "@src/models/classes/dto/create-track";
+import { UpdateTrackDto } from "@src/models/classes/dto/update-track";
+import { TrackArtistDaoInterface } from "@src/models/dao/track-artist.dao";
+import { TrackDaoInterface } from "@src/models/dao/track.dao";
 
 export class TrackMapper {
 
     constructor() {}
 
-    public async create(track: CreateTrackDto): Promise<number> {
+    public async create(dto: CreateTrackDto): Promise<number> {
         const result = await sql`
             insert into track
-                (name, album_id, isrc, disc_number, duration_ms, created_at)
+                (name, album_id, isrc, disc_number, track_number, duration_ms, explicit, created_at, updated_at)
             values
-                (${ track.name }, ${ track.albumId }, ${ track.isrc }, ${ track.discNumber }, ${ track.durationMs }, now())
+                (${ dto.name }, ${ dto.albumId }, ${ dto.isrc }, ${ dto.discNumber }, ${ dto.trackNumber }, ${ dto.durationMs }, ${ dto.explicit }, now(), null)
             returning id
         `;
     
         const trackId = result[0].id;
     
-        for (const artistId of track.artistIds) {
+        for (const artistId of dto.artistIds) {
             await this.createTrackArtistRelation(trackId, artistId);
         }
     
@@ -44,8 +47,11 @@ export class TrackMapper {
                 album_id,
                 isrc,
                 disc_number,
+                track_number,
                 duration_ms,
-                created_at
+                explicit,
+                created_at,
+                updated_at
             from
                 track
             where
@@ -56,30 +62,35 @@ export class TrackMapper {
             return null;
         }
     
-        const track = result[0];
+        const item = result[0];
     
-        const trackArtistIds = await this.getTrackArtistIds(track.id);
+        const trackArtistIds = await this.getTrackArtistIds(item.id);
     
         return TrackDao.Builder
-            .withId(track.id)
-            .withName(track.name)
+            .withId(item.id)
+            .withName(item.name)
             .withArtistIds(new Set(trackArtistIds))
-            .withAlbumId(track.albumId)
-            .withIsrc(track.isrc)
-            .withDiscNumber(track.discNumber)
-            .withDurationMs(track.durationMs)
-            .withCreatedAt(track.createdAt)
+            .withAlbumId(item.albumId)
+            .withIsrc(item.isrc)
+            .withDiscNumber(item.discNumber)
+            .withTrackNumber(item.trackNumber)
+            .withDurationMs(item.durationMs)
+            .withExplicit(item.explicit)
+            .withCreatedAt(item.createdAt)
+            .withUpdatedAt(item.updatedAt)
             .build();
     }
 
     public async update(id: number, dto: UpdateTrackDto): Promise<void> {
-        sql`
+        await sql`
             update track set
-                name = ${dto.getName()},
-                album_id = ${dto.getAlbumId()},
-                isrc = ${dto.getIsrc()},
-                disc_number = ${dto.getDiscNumber()},
-                duration_ms = ${dto.getDurationMs()}
+                name = ${ dto.name },
+                isrc = ${ dto.isrc },
+                disc_number = ${ dto.discNumber },
+                track_number = ${ dto.trackNumber },
+                explicit = ${ dto.explicit },
+                duration_ms = ${ dto.durationMs },
+                updated_at = now()
             where id = ${ id }
             `;
     };

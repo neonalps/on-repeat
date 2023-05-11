@@ -1,4 +1,12 @@
 import sql from "@src/db/db";
+import { AlbumImageDao } from "@src/models/classes/dao/album-image";
+import { AlbumDao } from "@src/models/classes/dao/album";
+import { CreateAlbumDto } from "@src/models/classes/dto/create-album";
+import { CreateAlbumImageDto } from "@src/models/classes/dto/create-album-image";
+import { UpdateAlbumDto } from "@src/models/classes/dto/update-album";
+import { AlbumImageDaoInterface } from "@src/models/dao/album-image.dao";
+import { AlbumArtistDaoInterface } from "@src/models/dao/album-artist.dao";
+import { AlbumDaoInterface } from "@src/models/dao/album.dao";
 
 export class AlbumMapper {
 
@@ -7,9 +15,9 @@ export class AlbumMapper {
     public async create(album: CreateAlbumDto): Promise<number> {
         const result = await sql`
             insert into album
-                (name, type, album_type, album_group, release_date, release_date_precision, created_at)
+                (name, album_type, album_group, release_date, release_date_precision, created_at, updated_at)
             values
-                (${ album.getName() }, ${ album.getType() }, ${ album.getAlbumType() }, ${ album.getAlbumGroup() }, ${ album.getReleaseDate() }, ${ album.getReleaseDatePrecision() }, now())
+                (${ album.name }, ${ album.albumType }, ${ album.albumGroup }, ${ album.releaseDate }, ${ album.releaseDatePrecision }, now(), null)
             returning id
         `;
     
@@ -33,7 +41,7 @@ export class AlbumMapper {
             insert into album_images
                 (album_id, height, width, url)
             values
-                (${ albumId }, ${ image.getHeight() }, ${ image.getWidth() }, ${ image.getUrl() })
+                (${ albumId }, ${ image.height }, ${ image.width }, ${ image.url })
             returning id
         `;
     
@@ -45,12 +53,13 @@ export class AlbumMapper {
             select
                 id,
                 name,
-                type,
                 album_type,
                 album_group,
+                total_tracks,
                 release_date,
                 release_date_precision,
-                created_at
+                created_at,
+                updated_at
             from
                 album
             where
@@ -70,17 +79,17 @@ export class AlbumMapper {
             this.getAlbumImages(albumId),
         ])
 
-        return new AlbumDaoBuilder()
-            .setId(albumId)
-            .setName(item.name)
-            .setArtistIds(new Set(artistIds))
-            .setImages(new Set(albumImages))
-            .setType(item.type)
-            .setAlbumType(item.albumType)
-            .setAlbumGroup(item.albumGroup)
-            .setReleaseDate(item.releaseDate)
-            .setReleaseDatePrecision(item.releaseDatePrecision)
-            .setCreatedAt(item.createdAt)
+        return AlbumDao.Builder
+            .withId(albumId)
+            .withName(item.name)
+            .withArtistIds(new Set(artistIds))
+            .withImages(new Set(albumImages))
+            .withAlbumType(item.albumType)
+            .withAlbumGroup(item.albumGroup)
+            .withTotalTracks(item.totalTracks)
+            .withReleaseDate(item.releaseDate)
+            .withReleaseDatePrecision(item.releaseDatePrecision)
+            .withCreatedAt(item.createdAt)
             .build();
     }
 
@@ -103,7 +112,7 @@ export class AlbumMapper {
         return result.map(item => item.artistId);
     };
     
-    public async getAlbumImages(albumId: number): Promise<AlbumImage[]> {
+    public async getAlbumImages(albumId: number): Promise<AlbumImageDao[]> {
         const result = await sql<AlbumImageDaoInterface[]>`
             select
                 id,
@@ -120,24 +129,31 @@ export class AlbumMapper {
             return [];
         }
     
-        return result.map(item => {
-            return new AlbumImageBuilder()
-                .setHeight(item.height)
-                .setWidth(item.width)
-                .setUrl(item.url)
-                .build();
-        });
+        const images = [];
+        
+        for (const item of result) {
+            const dao = AlbumImageDao.fromInterface(item);
+            
+            if (dao === null) {
+                continue;
+            }
+
+            images.push(dao);
+        }
+
+        return images;
     };
     
     public async update(id: number, dto: UpdateAlbumDto): Promise<void> {
         sql`
             update album set
-                name = ${dto.getName()},
-                type = ${dto.getType()},
-                album_type = ${dto.getAlbumType()},
-                album_group = ${dto.getAlbumGroup()},
-                release_date = ${dto.getReleaseDate()},
-                release_date_precision = ${dto.getReleaseDatePrecision()}
+                name = ${ dto.name },
+                album_type = ${ dto.albumType },
+                album_group = ${ dto.albumGroup },
+                total_tracks = ${ dto.totalTracks },
+                release_date = ${ dto.releaseDate },
+                release_date_precision = ${ dto.releaseDatePrecision },
+                updated_at = now()
             where id = ${ id }
             `;
     };

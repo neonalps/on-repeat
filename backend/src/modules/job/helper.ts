@@ -27,9 +27,9 @@ export class JobHelper {
     static readonly ERROR_JOB_DISABLED_ACCOUNT = "Job has been disabled for this account";
 
     private static readonly JOB_FETCH_SPOTIFY_RECENT_PLAYED_TRACKS_DEFAULT_INTERVAL_SECONDS = 600;
-    private static readonly INITIAL_JOB_SCHEDULE_DELAY_SECONDS = 10;
+    private static readonly INITIAL_JOB_SCHEDULE_DELAY_SECONDS = 1;
     private static readonly MAXIMUM_FAILURE_COUNT = 5;
-    private static readonly BATCH_SIZE = 1;
+    private static readonly BATCH_SIZE = 10;
 
     private readonly accountService: AccountService;
     private readonly jobService: JobService;
@@ -72,6 +72,10 @@ export class JobHelper {
         if (!accountJobSchedule) {
             throw new Error(JobHelper.ERROR_CREATE_ACCOUNT_JOB_SCHEDULE);
         }
+    }
+
+    public async isJobProcessingEnabled(): Promise<boolean> {
+        return true;
     }
 
     public async getConfiguredBatchSize(): Promise<number> {

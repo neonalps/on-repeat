@@ -1,3 +1,5 @@
+import { AccountTokenDaoInterface } from "@src/models/dao/account-token.dao";
+
 export class SecureAccountTokenDao {
     private _id!: number;
     private _accountId!: number;

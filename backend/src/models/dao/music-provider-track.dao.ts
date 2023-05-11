@@ -1,4 +1,4 @@
-interface MusicProviderTrackDaoInterface {
+export interface MusicProviderTrackDaoInterface {
     id: number;
     musicProviderId: number;
     trackId: number;

@@ -1,6 +1,7 @@
 import sql from "@src/db/db";
 import { SecureAccountTokenDao } from "@src/models/classes/dao/secure-account-token";
 import { CreateSecureAccountTokenDto } from "@src/models/classes/dto/create-secure-account-token";
+import { AccountTokenDaoInterface } from "@src/models/dao/account-token.dao";
 
 export class AccountTokenMapper {
 
@@ -8,7 +9,7 @@ export class AccountTokenMapper {
 
     public async create(accountToken: CreateSecureAccountTokenDto): Promise<number> {
         const result = await sql`
-            insert into account_token
+            insert into account_tokens
                 (account_id, oauth_provider, scope, encrypted_access_token, access_token_expires_at, encrypted_refresh_token, created_at, updated_at)
             values
                 (${ accountToken.accountId }, ${ accountToken.oauthProvider }, ${ accountToken.scope }, ${ accountToken.encryptedAccessToken }, ${ accountToken.accessTokenExpiresAt }, ${ accountToken.encryptedRefreshToken }, now(), null)
@@ -71,5 +72,14 @@ export class AccountTokenMapper {
         return SecureAccountTokenDao.fromDaoInterface(result[0])
     }
     
-    // TODO add update access token
+    public async updateAccessToken(id: number, encryptedAccessToken: string, accessTokenExpiresAt: Date): Promise<void> {
+        await sql`
+            update account_tokens set
+                encrypted_access_token = ${ encryptedAccessToken },
+                access_token_expires_at = ${ accessTokenExpiresAt },
+                updated_at = now()
+            where
+                id = ${ id }
+        `;
+    }
 }
