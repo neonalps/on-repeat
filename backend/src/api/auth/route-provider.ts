@@ -1,5 +1,5 @@
 import { FastifySchema } from "fastify";
-import { RouteDefinition, RouteProvider } from "../types";
+import { RouteDefinition, RouteProvider } from "@src/router/types";
 import { CreateAccessTokenRequestDto } from "@src/models/api/create-access-token";
 import { CreateAccessTokenResponseDto } from "@src/models/api/create-access-token-response";
 import { AuthHandler } from "./handler";
@@ -23,7 +23,7 @@ export class AuthRouteProvider implements RouteProvider<CreateAccessTokenRequest
         };
 
         const createAuthTokenSchema: FastifySchema = {
-            body: createAuthTokenDtoJsonSchema
+            body: createAuthTokenDtoJsonSchema,
         };
 
         return {
