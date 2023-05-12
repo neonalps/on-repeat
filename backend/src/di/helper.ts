@@ -29,6 +29,7 @@ import { JobMapper } from "@src/modules/job/mapper";
 import { JobService } from "@src/modules/job/service";
 import { SpotifyClient } from "@src/modules/music-provider/spotify/client";
 import { SpotifyMusicProvider } from "@src/modules/music-provider/spotify/music-provider";
+import { MusicProviderService } from "@src/modules/music-provider/service";
 
 export class DependencyHelper {
 
@@ -81,6 +82,7 @@ export class DependencyHelper {
         const authService = new AuthService(getTokenConfig(), timeSource);
 
         const musicProviderMapper = new MusicProviderMapper();
+        const musicProviderService = new MusicProviderService(musicProviderMapper);
 
         const spotifyMusicProvider = new SpotifyMusicProvider(musicProviderMapper, accountTokenService, catalogueService, playedTrackService, spotifyClient, timeSource);
 
@@ -99,6 +101,7 @@ export class DependencyHelper {
         dependencies.set(Dependencies.CryptoService, cryptoService);
         dependencies.set(Dependencies.JobHelper, jobHelper);
         dependencies.set(Dependencies.JobService, jobService);
+        dependencies.set(Dependencies.MusicProviderService, musicProviderService);
         dependencies.set(Dependencies.PlayedTrackService, playedTrackService);
         dependencies.set(Dependencies.Scheduler, scheduler);
         dependencies.set(Dependencies.SpotifyClient, spotifyClient);
