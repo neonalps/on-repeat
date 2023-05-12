@@ -1,7 +1,7 @@
 import { FastifyError, FastifyInstance, FastifyReply, FastifyRequest, FastifySchema } from "fastify";
 import fastifyJwt from "@fastify/jwt";
 import { AuthenticationContext, RequestSchema, RouteDefinition } from "./types";
-import { getProviders } from "./providers";
+import { getProviders } from "../api/providers";
 import { HttpMethod } from "@src/http/constants";
 import logger from "@src/log/logger";
 import { getAuthTokenSigningKey } from "@src/config";
@@ -10,8 +10,6 @@ import { AccountService } from "@src/modules/account/service";
 import { Dependencies } from "@src/di/dependencies";
 
 export class RouterHelper {
-
-    private static readonly ERROR_UNAUTHENTICATED = "Unauthenticated";
 
     private static readonly EMPTY_AUTHENTICATION: AuthenticationContext = {
         authenticated: false,
@@ -63,7 +61,7 @@ export class RouterHelper {
             handler: async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
                 const principal: AuthenticationContext = (request as any)['principal'];
 
-                const body = request.body as unknown;
+                const body = RouterHelper.mergeRequestContext(request) as unknown;
 
                 try {
                     const response = await route.handler.handle(principal, body) as any;
@@ -130,7 +128,27 @@ export class RouterHelper {
     private static convertRequestSchema(schema: RequestSchema): FastifySchema {
         return {
             body: schema.body,
+            params: schema.params,
+            querystring: schema.querystring,
         }
+    }
+
+    private static mergeRequestContext(request: FastifyRequest): unknown {
+        let requestContext = {};
+
+        if (typeof request.body === 'object') {
+            requestContext = { ...requestContext, ...request.body };
+        }
+
+        if (typeof request.query === 'object') {
+            requestContext = { ...requestContext, ...request.query };
+        }
+
+        if (typeof request.params === 'object') {
+            requestContext = { ...requestContext, ...request.params,  };
+        }
+
+        return requestContext;
     }
 
 }

@@ -92,6 +92,8 @@ export class DependencyHelper {
         dependencies.set(Dependencies.AccountJobService, accountJobService);
         dependencies.set(Dependencies.AccountJobScheduleService, accountJobScheduleService);
         dependencies.set(Dependencies.AccountTokenService, accountTokenService);
+        dependencies.set(Dependencies.AlbumService, albumService);
+        dependencies.set(Dependencies.ArtistService, artistService);
         dependencies.set(Dependencies.AuthService, authService);
         dependencies.set(Dependencies.CatalogueService, catalogueService);
         dependencies.set(Dependencies.CryptoService, cryptoService);
@@ -101,6 +103,7 @@ export class DependencyHelper {
         dependencies.set(Dependencies.Scheduler, scheduler);
         dependencies.set(Dependencies.SpotifyClient, spotifyClient);
         dependencies.set(Dependencies.SpotifyMusicProvider, spotifyMusicProvider);
+        dependencies.set(Dependencies.TrackService, trackService);
         dependencies.set(Dependencies.UuidSource, uuidSource);
 
         return dependencies;

@@ -1,6 +1,6 @@
 import { requireNonNull } from "@src/util/common";
 import { RequestSchema, RouteDefinition, RouteProvider } from "@src/router/types";
-import { ManualSpotifyResponseUploadHandler } from "@src/router/manual-spotify-response-upload/handler";
+import { ManualSpotifyResponseUploadHandler } from "@src/api/v1/manual-spotify-response-upload/handler";
 import { ManualSpotifyResponseUploadDto } from "@src/models/api/manual-spotify-response-upload";
 
 export class ManualSpotifyResponseUploadRouteProvider implements RouteProvider<ManualSpotifyResponseUploadDto, void> {
@@ -21,7 +21,7 @@ export class ManualSpotifyResponseUploadRouteProvider implements RouteProvider<M
         };
 
         const manualSpotifyResponseUploadRequestSchema: RequestSchema = {
-            body: manualSpotifyResponseUploadDtoJsonSchema
+            body: manualSpotifyResponseUploadDtoJsonSchema,
         };
 
         return {
