@@ -1,6 +1,8 @@
 import sql from "@src/db/db";
+import { PlayedInfoDao } from "@src/models/classes/dao/played-info";
 import { PlayedTrackDao } from "@src/models/classes/dao/played-track";
 import { CreatePlayedTrackDto } from "@src/models/classes/dto/create-played-track";
+import { PlayedInfoDaoInterface } from "@src/models/dao/played-info.dao";
 import { PlayedTrackDaoInterface } from "@src/models/dao/played-track.dao";
 
 export class PlayedTrackMapper {
@@ -90,6 +92,27 @@ export class PlayedTrackMapper {
         }
     
         return PlayedTrackDao.fromDaoInterface(result[0]);
+    }
+
+    public async getPlayedInfoForArtist(accountId: number, artistId: number): Promise<PlayedInfoDao | null> {
+        const result = await sql<PlayedInfoDaoInterface[]>`
+            select
+                max(pt.played_at) as last_played_at,
+                count(ta.id) as times_played
+            from
+                played_track pt left join
+                track_artists ta on ta.track_id = pt.track_id 
+            where
+                pt.account_id = ${ accountId }
+                and ta.artist_id = ${ artistId }
+                and pt.include_in_statistics = true
+        `;
+
+        if (!result || result.length === 0) {
+            return null;
+        }
+
+        return PlayedInfoDao.fromDaoInterface(result[0]);
     }
 
 }

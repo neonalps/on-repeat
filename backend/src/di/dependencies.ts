@@ -10,6 +10,7 @@ export enum Dependencies {
     CryptoService,
     JobHelper,
     JobService,
+    MusicProviderService,
     PlayedTrackService,
     Scheduler,
     SpotifyClient,

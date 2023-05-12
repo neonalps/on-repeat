@@ -3,6 +3,7 @@ import { PlayedTrackMapper } from "./mapper";
 import { validateNotNull } from "@src/util/validation";
 import { PlayedTrackDao } from "@src/models/classes/dao/played-track";
 import { CreatePlayedTrackDto } from "@src/models/classes/dto/create-played-track";
+import { PlayedInfoDao } from "@src/models/classes/dao/played-info";
 
 export class PlayedTrackService {
 
@@ -49,6 +50,13 @@ export class PlayedTrackService {
         validateNotNull(musicProviderId, "musicProviderId");
 
         return this.mapper.getMostRecentPlayedTrackByAccountAndMusicProvider(accountId, musicProviderId);
+    }
+
+    public async getPlayedInfoForArtist(accountId: number, artistId: number): Promise<PlayedInfoDao | null> {
+        validateNotNull(accountId, "accountId");
+        validateNotNull(artistId, "artistId");
+
+        return this.mapper.getPlayedInfoForArtist(accountId, artistId);
     }
 
 }
