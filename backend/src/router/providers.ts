@@ -11,6 +11,9 @@ import { ConnectSpotifyAccountHandler } from "@src/router/connect-spotify-accoun
 import { AccountTokenService } from "@src/modules/account-token/service";
 import { ConnectSpotifyAccountRouteProvider } from "@src/router/connect-spotify-account/route-provider";
 import { SpotifyClient } from "@src/modules/music-provider/spotify/client";
+import { ManualSpotifyResponseUploadHandler } from "@src/router/manual-spotify-response-upload/handler";
+import { SpotifyMusicProvider } from "@src/modules/music-provider/spotify/music-provider";
+import { ManualSpotifyResponseUploadRouteProvider } from "@src/router/manual-spotify-response-upload/route-provider";
 
 export const getProviders = () => {
     const accountService = dependencyManager.get<AccountService>(Dependencies.AccountService);
@@ -18,16 +21,19 @@ export const getProviders = () => {
     const authService = dependencyManager.get<AuthService>(Dependencies.AuthService);
     const jobHelper = dependencyManager.get<JobHelper>(Dependencies.JobHelper);
     const spotifyClient = dependencyManager.get<SpotifyClient>(Dependencies.SpotifyClient);
+    const spotifyMusicProvider = dependencyManager.get<SpotifyMusicProvider>(Dependencies.SpotifyMusicProvider);
 
     const authHandler = new AuthHandler(authService);
     const connectSpotifyAccountHandler = new ConnectSpotifyAccountHandler(accountTokenService, jobHelper, spotifyClient);
+    const manualSpotifyResponseUploadHandler = new ManualSpotifyResponseUploadHandler(spotifyMusicProvider);
     const oauthLoginHandler = new OauthLoginHandler(authService, accountService, spotifyClient);
 
     const providers = [
         new AuthRouteProvider(authHandler),
         new ConnectSpotifyAccountRouteProvider(connectSpotifyAccountHandler),
+        new ManualSpotifyResponseUploadRouteProvider(manualSpotifyResponseUploadHandler),
         new OauthLoginRouteProvider(oauthLoginHandler),
     ];
 
     return providers;
-};
+}
