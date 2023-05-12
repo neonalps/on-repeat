@@ -7,6 +7,7 @@ import { ConnectSpotifyResponseDto } from "@src/models/api/connect-spotify-accou
 import { CreateAccountTokenDto } from "@src/models/classes/dto/create-account-token";
 import { SpotifyClient } from "@src/modules/music-provider/spotify/client";
 import { JobHelper } from "@src/modules/job/helper";
+import { OAUTH_PROVIDER_SPOTIFY } from "@src/modules/oauth/constants";
 
 export class ConnectSpotifyAccountHandler implements RouteHandler<ConnectSpotifyRequestDto, ConnectSpotifyResponseDto> {
 
@@ -30,7 +31,7 @@ export class ConnectSpotifyAccountHandler implements RouteHandler<ConnectSpotify
 
         const createAccountToken = CreateAccountTokenDto.Builder
             .withAccountId(accountId)
-            .withOauthProvider("spotify")
+            .withOauthProvider(OAUTH_PROVIDER_SPOTIFY)
             .withAccessToken(tokenResponse.accessToken)
             .withAccessTokenExpiresIn(tokenResponse.expiresIn)
             .withRefreshToken(tokenResponse.refreshToken)

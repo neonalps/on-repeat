@@ -62,7 +62,7 @@ export class SpotifyMusicProvider extends MusicProvider {
         await this.processPlayedTracks(accountId, playedTracksResponse.items);
     }
 
-    private async processPlayedTracks(accountId: number, playedTracks: SpotifyPlayedTrackDto[]): Promise<void> {
+    public async processPlayedTracks(accountId: number, playedTracks: SpotifyPlayedTrackDto[]): Promise<void> {
         validateNotNull(accountId, "accountId");
         validateNotNull(playedTracks, "playedTracks");
 
@@ -74,7 +74,6 @@ export class SpotifyMusicProvider extends MusicProvider {
                 }
 
                 if (await this.playedTrackService.hasPlayedTrackAlreadyBeenProcessed(accountId, this.getProviderId(), playedAt)) {
-                    console.log(`skipping already processed track played at ${playedAt}`);
                     continue;
                 }
 

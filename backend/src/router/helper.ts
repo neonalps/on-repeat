@@ -100,7 +100,7 @@ export class RouterHelper {
 
     private static sendSuccessResponse(reply: FastifyReply, route: RouteDefinition<unknown, unknown>, responseBody: unknown): void {
         reply
-            .code(this.getCodeFromMethod(route.method))
+            .code(this.getCodeFromMethod(route.method, !responseBody))
             .header('Content-Type', 'application/json; charset=utf-8')
             .send(responseBody);
     }
@@ -115,7 +115,11 @@ export class RouterHelper {
             .send({ message: errorMessage });
     }
 
-    private static getCodeFromMethod(method: HttpMethod): number {
+    private static getCodeFromMethod(method: HttpMethod, isResponseBodyEmpty: boolean): number {
+        if (isResponseBodyEmpty) {
+            return 204;
+        }
+
         if (method === "POST") {
             return 201;
         }
