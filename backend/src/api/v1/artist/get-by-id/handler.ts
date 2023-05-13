@@ -40,10 +40,11 @@ export class GetArtistByIdHandler implements RouteHandler<GetArtistByIdRequestDt
             id: artist.id,
             name: artist.name,
             externalUrls,
-            playedInfo: {
+            playedInfo: { 
+                firstPlayedAt: playedInfo.firstPlayedAt,
                 lastPlayedAt: playedInfo.lastPlayedAt,
                 timesPlayed: playedInfo.timesPlayed,
-            }
+            },
         }
     }
 

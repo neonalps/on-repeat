@@ -97,8 +97,9 @@ export class PlayedTrackMapper {
     public async getPlayedInfoForArtist(accountId: number, artistId: number): Promise<PlayedInfoDao | null> {
         const result = await sql<PlayedInfoDaoInterface[]>`
             select
+                min(pt.played_at) as first_played_at,
                 max(pt.played_at) as last_played_at,
-                count(ta.id) as times_played
+                count(pt.played_at) as times_played
             from
                 played_track pt left join
                 track_artists ta on ta.track_id = pt.track_id 

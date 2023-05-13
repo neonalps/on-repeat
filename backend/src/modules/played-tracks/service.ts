@@ -8,6 +8,7 @@ import { PlayedInfoDao } from "@src/models/classes/dao/played-info";
 export class PlayedTrackService {
 
     static readonly EMPTY_PLAYED_INFO = PlayedInfoDao.Builder
+        .withFirstPlayedAt(null)
         .withLastPlayedAt(null)
         .withTimesPlayed(0)
         .build();
