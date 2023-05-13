@@ -8,6 +8,7 @@ import { getAuthTokenSigningKey } from "@src/config";
 import dependencyManager from "@src/di/manager";
 import { AccountService } from "@src/modules/account/service";
 import { Dependencies } from "@src/di/dependencies";
+import { IllegalStateError } from "@src/api/error/illegal-state-error";
 
 export class RouterHelper {
 
@@ -67,8 +68,13 @@ export class RouterHelper {
                     const response = await route.handler.handle(principal, body) as any;
                     this.sendSuccessResponse(reply, route, response);
                 } catch (ex) {
+                    if (ex instanceof IllegalStateError) {
+                        this.sendErrorResponse(reply, route, 400, ex);
+                        return;
+                    }
+
                     logger.error(`Error while handling ${route.path} (${route.name}): ${ex}`);
-                    this.sendErrorResponse(reply, route, 400, ex);
+                    this.sendErrorResponse(reply, route, 500, ex);
                 }
             },
         })

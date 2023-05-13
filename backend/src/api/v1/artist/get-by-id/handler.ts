@@ -7,6 +7,7 @@ import { ArtistApiDto } from "@src/models/api/artist";
 import { MusicProviderService } from "@src/modules/music-provider/service";
 import { PlayedTrackService } from "@src/modules/played-tracks/service";
 import { AccountDao } from "@src/models/classes/dao/account";
+import { IllegalStateError } from "@src/api/error/illegal-state-error";
 
 export class GetArtistByIdHandler implements RouteHandler<GetArtistByIdRequestDto, ArtistApiDto> {
 
@@ -28,7 +29,7 @@ export class GetArtistByIdHandler implements RouteHandler<GetArtistByIdRequestDt
         const artist = await this.artistService.getById(artistId);
 
         if (!artist) {
-            throw new Error(GetArtistByIdHandler.ERROR_ARTIST_NOT_FOUND);
+            throw new IllegalStateError(GetArtistByIdHandler.ERROR_ARTIST_NOT_FOUND);
         }
 
         const [externalUrls, playedInfo] = await Promise.all([
