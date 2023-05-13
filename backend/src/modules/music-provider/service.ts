@@ -13,8 +13,7 @@ export class MusicProviderService {
     public async getExternalUrlsForArtist(artistId: number): Promise<Record<string, string>> {
         validateNotNull(artistId, "artistId");
 
-        // TODO implement
-        return {};
+        return this.mapper.getExternalUrlsForArtist(artistId);
     }
 
 }

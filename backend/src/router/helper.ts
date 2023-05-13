@@ -68,7 +68,7 @@ export class RouterHelper {
                     this.sendSuccessResponse(reply, route, response);
                 } catch (ex) {
                     logger.error(`Error while handling ${route.path} (${route.name}): ${ex}`);
-                    this.sendErrorResponse(reply, route, 500, ex);
+                    this.sendErrorResponse(reply, route, 400, ex);
                 }
             },
         })
