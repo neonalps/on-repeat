@@ -7,6 +7,11 @@ import { PlayedInfoDao } from "@src/models/classes/dao/played-info";
 
 export class PlayedTrackService {
 
+    static readonly EMPTY_PLAYED_INFO = PlayedInfoDao.Builder
+        .withLastPlayedAt(null)
+        .withTimesPlayed(0)
+        .build();
+
     private readonly mapper: PlayedTrackMapper;
 
     constructor(mapper: PlayedTrackMapper) {
@@ -52,11 +57,17 @@ export class PlayedTrackService {
         return this.mapper.getMostRecentPlayedTrackByAccountAndMusicProvider(accountId, musicProviderId);
     }
 
-    public async getPlayedInfoForArtist(accountId: number, artistId: number): Promise<PlayedInfoDao | null> {
+    public async getPlayedInfoForArtist(accountId: number, artistId: number): Promise<PlayedInfoDao> {
         validateNotNull(accountId, "accountId");
         validateNotNull(artistId, "artistId");
 
-        return this.mapper.getPlayedInfoForArtist(accountId, artistId);
+        const playedInfo = await this.mapper.getPlayedInfoForArtist(accountId, artistId); 
+
+        if (playedInfo !== null) {
+            return playedInfo;
+        }
+
+        return PlayedTrackService.EMPTY_PLAYED_INFO;
     }
 
 }
