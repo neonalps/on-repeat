@@ -30,6 +30,7 @@ import { JobService } from "@src/modules/job/service";
 import { SpotifyClient } from "@src/modules/music-provider/spotify/client";
 import { SpotifyMusicProvider } from "@src/modules/music-provider/spotify/music-provider";
 import { MusicProviderService } from "@src/modules/music-provider/service";
+import { PaginationService } from "@src/modules/pagination/service";
 
 export class DependencyHelper {
 
@@ -88,6 +89,8 @@ export class DependencyHelper {
 
         const scheduler = new Scheduler(jobHelper);
 
+        const paginationService = new PaginationService();
+
         const dependencies: Map<Dependencies, any> = new Map();
         
         dependencies.set(Dependencies.AccountService, accountService);
@@ -102,6 +105,7 @@ export class DependencyHelper {
         dependencies.set(Dependencies.JobHelper, jobHelper);
         dependencies.set(Dependencies.JobService, jobService);
         dependencies.set(Dependencies.MusicProviderService, musicProviderService);
+        dependencies.set(Dependencies.PaginationService, paginationService);
         dependencies.set(Dependencies.PlayedTrackService, playedTrackService);
         dependencies.set(Dependencies.Scheduler, scheduler);
         dependencies.set(Dependencies.SpotifyClient, spotifyClient);

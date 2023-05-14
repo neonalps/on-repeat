@@ -3,13 +3,13 @@ import { AuthenticationContext, RouteHandler } from "@src/router/types";
 import { requireNonNull } from "@src/util/common";
 import { ArtistService } from "@src/modules/artist/service";
 import { GetArtistByIdRequestDto } from "@src/models/api/get-artist-by-id-request";
-import { ArtistApiDto } from "@src/models/api/artist";
+import { DetailedArtistApiDto } from "@src/models/api/detailed-artist";
 import { MusicProviderService } from "@src/modules/music-provider/service";
 import { PlayedTrackService } from "@src/modules/played-tracks/service";
 import { AccountDao } from "@src/models/classes/dao/account";
 import { IllegalStateError } from "@src/api/error/illegal-state-error";
 
-export class GetArtistByIdHandler implements RouteHandler<GetArtistByIdRequestDto, ArtistApiDto> {
+export class GetArtistByIdHandler implements RouteHandler<GetArtistByIdRequestDto, DetailedArtistApiDto> {
 
     static readonly ERROR_ARTIST_NOT_FOUND = "No artist with this ID exists";
 
@@ -23,7 +23,7 @@ export class GetArtistByIdHandler implements RouteHandler<GetArtistByIdRequestDt
         this.playedTrackService = requireNonNull(playedTrackService);
     }
     
-    public async handle(context: AuthenticationContext, dto: GetArtistByIdRequestDto): Promise<ArtistApiDto> {
+    public async handle(context: AuthenticationContext, dto: GetArtistByIdRequestDto): Promise<DetailedArtistApiDto> {
         const accountId = (context.account as AccountDao).id;
         const artistId = dto.artistId;
         const artist = await this.artistService.getById(artistId);

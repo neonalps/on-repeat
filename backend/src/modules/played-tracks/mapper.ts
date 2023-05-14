@@ -1,8 +1,11 @@
 import sql from "@src/db/db";
+import { SimpleArtistDao } from "@src/models/classes/dao/artist-simple";
 import { PlayedInfoDao } from "@src/models/classes/dao/played-info";
 import { PlayedTrackDao } from "@src/models/classes/dao/played-track";
+import { PlayedTrackDetailsDao } from "@src/models/classes/dao/played-track-details";
 import { CreatePlayedTrackDto } from "@src/models/classes/dto/create-played-track";
 import { PlayedInfoDaoInterface } from "@src/models/dao/played-info.dao";
+import { PlayedTrackDetailsDaoInterface } from "@src/models/dao/played-track-details.dao";
 import { PlayedTrackDaoInterface } from "@src/models/dao/played-track.dao";
 
 export class PlayedTrackMapper {
@@ -42,6 +45,83 @@ export class PlayedTrackMapper {
         }
     
         return PlayedTrackDao.fromDaoInterface(result[0]);
+    }
+
+    public async getAllForAccountPaginatedDetails(orderedIds: number[]): Promise<PlayedTrackDetailsDao[]> {
+        const result = await sql<PlayedTrackDetailsDaoInterface[]>`
+            select
+                pt.id as played_track_id,
+                t.id as track_id,
+                t.name as track_name,
+                alb.id as album_id,
+                alb.name as album_name,
+                art.id as artist_id,
+                art.name as artist_name,
+                mp.id as music_provider_id,
+                mp.name as music_provider_name,
+                pt.played_at as played_at,
+                pt.include_in_statistics as include_in_statistics
+            from
+                played_track pt left join
+                music_provider mp on mp.id = pt.music_provider_id left join
+                track t on t.id = pt.track_id left join
+                album alb on alb.id = t.album_id left join
+                track_artists ta on t.id = ta.track_id left join
+                artist art on art.id = ta.artist_id
+            where
+                pt.id in ${ sql(orderedIds) }
+        `;
+    
+        if (!result || result.length === 0) {
+            return [];
+        }
+
+        return PlayedTrackMapper.convertTrackDetailsResult(result);
+    }
+
+    public async getAllIdsForAccountPaginatedAscending(accountId: number, lastSeenPlayedAt: Date, limit: number): Promise<number[]> {
+        const result = await sql<PlayedTrackDaoInterface[]>`
+            select
+                id
+            from
+                played_track
+            where
+                account_id = ${ accountId }
+                and played_at > ${ lastSeenPlayedAt }
+            order by
+                played_at asc
+            limit
+                ${ limit }
+        `;
+    
+        if (!result || result.length === 0) {
+            return [];
+        }
+    
+        return result.map(item => item.id);
+    }
+
+    public async getAllIdsForAccountPaginatedDescending(accountId: number, lastSeenPlayedAt: Date, limit: number): Promise<number[]> {
+        const result = await sql<PlayedTrackDaoInterface[]>`
+            select
+                id
+            from
+                played_track
+            where
+                account_id = ${ accountId }
+                and played_at < ${ lastSeenPlayedAt }
+            order by
+                played_at desc
+            limit
+                ${ limit }
+
+        `;
+    
+        if (!result || result.length === 0) {
+            return [];
+        }
+    
+        return result.map(item => item.id);
     }
     
     public async getByAccountIdAndMusicProviderIdAndPlayedAt(accountId: number, musicProviderId: number, playedAt: Date): Promise<PlayedTrackDao | null> {
@@ -114,6 +194,53 @@ export class PlayedTrackMapper {
         }
 
         return PlayedInfoDao.fromDaoInterface(result[0]);
+    }
+
+    private static convertTrackDetailsResult(items: PlayedTrackDetailsDaoInterface[]): PlayedTrackDetailsDao[] {
+        const playedTrackDetailsMap = new Map<number, PlayedTrackDetailsDaoInterface>();
+        const trackArtistsMap = new Map<number, SimpleArtistDao[]>();
+
+        for (const item of items) {
+            const playedTrackId = item.playedTrackId;
+            playedTrackDetailsMap.set(playedTrackId, item);
+
+            const trackId = item.trackId;
+
+            const artistDao = SimpleArtistDao.Builder
+                .withId(item.artistId)
+                .withName(item.artistName)
+                .build();
+
+            const trackArtists = trackArtistsMap.get(trackId);
+            if (trackArtists) {
+                if (trackArtists.findIndex(taItem => taItem.id === item.artistId) < 0) {
+                    trackArtists.push(artistDao);
+                }
+            } else {
+                trackArtistsMap.set(trackId, [artistDao]);
+            }
+        }
+
+        const result = [];
+        
+        for (const item of playedTrackDetailsMap.values()) {
+            const dao = PlayedTrackDetailsDao.Builder
+                .withPlayedTrackId(item.playedTrackId)
+                .withTrackId(item.trackId)
+                .withTrackName(item.trackName)
+                .withAlbumId(item.albumId)
+                .withAlbumName(item.albumName)
+                .withArtists(new Set(trackArtistsMap.get(item.trackId)))
+                .withMusicProviderId(item.musicProviderId)
+                .withMusicProviderName(item.musicProviderName)
+                .withPlayedAt(item.playedAt)
+                .withIncludeInStatistics(item.includeInStatistics)
+                .build();
+
+            result.push(dao);
+        }
+
+        return result;
     }
 
 }
