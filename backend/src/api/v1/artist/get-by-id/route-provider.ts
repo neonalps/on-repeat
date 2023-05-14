@@ -2,9 +2,9 @@ import { requireNonNull } from "@src/util/common";
 import { RequestSchema, RouteDefinition, RouteProvider } from "@src/router/types";
 import { GetArtistByIdHandler } from "@src/api/v1/artist/get-by-id/handler";
 import { GetArtistByIdRequestDto } from "@src/models/api/get-artist-by-id-request";
-import { ArtistApiDto } from "@src/models/api/artist";
+import { DetailedArtistApiDto } from "@src/models/api/detailed-artist";
 
-export class GetArtistByIdRouteProvider implements RouteProvider<GetArtistByIdRequestDto, ArtistApiDto> {
+export class GetArtistByIdRouteProvider implements RouteProvider<GetArtistByIdRequestDto, DetailedArtistApiDto> {
 
     private readonly getArtistByIdHandler: GetArtistByIdHandler;
 
@@ -12,7 +12,7 @@ export class GetArtistByIdRouteProvider implements RouteProvider<GetArtistByIdRe
         this.getArtistByIdHandler = requireNonNull(getArtistByIdHandler);
     }
 
-    provide(): RouteDefinition<GetArtistByIdRequestDto, ArtistApiDto> {
+    provide(): RouteDefinition<GetArtistByIdRequestDto, DetailedArtistApiDto> {
         const getArtistByIdRequestSchema: RequestSchema = {
             params: {
                 type: 'object',

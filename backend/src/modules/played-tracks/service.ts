@@ -4,6 +4,11 @@ import { validateNotNull } from "@src/util/validation";
 import { PlayedTrackDao } from "@src/models/classes/dao/played-track";
 import { CreatePlayedTrackDto } from "@src/models/classes/dto/create-played-track";
 import { PlayedInfoDao } from "@src/models/classes/dao/played-info";
+import { PaginationParams, SortOrder } from "@src/modules/pagination/constants";
+import { PlayedTrackDetailsDao } from "@src/models/classes/dao/played-track-details";
+import { DateUtils } from "@src/util/date";
+
+export interface GetPlayedTracksPaginationParams extends PaginationParams<Date> {}
 
 export class PlayedTrackService {
 
@@ -42,6 +47,28 @@ export class PlayedTrackService {
         return this.mapper.getById(id);
     }
 
+    public async getAllForAccountPaginated(accountId: number, paginationParams: GetPlayedTracksPaginationParams): Promise<PlayedTrackDetailsDao[]> {
+        validateNotNull(accountId, "accountId");
+        validateNotNull(paginationParams, "paginationParams");
+        validateNotNull(paginationParams.limit, "paginationParams.limit");
+        validateNotNull(paginationParams.order, "paginationParams.order");
+        validateNotNull(paginationParams.lastSeen, "paginationParams.lastSeen");
+
+        const orderedIds = await this.getOrderedPaginatedResult(accountId, paginationParams.lastSeen, paginationParams.limit, paginationParams.order);
+
+        const playedTrackDetails = await this.mapper.getAllForAccountPaginatedDetails(orderedIds);
+        
+        return playedTrackDetails.sort(PlayedTrackService.playedAtComparator(paginationParams.order));
+    }
+
+    private async getOrderedPaginatedResult(accountId: number, lastSeenPlayedAt: Date, limit: number, order: SortOrder): Promise<number[]> {
+        if (order === SortOrder.DESCENDING) {
+            return this.mapper.getAllIdsForAccountPaginatedDescending(accountId, lastSeenPlayedAt, limit);
+        }
+
+        return this.mapper.getAllIdsForAccountPaginatedAscending(accountId, lastSeenPlayedAt, limit);
+    }
+
     public async hasPlayedTrackAlreadyBeenProcessed(accountId: number, musicProviderId: number, playedAt: Date): Promise<boolean> {
         validateNotNull(accountId, "accountId");
         validateNotNull(musicProviderId, "musicProviderId");
@@ -69,6 +96,19 @@ export class PlayedTrackService {
         }
 
         return PlayedTrackService.EMPTY_PLAYED_INFO;
+    }
+
+    private static playedAtComparator(sortOrder: SortOrder): ((a: PlayedTrackDetailsDao, b: PlayedTrackDetailsDao) => number) | undefined {
+        return (a, b) => {
+            const first = DateUtils.getUnixTimestampFromDate(a.playedAt);
+            const second = DateUtils.getUnixTimestampFromDate(b.playedAt);
+
+            if (sortOrder === SortOrder.ASCENDING) {
+                return first - second;
+            }
+
+            return second - first;
+        };
     }
 
 }

@@ -1,4 +1,4 @@
-export interface ArtistApiDto {
+export interface AlbumApiDto {
     id: number;
     name: string;
 }
