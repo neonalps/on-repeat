@@ -5,6 +5,8 @@ export const shorthands: ColumnDefinitions | undefined = undefined;
 
 const TABLE_NAME = "music_provider_tracks";
 
+const UNIQUE_CONSTRAINT_MUSIC_PROVIDER_ID_TRACK_ID = "uq_music_provider_tracks_music_provider_id_track_id";
+
 export async function up(pgm: MigrationBuilder): Promise<void> {
     pgm.createTable(TABLE_NAME, {
         id: 'id',
@@ -32,8 +34,14 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
             default: pgm.func('current_timestamp'),
         },
     });
+
+    pgm.addConstraint(TABLE_NAME, UNIQUE_CONSTRAINT_MUSIC_PROVIDER_ID_TRACK_ID, {
+        unique: ['music_provider_id', 'track_id']
+    });
 }
 
 export async function down(pgm: MigrationBuilder): Promise<void> {
+    pgm.dropConstraint(TABLE_NAME, UNIQUE_CONSTRAINT_MUSIC_PROVIDER_ID_TRACK_ID);
+
     pgm.dropTable(TABLE_NAME);
 }
