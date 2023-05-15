@@ -7,7 +7,7 @@ import { ArtistService } from "@src/modules/artist/service";
 import { AlbumMapper } from "@src/modules/album/mapper";
 import { AlbumService } from "@src/modules/album/service";
 import { CatalogueService } from "@src/modules/catalogue/service";
-import { getTokenConfig, getSpotifyClientConfig } from "@src/config";
+import { getTokenConfig, getSpotifyClientConfig, getApiConfig } from "@src/config";
 import { AccountMapper } from "@src/modules/account/mapper";
 import { AccountService } from "@src/modules/account/service";
 import { CryptoService } from "@src/modules/crypto/service";
@@ -31,6 +31,7 @@ import { SpotifyClient } from "@src/modules/music-provider/spotify/client";
 import { SpotifyMusicProvider } from "@src/modules/music-provider/spotify/music-provider";
 import { MusicProviderService } from "@src/modules/music-provider/service";
 import { PaginationService } from "@src/modules/pagination/service";
+import { ApiHelper } from "@src/api/helper";
 
 export class DependencyHelper {
 
@@ -44,6 +45,8 @@ export class DependencyHelper {
 
         const uuidSource = new UuidSource();
         const timeSource = new TimeSource();
+
+        const apiHelper = new ApiHelper(getApiConfig());
 
         const cryptoService = new CryptoService();
 
@@ -98,6 +101,7 @@ export class DependencyHelper {
         dependencies.set(Dependencies.AccountJobScheduleService, accountJobScheduleService);
         dependencies.set(Dependencies.AccountTokenService, accountTokenService);
         dependencies.set(Dependencies.AlbumService, albumService);
+        dependencies.set(Dependencies.ApiHelper, apiHelper);
         dependencies.set(Dependencies.ArtistService, artistService);
         dependencies.set(Dependencies.AuthService, authService);
         dependencies.set(Dependencies.CatalogueService, catalogueService);

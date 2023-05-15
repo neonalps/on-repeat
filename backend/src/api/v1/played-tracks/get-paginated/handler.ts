@@ -8,13 +8,16 @@ import { GetPlayedTracksPaginationParams, PlayedTrackService } from "@src/module
 import { AuthenticationContext, RouteHandler } from "@src/router/types";
 import { requireNonNull } from "@src/util/common";
 import { PlayedTrackDetailsDao } from "@src/models/classes/dao/played-track-details";
+import { ApiHelper } from "@src/api/helper";
 
 export class GetPlayedTracksPaginatedHandler implements RouteHandler<GetPlayedTracksPaginatedRequestDto, PaginatedResponseDto<PlayedTrackApiDto>> {
 
+    private readonly apiHelper: ApiHelper;
     private readonly paginationService: PaginationService;
     private readonly playedTrackService: PlayedTrackService;
 
-    constructor(paginationService: PaginationService, playedTrackService: PlayedTrackService) {
+    constructor(apiHelper: ApiHelper, paginationService: PaginationService, playedTrackService: PlayedTrackService) {
+        this.apiHelper = requireNonNull(apiHelper);
         this.paginationService = requireNonNull(paginationService);
         this.playedTrackService = requireNonNull(playedTrackService);
     }
@@ -24,7 +27,7 @@ export class GetPlayedTracksPaginatedHandler implements RouteHandler<GetPlayedTr
         PaginationService.validateQueryParams(dto);
         const paginationParams = this.getPaginationParams(dto);
         const playedTracks = await this.playedTrackService.getAllForAccountPaginated(accountId, paginationParams);
-        const items = playedTracks.map(GetPlayedTracksPaginatedHandler.mapPlayedTrackDetailDaoToApiDto);
+        const items = playedTracks.map(item => this.mapPlayedTrackDetailDaoToApiDto(item));
 
         return {
             nextPageKey: this.buildNextPageKey(items, paginationParams),
@@ -32,25 +35,32 @@ export class GetPlayedTracksPaginatedHandler implements RouteHandler<GetPlayedTr
         }
     }
 
-    private static mapPlayedTrackDetailDaoToApiDto(item: PlayedTrackDetailsDao): PlayedTrackApiDto {
+    private mapPlayedTrackDetailDaoToApiDto(item: PlayedTrackDetailsDao): PlayedTrackApiDto {
         const artists = [];
+        
+        const albumId = item.albumId;
+        const trackId = item.trackId;
 
         for (const artist of item.artists) {
+            const artistId = artist.id;
             artists.push({
-                id: artist.id,
+                id: artistId,
                 name: artist.name,
+                href: this.apiHelper.getArtistResourceUrl(artistId),
             });
         }
 
         return {
             playedAt: item.playedAt,
             track: {
-                id: item.trackId,
+                id: trackId,
                 name: item.trackName,
+                href: this.apiHelper.getTrackResourceUrl(trackId),
                 artists,
                 album: {
-                    id: item.albumId,
+                    id: albumId,
                     name: item.albumName,
+                    href: this.apiHelper.getAlbumResourceUrl(albumId),
                 },
             },
         };
