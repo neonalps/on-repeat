@@ -85,17 +85,30 @@ export class PlayedTrackService {
         return this.mapper.getMostRecentPlayedTrackByAccountAndMusicProvider(accountId, musicProviderId);
     }
 
+    public async getPlayedInfoForAlbum(accountId: number, albumId: number): Promise<PlayedInfoDao> {
+        validateNotNull(accountId, "accountId");
+        validateNotNull(albumId, "albumId");
+
+        const playedInfo = await this.mapper.getPlayedInfoForAlbum(accountId, albumId); 
+
+        if (playedInfo === null) {
+            return PlayedTrackService.EMPTY_PLAYED_INFO;
+        }
+
+        return playedInfo;
+    }
+
     public async getPlayedInfoForArtist(accountId: number, artistId: number): Promise<PlayedInfoDao> {
         validateNotNull(accountId, "accountId");
         validateNotNull(artistId, "artistId");
 
         const playedInfo = await this.mapper.getPlayedInfoForArtist(accountId, artistId); 
 
-        if (playedInfo !== null) {
-            return playedInfo;
+        if (playedInfo === null) {
+            return PlayedTrackService.EMPTY_PLAYED_INFO;
         }
 
-        return PlayedTrackService.EMPTY_PLAYED_INFO;
+        return playedInfo;
     }
 
     private static playedAtComparator(sortOrder: SortOrder): ((a: PlayedTrackDetailsDao, b: PlayedTrackDetailsDao) => number) | undefined {
