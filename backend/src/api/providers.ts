@@ -16,6 +16,8 @@ import { SpotifyMusicProvider } from "@src/modules/music-provider/spotify/music-
 import { ManualSpotifyResponseUploadRouteProvider } from "@src/api/v1/manual-spotify-response-upload/route-provider";
 import { getArtistApiRouteProviders } from "@src/api/v1/artist/artist-route-providers";
 import { getPlayedTracksApiRouteProviders } from "@src/api/v1/played-tracks/played-tracks-route-providers";
+import { getAlbumApiRouteProviders } from "@src/api/v1/album/album-route-providers";
+import { RouteProvider } from "@src/router/types";
 
 export const getProviders = () => {
     const accountService = dependencyManager.get<AccountService>(Dependencies.AccountService);
@@ -32,8 +34,9 @@ export const getProviders = () => {
     
     const oauthLoginHandler = new OauthLoginHandler(authService, accountService, spotifyClient);
 
-    const providers = [
+    const providers: RouteProvider<any, any>[] = [
         ...getArtistApiRouteProviders(),
+        ...getAlbumApiRouteProviders(),
         ...getPlayedTracksApiRouteProviders(),
         new AuthRouteProvider(authHandler),
         new ConnectSpotifyAccountRouteProvider(connectSpotifyAccountHandler),

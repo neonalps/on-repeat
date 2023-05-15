@@ -110,6 +110,31 @@ export class MusicProviderMapper {
         `;
     }
 
+    public async getExternalUrlsForAlbum(albumId: number): Promise<Record<string, string>> {
+        const result = await sql<ArtistExternalUriDaoInterface[]>`
+            select
+                mp.name as music_provider_name,
+                mpa.music_provider_album_uri as external_uri
+            from
+                music_provider_albums mpa left join
+                music_provider mp on mp.id = mpa.music_provider_id
+            where
+                mpa.album_id = ${ albumId }
+        `;
+
+        if (!result || result.length === 0) {
+            return {};
+        }
+
+        const externalUrls: Record<string, string> = {};
+
+        for (const item of result) {
+            externalUrls[item.musicProviderName] = item.externalUri;
+        }
+
+        return externalUrls;
+    }
+
     public async getExternalUrlsForArtist(artistId: number): Promise<Record<string, string>> {
         const result = await sql<ArtistExternalUriDaoInterface[]>`
             select

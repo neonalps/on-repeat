@@ -42,6 +42,38 @@ export class ArtistMapper {
         return ArtistDao.fromDaoInterface(item);
     }
 
+    public async getMultipleById(ids: number[]): Promise<ArtistDao[]> {
+        const result = await sql<ArtistDaoInterface[]>`
+            select
+                id,
+                name,
+                created_at,
+                updated_at
+            from
+                artist
+            where
+                id in ${ sql(ids) }
+        `;
+    
+        if (!result || result.length === 0) {
+            return [];
+        }
+    
+        const artists: ArtistDao[] = [];
+
+        for (const item of result) {
+            const artist = ArtistDao.fromDaoInterface(item);
+
+            if (!artist) {
+                continue;
+            }
+
+            artists.push(artist);
+        }
+    
+        return artists;
+    }
+
     public async update(id: number, dto: UpdateArtistDto): Promise<void> {
         await sql`
             update artist set
