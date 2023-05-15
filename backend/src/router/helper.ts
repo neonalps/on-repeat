@@ -73,6 +73,7 @@ export class RouterHelper {
                         return;
                     }
 
+                    console.error(ex);
                     logger.error(`Error while handling ${route.path} (${route.name}): ${ex}`);
                     this.sendErrorResponse(reply, route, 500, ex);
                 }
