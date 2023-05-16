@@ -111,6 +111,19 @@ export class PlayedTrackService {
         return playedInfo;
     }
 
+    public async getPlayedInfoForTrack(accountId: number, trackId: number): Promise<PlayedInfoDao> {
+        validateNotNull(accountId, "accountId");
+        validateNotNull(trackId, "trackId");
+
+        const playedInfo = await this.mapper.getPlayedInfoForTrack(accountId, trackId); 
+
+        if (playedInfo === null) {
+            return PlayedTrackService.EMPTY_PLAYED_INFO;
+        }
+
+        return playedInfo;
+    }
+
     private static playedAtComparator(sortOrder: SortOrder): ((a: PlayedTrackDetailsDao, b: PlayedTrackDetailsDao) => number) | undefined {
         return (a, b) => {
             const first = DateUtils.getUnixTimestampFromDate(a.playedAt);

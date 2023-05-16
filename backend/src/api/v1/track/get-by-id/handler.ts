@@ -5,14 +5,14 @@ import { MusicProviderService } from "@src/modules/music-provider/service";
 import { PlayedTrackService } from "@src/modules/played-tracks/service";
 import { AccountDao } from "@src/models/classes/dao/account";
 import { IllegalStateError } from "@src/api/error/illegal-state-error";
-import { GetAlbumByIdRequestDto } from "@src/models/api/get-album-by-id-request";
-import { DetailedAlbumApiDto } from "@src/models/api/detailed-album";
 import { ApiHelper } from "@src/api/helper";
 import { CatalogueService } from "@src/modules/catalogue/service";
+import { GetTrackByIdRequestDto } from "@src/models/api/get-track-by-id-request";
+import { DetailedTrackApiDto } from "@src/models/api/detailed-track";
 
-export class GetAlbumByIdHandler implements RouteHandler<GetAlbumByIdRequestDto, DetailedAlbumApiDto> {
+export class GetTrackByIdHandler implements RouteHandler<GetTrackByIdRequestDto, DetailedTrackApiDto> {
 
-    static readonly ERROR_ALBUM_NOT_FOUND = "No album with this ID exists";
+    static readonly ERROR_TRACK_NOT_FOUND = "No track with this ID exists";
 
     private readonly apiHelper: ApiHelper;
     private readonly catalogueService: CatalogueService;
@@ -23,7 +23,7 @@ export class GetAlbumByIdHandler implements RouteHandler<GetAlbumByIdRequestDto,
         apiHelper: ApiHelper,
         catalogueService: CatalogueService,
         musicProviderService: MusicProviderService, 
-        playedTrackService: PlayedTrackService
+        playedTrackService: PlayedTrackService,
     ) {
         this.apiHelper = requireNonNull(apiHelper);
         this.catalogueService = requireNonNull(catalogueService);
@@ -31,19 +31,20 @@ export class GetAlbumByIdHandler implements RouteHandler<GetAlbumByIdRequestDto,
         this.playedTrackService = requireNonNull(playedTrackService);
     }
     
-    public async handle(context: AuthenticationContext, dto: GetAlbumByIdRequestDto): Promise<DetailedAlbumApiDto> {
+    public async handle(context: AuthenticationContext, dto: GetTrackByIdRequestDto): Promise<DetailedTrackApiDto> {
         const accountId = (context.account as AccountDao).id;
-        const albumId = dto.albumId;
-        const album = await this.catalogueService.getAlbumById(albumId);
+        const trackId = dto.trackId;
+        const track = await this.catalogueService.getTrackById(trackId);
 
-        if (!album) {
-            throw new IllegalStateError(GetAlbumByIdHandler.ERROR_ALBUM_NOT_FOUND);
+        if (!track) {
+            throw new IllegalStateError(GetTrackByIdHandler.ERROR_TRACK_NOT_FOUND);
         }
 
-        const [externalUrls, playedInfo, artists] = await Promise.all([
-            this.musicProviderService.getExternalUrlsForAlbum(albumId),
-            this.playedTrackService.getPlayedInfoForAlbum(accountId, albumId),
-            this.catalogueService.getMultipleArtistsById(album.artistIds),
+        const [externalUrls, playedInfo, album, artists] = await Promise.all([
+            this.musicProviderService.getExternalUrlsForTrack(trackId),
+            this.playedTrackService.getPlayedInfoForTrack(accountId, trackId),
+            this.catalogueService.getAlbumById(track.albumId),
+            this.catalogueService.getMultipleArtistsById(track.artistIds),
         ]);
 
         const artistsApiDtos = [];
@@ -55,10 +56,17 @@ export class GetAlbumByIdHandler implements RouteHandler<GetAlbumByIdRequestDto,
             });
         }
 
-        return {
+        const albumApiDto = album !== null ? {
             id: album.id,
             name: album.name,
+            href: this.apiHelper.getAlbumResourceUrl(album.id),
+        } : null;
+
+        return {
+            id: track.id,
+            name: track.name,
             artists: artistsApiDtos,
+            album: albumApiDto,
             externalUrls,
             playedInfo: { 
                 firstPlayedAt: playedInfo.firstPlayedAt,

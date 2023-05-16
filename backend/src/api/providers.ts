@@ -18,6 +18,7 @@ import { getArtistApiRouteProviders } from "@src/api/v1/artist/artist-route-prov
 import { getPlayedTracksApiRouteProviders } from "@src/api/v1/played-tracks/played-tracks-route-providers";
 import { getAlbumApiRouteProviders } from "@src/api/v1/album/album-route-providers";
 import { RouteProvider } from "@src/router/types";
+import { getTrackApiRouteProviders } from "@src/api/v1/track/track-route-providers";
 
 export const getProviders = () => {
     const accountService = dependencyManager.get<AccountService>(Dependencies.AccountService);
@@ -37,6 +38,7 @@ export const getProviders = () => {
     const providers: RouteProvider<any, any>[] = [
         ...getArtistApiRouteProviders(),
         ...getAlbumApiRouteProviders(),
+        ...getTrackApiRouteProviders(),
         ...getPlayedTracksApiRouteProviders(),
         new AuthRouteProvider(authHandler),
         new ConnectSpotifyAccountRouteProvider(connectSpotifyAccountHandler),

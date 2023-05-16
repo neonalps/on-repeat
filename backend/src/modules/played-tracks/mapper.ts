@@ -218,6 +218,27 @@ export class PlayedTrackMapper {
         return PlayedInfoDao.fromDaoInterface(result[0]);
     }
 
+    public async getPlayedInfoForTrack(accountId: number, trackId: number): Promise<PlayedInfoDao | null> {
+        const result = await sql<PlayedInfoDaoInterface[]>`
+            select
+                min(pt.played_at) as first_played_at,
+                max(pt.played_at) as last_played_at,
+                count(pt.played_at)::int as times_played
+            from
+                played_track pt
+            where
+                pt.account_id = ${ accountId }
+                and pt.track_id = ${ trackId }
+                and pt.include_in_statistics = true
+        `;
+
+        if (!result || result.length === 0) {
+            return null;
+        }
+
+        return PlayedInfoDao.fromDaoInterface(result[0]);
+    }
+
     private static convertTrackDetailsResult(items: PlayedTrackDetailsDaoInterface[]): PlayedTrackDetailsDao[] {
         const playedTrackDetailsMap = new Map<number, PlayedTrackDetailsDaoInterface>();
         const trackArtistsMap = new Map<number, SimpleArtistDao[]>();
