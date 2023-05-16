@@ -216,6 +216,7 @@ export class SpotifyMusicProvider extends MusicProvider {
             .withIsrc(SpotifyMusicProvider.safelyExtractIsrc(trackToProcess.externalIds))
             .withDiscNumber(trackToProcess.discNumber)
             .withTrackNumber(trackToProcess.trackNumber)
+            .withDurationMs(trackToProcess.durationMs)
             .withExplicit(trackToProcess.explicit)
             .build();
 

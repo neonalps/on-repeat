@@ -15,9 +15,9 @@ export class AlbumMapper {
     public async create(album: CreateAlbumDto): Promise<number> {
         const result = await sql`
             insert into album
-                (name, album_type, album_group, release_date, release_date_precision, created_at, updated_at)
+                (name, album_type, album_group, total_tracks, release_date, release_date_precision, created_at, updated_at)
             values
-                (${ album.name }, ${ album.albumType }, ${ album.albumGroup }, ${ album.releaseDate }, ${ album.releaseDatePrecision }, now(), null)
+                (${ album.name }, ${ album.albumType }, ${ album.albumGroup }, ${ album.totalTracks }, ${ album.releaseDate }, ${ album.releaseDatePrecision }, now(), null)
             returning id
         `;
     

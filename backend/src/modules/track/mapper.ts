@@ -46,6 +46,7 @@ export class TrackMapper {
                 name,
                 album_id,
                 isrc,
+                bucket,
                 disc_number,
                 track_number,
                 duration_ms,
@@ -72,6 +73,7 @@ export class TrackMapper {
             .withArtistIds(new Set(trackArtistIds))
             .withAlbumId(item.albumId)
             .withIsrc(item.isrc)
+            .withBucket(item.bucket)
             .withDiscNumber(item.discNumber)
             .withTrackNumber(item.trackNumber)
             .withDurationMs(item.durationMs)
@@ -90,6 +92,15 @@ export class TrackMapper {
                 track_number = ${ dto.trackNumber },
                 explicit = ${ dto.explicit },
                 duration_ms = ${ dto.durationMs },
+                updated_at = now()
+            where id = ${ id }
+            `;
+    };
+
+    public async updateBucket(id: number, newBucket: number): Promise<void> {
+        await sql`
+            update track set
+                bucket = ${ newBucket },
                 updated_at = now()
             where id = ${ id }
             `;

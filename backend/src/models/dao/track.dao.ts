@@ -3,6 +3,7 @@ export interface TrackDaoInterface {
     name: string;
     albumId: number | null;
     isrc: string | null;
+    bucket: number;
     href: string | null;
     discNumber: number | null;
     trackNumber: number | null;
