@@ -22,4 +22,10 @@ export class MusicProviderService {
         return this.mapper.getExternalUrlsForArtist(artistId);
     }
 
+    public async getExternalUrlsForTrack(trackId: number): Promise<Record<string, string>> {
+        validateNotNull(trackId, "trackId");
+
+        return this.mapper.getExternalUrlsForTrack(trackId);
+    }
+
 }

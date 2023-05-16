@@ -18,7 +18,7 @@ export class GetAlbumByIdRouteProvider implements RouteProvider<GetAlbumByIdRequ
                 type: 'object',
                 required: ['albumId'],
                 properties: {
-                    artistId: { type: 'string' },
+                    albumId: { type: 'string' },
                 },
             }
         };

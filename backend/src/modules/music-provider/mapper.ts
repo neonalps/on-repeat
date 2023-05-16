@@ -9,6 +9,7 @@ import { ArtistExternalUriDaoInterface } from "@src/models/dao/artist-external-u
 import { MusicProviderAlbumDaoInterface } from "@src/models/dao/music-provider-album.dao";
 import { MusicProviderArtistDaoInterface } from "@src/models/dao/music-provider-artist.dao";
 import { MusicProviderTrackDaoInterface } from "@src/models/dao/music-provider-track.dao";
+import postgres from "postgres";
 
 export class MusicProviderMapper {
 
@@ -122,17 +123,7 @@ export class MusicProviderMapper {
                 mpa.album_id = ${ albumId }
         `;
 
-        if (!result || result.length === 0) {
-            return {};
-        }
-
-        const externalUrls: Record<string, string> = {};
-
-        for (const item of result) {
-            externalUrls[item.musicProviderName] = item.externalUri;
-        }
-
-        return externalUrls;
+        return MusicProviderMapper.convertResultToRecord(result);
     }
 
     public async getExternalUrlsForArtist(artistId: number): Promise<Record<string, string>> {
@@ -147,6 +138,25 @@ export class MusicProviderMapper {
                 mpa.artist_id = ${ artistId }
         `;
 
+        return MusicProviderMapper.convertResultToRecord(result);
+    }
+
+    public async getExternalUrlsForTrack(trackId: number): Promise<Record<string, string>> {
+        const result = await sql<ArtistExternalUriDaoInterface[]>`
+            select
+                mp.name as music_provider_name,
+                mpt.music_provider_track_uri as external_uri
+            from
+                music_provider_tracks mpt left join
+                music_provider mp on mp.id = mpt.music_provider_id
+            where
+                mpt.track_id = ${ trackId }
+        `;
+
+        return MusicProviderMapper.convertResultToRecord(result);
+    }
+
+    private static convertResultToRecord(result: postgres.RowList<ArtistExternalUriDaoInterface[]>): Record<string, string> {
         if (!result || result.length === 0) {
             return {};
         }
