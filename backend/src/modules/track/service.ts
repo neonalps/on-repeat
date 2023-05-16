@@ -37,4 +37,11 @@ export class TrackService {
         await this.mapper.update(id, dto);
     }
 
+    public async updateBucket(id: number, newBucket: number): Promise<void> {
+        validateNotNull(id, "id");
+        validateNotNull(newBucket, "newBucket");
+
+        await this.mapper.updateBucket(id, newBucket);
+    }
+
 }

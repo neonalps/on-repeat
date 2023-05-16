@@ -1,6 +1,6 @@
 import fastify from "fastify";
 
-import { getNodeEnv, getServerHost, getServerPort } from "@src/config";
+import { getAuthTokenSigningKey, getNodeEnv, getServerHost, getServerPort } from "@src/config";
 import logger from "@src/log/logger";
 import { DependencyHelper } from "@src/di/helper";
 import { RouterHelper } from "@src/router/helper";
@@ -16,7 +16,7 @@ const start = async () =>  {
   await testDbConnection();
   DependencyHelper.initDependencies();
   JobRepository.initJobs();
-  RouterHelper.registerJwtParser(server);
+  RouterHelper.registerJwtParser(server, getAuthTokenSigningKey());
   RouterHelper.registerRoutes(server);
 
   server.listen({ host: getServerHost(), port: getServerPort() }, async (err, address) => {

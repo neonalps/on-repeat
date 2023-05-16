@@ -21,6 +21,10 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
             type: 'varchar(20)',
             notNull: false,
         },
+        bucket: {
+            type: 'serial',
+            notNull: true,
+        },
         disc_number: {
             type: 'smallint',
             notNull: false,

@@ -4,6 +4,7 @@ export class TrackDao {
     private _artistIds!: Set<number>;
     private _albumId!: number | null;
     private _isrc!: string | null;
+    private _bucket!: number;
     private _discNumber!: number | null;
     private _trackNumber!: number | null;
     private _durationMs!: number | null;
@@ -17,6 +18,7 @@ export class TrackDao {
        this._artistIds = new Set(builder.artistIds);
        this._albumId = builder.albumId;
        this._isrc = builder.isrc;
+       this._bucket = builder.bucket;
        this._discNumber = builder.discNumber;
        this._trackNumber = builder.trackNumber;
        this._durationMs = builder.durationMs;
@@ -43,6 +45,10 @@ export class TrackDao {
  
     public get isrc(): string | null {
        return this._isrc;
+    }
+
+    public get bucket(): number {
+      return this._bucket;
     }
  
     public get discNumber(): number | null {
@@ -98,6 +104,7 @@ export class TrackDao {
     private _artistIds!: Set<number>;
     private _albumId!: number | null;
     private _isrc!: string | null;
+    private _bucket!: number;
     private _discNumber!: number | null;
     private _trackNumber!: number | null;
     private _durationMs!: number | null;
@@ -128,6 +135,11 @@ export class TrackDao {
     public withIsrc(isrc: string | null): TrackDaoBuilder {
        this._isrc = isrc;
        return this;
+    }
+
+    public withBucket(bucket: number): TrackDaoBuilder {
+      this._bucket = bucket;
+      return this;
     }
  
     public withDiscNumber(discNumber: number | null): TrackDaoBuilder {
@@ -178,6 +190,10 @@ export class TrackDao {
  
     public get isrc(): string | null {
        return this._isrc;
+    }
+
+    public get bucket(): number {
+      return this._bucket;
     }
  
     public get discNumber(): number | null {

@@ -4,7 +4,6 @@ import { AuthenticationContext, RequestSchema, RouteDefinition } from "./types";
 import { getProviders } from "../api/providers";
 import { HttpMethod } from "@src/http/constants";
 import logger from "@src/log/logger";
-import { getAuthTokenSigningKey } from "@src/config";
 import dependencyManager from "@src/di/manager";
 import { AccountService } from "@src/modules/account/service";
 import { Dependencies } from "@src/di/dependencies";
@@ -25,10 +24,10 @@ export class RouterHelper {
         }
     }
 
-    public static registerJwtParser(server: FastifyInstance): void {
+    public static registerJwtParser(server: FastifyInstance, secret: string): void {
         server.register(fastifyJwt, {
             formatUser: (user: any) => user.sub,
-            secret: getAuthTokenSigningKey(),
+            secret,
         });
     }
 

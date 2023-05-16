@@ -46,6 +46,9 @@ export class CatalogueService {
         }
     
         if (!storedTrack.areUpdateablePropertiesEqual(trackToProcess)) {
+            console.log('we have to update track');
+            console.log('stored', storedTrack);
+            console.log('incoming', trackToProcess);
             const updateTrackDto = UpdateTrackDto.createFromTrackDao(trackToProcess) as UpdateTrackDto;
             await this.trackService.update(storedTrack.id, updateTrackDto);
         }
