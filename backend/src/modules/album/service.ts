@@ -43,6 +43,12 @@ export class AlbumService {
         return album;
     }
 
+    public async getMultipleById(ids: Set<number>): Promise<AlbumDao[]> {
+        validateNotNull(ids, "ids");
+
+        return this.mapper.getMultipleById(Array.from(ids));
+    }
+
     public async update(id: number, dto: UpdateAlbumDto): Promise<void> {
         validateNotNull(id, "id");
         validateNotNull(dto, "dto");

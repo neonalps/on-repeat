@@ -32,6 +32,10 @@ export class CatalogueService {
         return this.trackService.getById(trackId);
     }
 
+    public async getMultipleTracksById(trackIds: Set<number>): Promise<TrackDao[]> {
+        return this.trackService.getMultipleById(trackIds);
+    }
+
     public async upsertTrack(storedTrackId: number | null, trackToProcess: TrackDao): Promise<number> {
         validateNotNull(trackToProcess, "trackToProcess");
     
@@ -72,7 +76,7 @@ export class CatalogueService {
         return this.artistService.getById(artistId);
     }
 
-    public async getMultipleArtistsById(ids: Set<number>): Promise<Set<ArtistDao>> {
+    public async getMultipleArtistsById(ids: Set<number>): Promise<ArtistDao[]> {
         return this.artistService.getMultipleById(ids);
     }
     
@@ -115,6 +119,10 @@ export class CatalogueService {
         }
 
         return this.albumService.getById(albumId);
+    }
+
+    public async getMultipleAlbumsById(albumIds: Set<number>): Promise<AlbumDao[]> {
+        return this.albumService.getMultipleById(albumIds);
     }
     
     public async upsertAlbum(storedAlbumId: number | null, albumToProcess: AlbumDao): Promise<number> {

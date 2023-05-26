@@ -7,6 +7,8 @@ import { CreatePlayedTrackDto } from "@src/models/classes/dto/create-played-trac
 import { PlayedInfoDaoInterface } from "@src/models/dao/played-info.dao";
 import { PlayedTrackDetailsDaoInterface } from "@src/models/dao/played-track-details.dao";
 import { PlayedTrackDaoInterface } from "@src/models/dao/played-track.dao";
+import { BucketPlayedInfoPair } from "./service";
+import { BucketPlayedInfoDaoInterface } from "@src/models/dao/track-times-played.dao";
 
 export class PlayedTrackMapper {
 
@@ -237,6 +239,34 @@ export class PlayedTrackMapper {
         }
 
         return PlayedInfoDao.fromDaoInterface(result[0]);
+    }
+
+    public async getAccountTrackChartBucketIdsForPeriod(accountId: number, from: Date, to: Date, limit: number): Promise<BucketPlayedInfoPair[]> {
+        const result = await sql<BucketPlayedInfoDaoInterface[]>`
+            select
+                t.bucket as track_bucket,
+                count(pt.played_at)::int as times_played
+            from
+                played_track pt left join
+                track t on pt.track_id = t.id
+            where
+                pt.account_id = ${ accountId }
+                and pt.played_at >= ${ from }
+                and pt.played_at <= ${ to }
+                and pt.include_in_statistics = true
+            group by
+                t.bucket
+            order by
+                count(pt.played_at) desc,
+                t.bucket asc
+            limit ${ limit }
+        `;
+
+        if (!result || result.length === 0) {
+            return [];
+        }
+
+        return result.map(item => [item.trackBucket, item.timesPlayed]);
     }
 
     private static convertTrackDetailsResult(items: PlayedTrackDetailsDaoInterface[]): PlayedTrackDetailsDao[] {

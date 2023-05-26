@@ -4,4 +4,8 @@ export class DateUtils {
         return Math.floor(date.getTime() / 1000);
     }
 
+    public static getDateFromUnixtimestamp(unixTimestamp: number): Date {
+        return new Date(unixTimestamp * 1000);
+    }
+
 }

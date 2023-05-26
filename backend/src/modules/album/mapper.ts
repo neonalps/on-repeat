@@ -7,6 +7,7 @@ import { UpdateAlbumDto } from "@src/models/classes/dto/update-album";
 import { AlbumImageDaoInterface } from "@src/models/dao/album-image.dao";
 import { AlbumArtistDaoInterface } from "@src/models/dao/album-artist.dao";
 import { AlbumDaoInterface } from "@src/models/dao/album.dao";
+import { removeNull } from "@src/util/common";
 
 export class AlbumMapper {
 
@@ -91,6 +92,11 @@ export class AlbumMapper {
             .withReleaseDatePrecision(item.releaseDatePrecision)
             .withCreatedAt(item.createdAt)
             .build();
+    }
+
+    public async getMultipleById(ids: number[]): Promise<AlbumDao[]> {
+        const albums = await Promise.all(ids.map(albumId => this.getById(albumId)));
+        return albums.filter(removeNull) as AlbumDao[];
     }
 
     public async getAlbumArtistIds(albumId: number): Promise<number[]> {

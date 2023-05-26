@@ -32,6 +32,7 @@ import { SpotifyMusicProvider } from "@src/modules/music-provider/spotify/music-
 import { MusicProviderService } from "@src/modules/music-provider/service";
 import { PaginationService } from "@src/modules/pagination/service";
 import { ApiHelper } from "@src/api/helper";
+import { ChartService } from "@src/modules/chart/service";
 
 export class DependencyHelper {
 
@@ -81,6 +82,8 @@ export class DependencyHelper {
         const playedTrackMapper = new PlayedTrackMapper();
         const playedTrackService = new PlayedTrackService(playedTrackMapper);
 
+        const chartService = new ChartService(apiHelper, catalogueService, playedTrackService);
+
         const spotifyClient = new SpotifyClient(getSpotifyClientConfig());
 
         const authService = new AuthService(getTokenConfig(), timeSource);
@@ -100,11 +103,10 @@ export class DependencyHelper {
         dependencies.set(Dependencies.AccountJobService, accountJobService);
         dependencies.set(Dependencies.AccountJobScheduleService, accountJobScheduleService);
         dependencies.set(Dependencies.AccountTokenService, accountTokenService);
-        dependencies.set(Dependencies.AlbumService, albumService);
         dependencies.set(Dependencies.ApiHelper, apiHelper);
-        dependencies.set(Dependencies.ArtistService, artistService);
         dependencies.set(Dependencies.AuthService, authService);
         dependencies.set(Dependencies.CatalogueService, catalogueService);
+        dependencies.set(Dependencies.ChartService, chartService);
         dependencies.set(Dependencies.CryptoService, cryptoService);
         dependencies.set(Dependencies.JobHelper, jobHelper);
         dependencies.set(Dependencies.JobService, jobService);
@@ -114,7 +116,6 @@ export class DependencyHelper {
         dependencies.set(Dependencies.Scheduler, scheduler);
         dependencies.set(Dependencies.SpotifyClient, spotifyClient);
         dependencies.set(Dependencies.SpotifyMusicProvider, spotifyMusicProvider);
-        dependencies.set(Dependencies.TrackService, trackService);
         dependencies.set(Dependencies.UuidSource, uuidSource);
 
         return dependencies;
