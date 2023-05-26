@@ -34,11 +34,10 @@ export class ArtistService {
         return artist;
     }
 
-    public async getMultipleById(ids: Set<number>): Promise<Set<ArtistDao>> {
+    public async getMultipleById(ids: Set<number>): Promise<ArtistDao[]> {
         validateNotNull(ids, "ids");
 
-        const artists = await this.mapper.getMultipleById(Array.from(ids));
-        return new Set(artists);
+        return this.mapper.getMultipleById(Array.from(ids));    
     }
 
     public async update(id: number, dto: UpdateArtistDto): Promise<void> {

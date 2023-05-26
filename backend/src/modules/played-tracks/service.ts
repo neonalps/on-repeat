@@ -9,6 +9,7 @@ import { PlayedTrackDetailsDao } from "@src/models/classes/dao/played-track-deta
 import { DateUtils } from "@src/util/date";
 
 export interface GetPlayedTracksPaginationParams extends PaginationParams<Date> {}
+export type BucketPlayedInfoPair = [number, number];
 
 export class PlayedTrackService {
 
@@ -122,6 +123,15 @@ export class PlayedTrackService {
         }
 
         return playedInfo;
+    }
+
+    public async getAccountTrackChartsForPeriod(accountId: number, from: Date, to: Date, limit: number): Promise<BucketPlayedInfoPair[]> {
+        validateNotNull(accountId, "accountId");
+        validateNotNull(from, "from");
+        validateNotNull(to, "to");
+        validateNotNull(limit, "limit");
+
+        return this.mapper.getAccountTrackChartBucketIdsForPeriod(accountId, from, to, limit);
     }
 
     private static playedAtComparator(sortOrder: SortOrder): ((a: PlayedTrackDetailsDao, b: PlayedTrackDetailsDao) => number) | undefined {

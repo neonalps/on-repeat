@@ -29,6 +29,12 @@ export class TrackService {
         return this.mapper.getById(id);
     }
 
+    public async getMultipleById(ids: Set<number>): Promise<TrackDao[]> {
+        validateNotNull(ids, "ids");
+
+        return this.mapper.getMultipleById(Array.from(ids));
+    }
+
     public async update(id: number, dto: UpdateTrackDto): Promise<void> {
         validateNotNull(id, "id");
         validateNotNull(dto, "dto");

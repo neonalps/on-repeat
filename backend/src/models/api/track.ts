@@ -5,6 +5,6 @@ export interface TrackApiDto {
     id: number;
     name: string;
     href: string;
-    album: AlbumApiDto;
+    album: AlbumApiDto | null;
     artists: ArtistApiDto[];
 }

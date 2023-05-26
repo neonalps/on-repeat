@@ -91,6 +91,7 @@ export class AlbumDao {
     public static get Builder(): AlbumDaoBuilder {
        return new AlbumDaoBuilder();
     }
+    
  }
  
  class AlbumDaoBuilder {

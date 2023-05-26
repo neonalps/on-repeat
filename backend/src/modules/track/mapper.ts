@@ -67,20 +67,39 @@ export class TrackMapper {
     
         const trackArtistIds = await this.getTrackArtistIds(item.id);
     
-        return TrackDao.Builder
-            .withId(item.id)
-            .withName(item.name)
-            .withArtistIds(new Set(trackArtistIds))
-            .withAlbumId(item.albumId)
-            .withIsrc(item.isrc)
-            .withBucket(item.bucket)
-            .withDiscNumber(item.discNumber)
-            .withTrackNumber(item.trackNumber)
-            .withDurationMs(item.durationMs)
-            .withExplicit(item.explicit)
-            .withCreatedAt(item.createdAt)
-            .withUpdatedAt(item.updatedAt)
-            .build();
+        return TrackMapper.convertToDao(item, trackArtistIds);
+    }
+
+    public async getMultipleById(ids: number[]): Promise<TrackDao[]> {
+        const result = await sql<TrackDaoInterface[]>`
+            select
+                id,
+                name,
+                album_id,
+                isrc,
+                bucket,
+                disc_number,
+                track_number,
+                duration_ms,
+                explicit,
+                created_at,
+                updated_at
+            from
+                track
+            where
+                id in ${ sql(ids) }
+        `;
+    
+        if (!result || result.length === 0) {
+            return [];
+        }
+
+        const tracks = [];
+        for (const item of result) {
+            const trackArtistIds = await this.getTrackArtistIds(item.id);
+            tracks.push(TrackMapper.convertToDao(item, trackArtistIds));
+        }
+        return tracks;
     }
 
     public async update(id: number, dto: UpdateTrackDto): Promise<void> {
@@ -104,7 +123,24 @@ export class TrackMapper {
                 updated_at = now()
             where id = ${ id }
             `;
-    };
+    }
+
+    private static convertToDao(item: TrackDaoInterface, artistIds: number[]): TrackDao {
+        return TrackDao.Builder
+            .withId(item.id)
+            .withName(item.name)
+            .withArtistIds(new Set(artistIds))
+            .withAlbumId(item.albumId)
+            .withIsrc(item.isrc)
+            .withBucket(item.bucket)
+            .withDiscNumber(item.discNumber)
+            .withTrackNumber(item.trackNumber)
+            .withDurationMs(item.durationMs)
+            .withExplicit(item.explicit)
+            .withCreatedAt(item.createdAt)
+            .withUpdatedAt(item.updatedAt)
+            .build();
+    }
 
     private async getTrackArtistIds(trackId: number): Promise<number[]> {
         const result = await sql<TrackArtistDaoInterface[]>`

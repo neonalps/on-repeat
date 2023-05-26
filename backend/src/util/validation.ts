@@ -16,8 +16,22 @@ const validateNotBlank = (input: string, property: string): void => {
     }
 };
 
+const validateTrue = (input: boolean, errorMessage: string): void => {
+    if (input !== true) {
+        throw new Error(errorMessage);
+    }
+};
+
+const validateFalse = (input: boolean, errorMessage: string): void => {
+    if (input !== false) {
+        throw new Error(errorMessage);
+    }
+};
+
 export {
     validateNotBlank,
     validateNotEmpty,
+    validateFalse,
     validateNotNull,
+    validateTrue,
 };
