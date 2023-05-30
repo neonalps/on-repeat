@@ -7,7 +7,7 @@ import { AuthenticationContext, RouteHandler } from "@src/router/types";
 import { requireNonNull } from "@src/util/common";
 import { DateUtils } from "@src/util/date";
 
-export class CreateChartForPeriodHandler implements RouteHandler<CreateChartsForPeriodRequestDto, ChartApiDto<ChartTrackApiDto>> {
+export class GetChartForPeriodHandler implements RouteHandler<CreateChartsForPeriodRequestDto, ChartApiDto<ChartTrackApiDto>> {
 
     private readonly chartService: ChartService;
 
