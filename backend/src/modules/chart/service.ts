@@ -31,9 +31,9 @@ export class ChartService {
         validateNotNull(to, "to");
         validateTrue(from < to, "from must be before to");
 
-        const bucketTimesPlayedPairs = await this.playedTrackService.getAccountTrackChartsForPeriod(accountId, from, to, ChartService.ACCOUNT_TRACK_CHART_LIMIT);
+        const bucketPlayedInfoPairs = await this.playedTrackService.getAccountTrackChartsForPeriod(accountId, from, to, ChartService.ACCOUNT_TRACK_CHART_LIMIT);
         
-        const trackIds = bucketTimesPlayedPairs.map((pair: BucketPlayedInfoPair) => pair[0]);
+        const trackIds = bucketPlayedInfoPairs.map((pair: BucketPlayedInfoPair) => pair[0]);
 
         const trackDaos = await this.catalogueService.getMultipleTracksById(new Set(trackIds));
 
@@ -52,7 +52,7 @@ export class ChartService {
         let lastSeenPlayedValue = null;
         let loopIndex = 1;
 
-        for (const chartEntry of bucketTimesPlayedPairs) {
+        for (const chartEntry of bucketPlayedInfoPairs) {
             const bucketId = chartEntry[0];
             const timesPlayed = chartEntry[1];
 
@@ -80,6 +80,7 @@ export class ChartService {
             lastSeenPlayedValue = timesPlayed;
             loopIndex += 1;
         }
+        
         return chartTracks;
     }
 
