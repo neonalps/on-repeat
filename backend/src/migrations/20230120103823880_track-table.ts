@@ -24,6 +24,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
         bucket: {
             type: 'serial',
             notNull: true,
+            references: `"track"`,
         },
         disc_number: {
             type: 'smallint',

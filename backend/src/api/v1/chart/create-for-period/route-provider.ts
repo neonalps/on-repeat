@@ -15,7 +15,7 @@ export class GetChartForPeriodRouteProvider implements RouteProvider<CreateChart
 
     provide(): RouteDefinition<CreateChartsForPeriodRequestDto, ChartApiDto<ChartTrackApiDto>> {
         const schema: RequestSchema = {
-            body: {
+            params: {
                 type: 'object',
                 required: ['from', 'to', 'type'],
                 properties: {
