@@ -4,6 +4,7 @@ import { CreateTrackDto } from "@src/models/classes/dto/create-track";
 import { UpdateTrackDto } from "@src/models/classes/dto/update-track";
 import { TrackArtistDaoInterface } from "@src/models/dao/track-artist.dao";
 import { TrackDaoInterface } from "@src/models/dao/track.dao";
+import postgres from "postgres";
 
 export class TrackMapper {
 
@@ -94,12 +95,34 @@ export class TrackMapper {
             return [];
         }
 
-        const tracks = [];
-        for (const item of result) {
-            const trackArtistIds = await this.getTrackArtistIds(item.id);
-            tracks.push(TrackMapper.convertToDao(item, trackArtistIds));
+        return this.convertResultSet(result);
+    }
+
+    public async getByIsrc(isrc: string): Promise<TrackDao[]> {
+        const result = await sql<TrackDaoInterface[]>`
+            select
+                id,
+                name,
+                album_id,
+                isrc,
+                bucket,
+                disc_number,
+                track_number,
+                duration_ms,
+                explicit,
+                created_at,
+                updated_at
+            from
+                track
+            where
+                isrc = ${ isrc }
+        `;
+    
+        if (!result || result.length === 0) {
+            return [];
         }
-        return tracks;
+
+        return this.convertResultSet(result);
     }
 
     public async update(id: number, dto: UpdateTrackDto): Promise<void> {
@@ -140,6 +163,17 @@ export class TrackMapper {
             .withCreatedAt(item.createdAt)
             .withUpdatedAt(item.updatedAt)
             .build();
+    }
+
+    private async convertResultSet(resultSet: postgres.RowList<TrackDaoInterface[]>): Promise<TrackDao[]> {
+        const tracks = [];
+
+        for (const item of resultSet ) {
+            const trackArtistIds = await this.getTrackArtistIds(item.id);
+            tracks.push(TrackMapper.convertToDao(item, trackArtistIds));
+        }
+
+        return tracks;
     }
 
     private async getTrackArtistIds(trackId: number): Promise<number[]> {
