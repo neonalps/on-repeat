@@ -25,11 +25,12 @@ export class ChartService {
         this.playedTrackService = requireNonNull(playedTrackService);
     }
 
-    public async createAccountTrackChartsForPeriod(accountId: number, from: Date, to: Date): Promise<ChartTrackApiDto[]> {
+    public async createAccountTrackChartsForPeriod(accountId: number, from: Date | null, to: Date | null): Promise<ChartTrackApiDto[]> {
         validateNotNull(accountId, "accountId");
-        validateNotNull(from, "from");
-        validateNotNull(to, "to");
-        validateTrue(from < to, "from must be before to");
+
+        if (from !== null && to !== null) {
+            validateTrue(from < to, "from must be before to");
+        }
 
         const bucketPlayedInfoPairs = await this.playedTrackService.getAccountTrackChartsForPeriod(accountId, from, to, ChartService.ACCOUNT_TRACK_CHART_LIMIT);
         

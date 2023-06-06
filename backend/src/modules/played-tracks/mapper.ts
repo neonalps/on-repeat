@@ -9,6 +9,7 @@ import { PlayedTrackDetailsDaoInterface } from "@src/models/dao/played-track-det
 import { PlayedTrackDaoInterface } from "@src/models/dao/played-track.dao";
 import { BucketPlayedInfoPair } from "./service";
 import { BucketPlayedInfoDaoInterface } from "@src/models/dao/track-times-played.dao";
+import { isDefined } from "@src/util/common";
 
 export class PlayedTrackMapper {
 
@@ -241,7 +242,10 @@ export class PlayedTrackMapper {
         return PlayedInfoDao.fromDaoInterface(result[0]);
     }
 
-    public async getAccountTrackChartBucketIdsForPeriod(accountId: number, from: Date, to: Date, limit: number): Promise<BucketPlayedInfoPair[]> {
+    public async getAccountTrackChartBucketIdsForPeriod(accountId: number, from: Date | null, to: Date | null, limit: number): Promise<BucketPlayedInfoPair[]> {
+        const whereFrom = (from: Date) => sql`and pt.played_at >= ${from}`;
+        const whereTo = (to: Date) => sql`and pt.played_at <= ${to}`;
+
         const result = await sql<BucketPlayedInfoDaoInterface[]>`
             select
                 t.bucket as track_bucket,
@@ -251,8 +255,8 @@ export class PlayedTrackMapper {
                 track t on pt.track_id = t.id
             where
                 pt.account_id = ${ accountId }
-                and pt.played_at >= ${ from }
-                and pt.played_at <= ${ to }
+                ${isDefined(from) ? whereFrom(from as Date) : sql``}
+                ${isDefined(to) ? whereTo(to as Date) : sql``}
                 and pt.include_in_statistics = true
             group by
                 t.bucket
