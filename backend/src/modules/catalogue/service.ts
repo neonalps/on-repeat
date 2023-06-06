@@ -16,6 +16,12 @@ import { UpdateArtistDto } from "@src/models/classes/dto/update-artist";
 import { AlbumImageDao } from "@src/models/classes/dao/album-image";
 import { CreateAlbumImageDto } from "@src/models/classes/dto/create-album-image";
 
+interface TrackBucketContext {
+    trackId: number;
+    albumTotalTracks: number | null;
+    albumReleaseDate: Date | null;
+};
+
 export class CatalogueService {
 
     private readonly trackService: TrackService;
@@ -40,7 +46,9 @@ export class CatalogueService {
         validateNotNull(trackToProcess, "trackToProcess");
     
         if (!storedTrackId) {
-            return this.insertTrack(trackToProcess);
+            const createdTrackId = await this.insertTrack(trackToProcess);
+            await this.performAutomaticTrackBucketAssignmentForTrackId(createdTrackId);
+            return createdTrackId;
         }
     
         const storedTrack = await this.trackService.getById(storedTrackId);
@@ -50,9 +58,6 @@ export class CatalogueService {
         }
     
         if (!storedTrack.areUpdateablePropertiesEqual(trackToProcess)) {
-            console.log('we have to update track');
-            console.log('stored', storedTrack);
-            console.log('incoming', trackToProcess);
             const updateTrackDto = UpdateTrackDto.createFromTrackDao(trackToProcess) as UpdateTrackDto;
             await this.trackService.update(storedTrack.id, updateTrackDto);
         }
@@ -166,6 +171,123 @@ export class CatalogueService {
         }
     
         return createdAlbum.id;
+    }
+
+    public async performAutomaticTrackBucketAssignmentForTrackId(trackId: number): Promise<void> {
+        validateNotNull(trackId, "trackId");
+
+        const track = await this.trackService.getById(trackId);
+        if (!track || !track.isrc) {
+            return;
+        }
+        
+        const trackBucketContextItems = await this.getOrderedTrackBucketContextsForIsrc(track.isrc);
+
+        // it's only the track itself, abort
+        if (trackBucketContextItems.length === 1) {
+            return;
+        }
+
+        // the ID of the bucket is the track ID of the primary track (i.e. the first element of the array)
+        const trackBucketId = trackBucketContextItems[0].trackId;
+
+        for (const trackBucketContextItem of trackBucketContextItems) {
+            const currentTrack = await this.trackService.getById(trackBucketContextItem.trackId) as TrackDao;
+
+            if (currentTrack.bucket === trackBucketId) {
+                continue;
+            }
+
+            await this.trackService.updateBucket(currentTrack.id, trackBucketId);
+        }
+    }
+
+    private async getOrderedTrackBucketContextsForIsrc(isrc: string): Promise<TrackBucketContext[]> {
+        const tracksWithSameIsrc = await this.trackService.getByIsrc(isrc);
+        if (!tracksWithSameIsrc || tracksWithSameIsrc.length === 0) {
+            return [];
+        }
+
+        const trackBucketContexts: TrackBucketContext[] = [];
+        for (const track of tracksWithSameIsrc) {
+            trackBucketContexts.push(await this.buildTrackBucketContext(track));
+        }
+
+        return trackBucketContexts.sort(this.compareTrackBucketContexts);
+    }
+
+    /**
+     * Returns the ordered tracks for this bucket. The first element is the primary track for the bucket.
+     */
+    private compareTrackBucketContexts(first: TrackBucketContext, second: TrackBucketContext): number {
+        const firstReleaseDate = first.albumReleaseDate;
+        const secondReleaseDate = second.albumReleaseDate;
+
+        if (firstReleaseDate !== null && secondReleaseDate !== null) {
+            const firstReleaseDateTime = firstReleaseDate.getTime();
+            const secondReleaseDateTime = secondReleaseDate.getTime();
+
+            if (firstReleaseDateTime > secondReleaseDateTime) {
+                return -1;
+            }
+
+            if (secondReleaseDateTime > firstReleaseDateTime) {
+                return 1;
+            }
+        }
+
+        if (firstReleaseDate !== null && secondReleaseDate === null) {
+            return -1;
+        }
+
+        if (firstReleaseDate === null && secondReleaseDate !== null) {
+            return 1;
+        }
+
+        if (first.albumTotalTracks !== null && second.albumTotalTracks !== null) {
+            if (first.albumTotalTracks > second.albumTotalTracks) {
+                return -1;
+            }
+
+            if (second.albumTotalTracks > first.albumTotalTracks) {
+                return 1;
+            }
+        }
+
+        if (first.albumTotalTracks !== null && second.albumTotalTracks === null) {
+            return -1;
+        }
+
+        if (first.albumTotalTracks === null && second.albumTotalTracks !== null) {
+            return 1;
+        }
+
+        return first.trackId < second.trackId ? -1 : 1;
+    }
+
+    private async buildTrackBucketContext(track: TrackDao): Promise<TrackBucketContext> {
+        if (!track.albumId) {
+            return {
+                trackId: track.id,
+                albumReleaseDate: null,
+                albumTotalTracks: null,
+            };
+        }
+
+        const album = await this.albumService.getById(track.albumId);
+        if (!album) {
+            return {
+                trackId: track.id,
+                albumReleaseDate: null,
+                albumTotalTracks: null,
+            }
+        }
+
+        return {
+            trackId: track.id,
+            albumReleaseDate: album.releaseDate,
+            albumTotalTracks: album.totalTracks,
+        };
     }
 
     private static convertAlbumImages(images: Set<AlbumImageDao>): Set<CreateAlbumImageDto> {
