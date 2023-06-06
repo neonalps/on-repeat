@@ -3,25 +3,33 @@ import { RequestSchema, RouteDefinition, RouteProvider } from "@src/router/types
 import { CreateChartsForPeriodRequestDto } from "@src/models/api/create-charts-for-period-request";
 import { ChartTrackApiDto } from "@src/models/api/chart-track";
 import { ChartApiDto } from "@src/models/api/chart";
-import { GetChartForPeriodHandler } from "@src/api/v1/chart/create-for-period/handler";
+import { GetChartForPeriodHandler } from "@src/api/v1/chart/get-for-period/handler";
+import { CHART_TYPES } from "@src/modules/chart/constants";
 
 export class GetChartForPeriodRouteProvider implements RouteProvider<CreateChartsForPeriodRequestDto, ChartApiDto<ChartTrackApiDto>> {
 
-    private readonly createChartForPeriodHandler: GetChartForPeriodHandler;
+    private readonly handler: GetChartForPeriodHandler;
 
     constructor(createChartForPeriodHandler: GetChartForPeriodHandler) {
-        this.createChartForPeriodHandler = requireNonNull(createChartForPeriodHandler);
+        this.handler = requireNonNull(createChartForPeriodHandler);
     }
 
     provide(): RouteDefinition<CreateChartsForPeriodRequestDto, ChartApiDto<ChartTrackApiDto>> {
         const schema: RequestSchema = {
-            params: {
+            querystring: {
                 type: 'object',
-                required: ['from', 'to', 'type'],
+                required: [],
                 properties: {
-                    from: { type: 'number' },
-                    to: { type: 'number' },
-                    type: { type: 'string' },
+                    from: { 
+                        type: 'number', 
+                    },
+                    to: { 
+                        type: 'number', 
+                    },
+                    type: { 
+                        type: 'string', 
+                        enum: CHART_TYPES,
+                    },
                 },
             }
         };
@@ -31,7 +39,7 @@ export class GetChartForPeriodRouteProvider implements RouteProvider<CreateChart
             method: 'GET',
             path: '/api/v1/charts',
             schema,
-            handler: this.createChartForPeriodHandler,
+            handler: this.handler,
             authenticated: true,
         };
     }

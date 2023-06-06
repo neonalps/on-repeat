@@ -1,5 +1,6 @@
 export interface ChartApiDto<T> {
-    from: Date;
-    to: Date;
+    type: string;
+    from?: Date;
+    to?: Date;
     items: T[];
 }
