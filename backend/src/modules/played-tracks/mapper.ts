@@ -7,10 +7,10 @@ import { CreatePlayedTrackDto } from "@src/models/classes/dto/create-played-trac
 import { PlayedInfoDaoInterface } from "@src/models/dao/played-info.dao";
 import { PlayedTrackDetailsDaoInterface } from "@src/models/dao/played-track-details.dao";
 import { PlayedTrackDaoInterface } from "@src/models/dao/played-track.dao";
-import { ArtistPlayedInfoPair, TrackBucketPlayedInfoPair } from "@src/modules/played-tracks/service";
 import { TrackBucketPlayedInfoDaoInterface } from "@src/models/dao/track-bucket-played-info.dao";
 import { isDefined } from "@src/util/common";
-import { ArtistPlayedInfoDaoInterface } from "@src/models/dao/artist-played-info.dao copy";
+import { ArtistPlayedInfoDaoInterface } from "@src/models/dao/artist-played-info.dao";
+import { ChartItem } from "@src/models/interface/chart-item";
 
 export class PlayedTrackMapper {
 
@@ -243,61 +243,93 @@ export class PlayedTrackMapper {
         return PlayedInfoDao.fromDaoInterface(result[0]);
     }
 
-    public async getAccountTrackChartBucketIdsForPeriod(accountId: number, from: Date | null, to: Date | null, limit: number): Promise<TrackBucketPlayedInfoPair[]> {
+    public async getAccountTrackChartBucketIdsForPeriod(accountId: number, from: Date | null, to: Date | null, rankLimit: number): Promise<ChartItem[]> {
         const result = await sql<TrackBucketPlayedInfoDaoInterface[]>`
             select
-                t.bucket as track_bucket,
-                count(pt.played_at)::int as times_played
-            from
-                played_track pt left join
-                track t on pt.track_id = t.id
+                track_bucket,
+                times_played,
+                chart_rank::int as chart_rank
+            from (
+                select
+                    t.bucket as track_bucket,
+                    count(pt.played_at)::int as times_played,
+                    rank() over (
+                        order by count(pt.played_at) desc
+                    ) chart_rank
+                from
+                    played_track pt left join
+                    track t on pt.track_id = t.id
+                where
+                    pt.account_id = ${ accountId }
+                    ${isDefined(from) ? PlayedTrackMapper.wherePlayedAtFrom(from as Date) : sql``}
+                    ${isDefined(to) ? PlayedTrackMapper.wherePlayedAtTo(to as Date) : sql``}
+                    and pt.include_in_statistics = true
+                group by
+                    t.bucket
+                order by
+                    count(pt.played_at) desc,
+                    t.bucket asc
+            ) rank_query
             where
-                pt.account_id = ${ accountId }
-                ${isDefined(from) ? PlayedTrackMapper.wherePlayedAtFrom(from as Date) : sql``}
-                ${isDefined(to) ? PlayedTrackMapper.wherePlayedAtTo(to as Date) : sql``}
-                and pt.include_in_statistics = true
-            group by
-                t.bucket
-            order by
-                count(pt.played_at) desc,
-                t.bucket asc
-            limit ${ limit }
+                chart_rank <= ${ rankLimit }
         `;
 
         if (!result || result.length === 0) {
             return [];
         }
 
-        return result.map(item => [item.trackBucket, item.timesPlayed]);
+        return result.map(item => {
+            return {
+                rank: item.chartRank,
+                itemId: item.trackBucket,
+                timesPlayed: item.timesPlayed,
+            };
+        });
     }
 
-    public async getAccountArtistChartForPeriod(accountId: number, from: Date | null, to: Date | null, limit: number): Promise<ArtistPlayedInfoPair[]> {
+    public async getAccountArtistChartForPeriod(accountId: number, from: Date | null, to: Date | null, rankLimit: number): Promise<ChartItem[]> {
         const result = await sql<ArtistPlayedInfoDaoInterface[]>`
             select
-                ta.artist_id as artist_id,
-                count(pt.played_at)::int as times_played
-            from
-                played_track pt left join
-                track_artists ta on pt.track_id = ta.track_id left join
-                artist a on ta.artist_id = a.id
+                artist_id,
+                times_played,
+                chart_rank::int as chart_rank
+            from (
+                select
+                    ta.artist_id as artist_id,
+                    count(pt.played_at)::int as times_played,
+                    rank() over (
+                        order by count(pt.played_at) desc
+                    ) chart_rank
+                from
+                    played_track pt left join
+                    track_artists ta on pt.track_id = ta.track_id left join
+                    artist a on ta.artist_id = a.id
+                where
+                    pt.account_id = ${ accountId }
+                    ${isDefined(from) ? PlayedTrackMapper.wherePlayedAtFrom(from as Date) : sql``}
+                    ${isDefined(to) ? PlayedTrackMapper.wherePlayedAtTo(to as Date) : sql``}
+                    and pt.include_in_statistics = true
+                group by
+                    ta.artist_id
+                order by
+                    count(pt.played_at) desc,
+                    ta.artist_id asc
+            ) rank_query
             where
-                pt.account_id = ${ accountId }
-                ${isDefined(from) ? PlayedTrackMapper.wherePlayedAtFrom(from as Date) : sql``}
-                ${isDefined(to) ? PlayedTrackMapper.wherePlayedAtTo(to as Date) : sql``}
-                and pt.include_in_statistics = true
-            group by
-                ta.artist_id
-            order by
-                count(pt.played_at) desc,
-                ta.artist_id asc
-            limit ${ limit }
+                chart_rank <= ${ rankLimit }
         `;
 
         if (!result || result.length === 0) {
             return [];
         }
 
-        return result.map(item => [item.artistId, item.timesPlayed]);
+        return result.map(item => {
+            return {
+                rank: item.chartRank,
+                itemId: item.artistId,
+                timesPlayed: item.timesPlayed,
+            };
+        });
     }
 
     private static convertTrackDetailsResult(items: PlayedTrackDetailsDaoInterface[]): PlayedTrackDetailsDao[] {
