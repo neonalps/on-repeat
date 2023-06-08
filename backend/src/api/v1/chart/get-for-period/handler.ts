@@ -26,10 +26,12 @@ export class GetChartForPeriodHandler implements RouteHandler<CreateChartsForPer
         const from = isDefined(dto.from) ? DateUtils.getDateFromUnixTimestamp(dto.from) : null;
         const to = isDefined(dto.to) ? DateUtils.getDateFromUnixTimestamp(dto.to) : null;
 
+        const items = await this.getChartItems(type, accountId, from, to);
+
         let response: ChartApiDto<ChartApiItem>;
         response = {
             type,
-            items: await this.getChartItems(type, accountId, from, to),
+            items,
         };
 
         if (from !== null) {

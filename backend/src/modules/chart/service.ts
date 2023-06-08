@@ -1,4 +1,4 @@
-import { TrackBucketPlayedInfoPair, PlayedTrackService, ArtistPlayedInfoPair } from "@src/modules/played-tracks/service";
+import { PlayedTrackService } from "@src/modules/played-tracks/service";
 import { removeNull, requireNonNull } from "@src/util/common";
 import { validateNotNull, validateTrue } from "@src/util/validation";
 import { CatalogueService } from "@src/modules/catalogue/service";
@@ -8,10 +8,12 @@ import logger from "@src/log/logger";
 import { ApiHelper } from "@src/api/helper";
 import { ChartArtistApiDto } from "@src/models/api/chart-artist";
 import { ArtistApiDto } from "@src/models/api/artist";
+import { ChartItem } from "@src/models/interface/chart-item";
 
 export class ChartService {
 
-    private static readonly ACCOUNT_TRACK_CHART_LIMIT = 50;
+    private static readonly ACCOUNT_TRACK_CHART_LIMIT = 5;
+    private static readonly ACCOUNT_ARTIST_CHART_LIMIT = 5;
 
     private readonly apiHelper: ApiHelper;
     private readonly catalogueService: CatalogueService;
@@ -30,9 +32,9 @@ export class ChartService {
             validateTrue(from < to, "from must be before to");
         }
 
-        const bucketPlayedInfoPairs = await this.playedTrackService.getAccountTrackChartsForPeriod(accountId, from, to, ChartService.ACCOUNT_TRACK_CHART_LIMIT);
+        const chartItems = await this.playedTrackService.getAccountTrackChartsForPeriod(accountId, from, to, ChartService.ACCOUNT_TRACK_CHART_LIMIT);
         
-        const trackIds = bucketPlayedInfoPairs.map((pair: TrackBucketPlayedInfoPair) => pair[0]);
+        const trackIds = chartItems.map((item: ChartItem) => item.itemId);
 
         const trackDaos = await this.catalogueService.getMultipleTracksById(new Set(trackIds));
 
@@ -46,13 +48,9 @@ export class ChartService {
 
         const chartTracks: ChartTrackApiDto[] = [];
 
-        let currentPosition = 1;
-        let lastSeenPlayedValue = null;
-        let loopIndex = 1;
-
-        for (const chartEntry of bucketPlayedInfoPairs) {
-            const bucketId = chartEntry[0];
-            const timesPlayed = chartEntry[1];
+        for (const chartItem of chartItems) {
+            const bucketId = chartItem.itemId;
+            const timesPlayed = chartItem.timesPlayed;
 
             const track = trackDaos.find(track => track.id === bucketId);
 
@@ -64,19 +62,12 @@ export class ChartService {
             const album = albumDaos.find(album => album.id === track.albumId);
             const artists = artistDaos.filter(artist => track.artistIds.has(artist.id));
 
-            if (this.doesPositionNeedIncreasing(lastSeenPlayedValue, timesPlayed)) {
-                currentPosition = loopIndex;
-            }
-
             chartTracks.push({
-                position: currentPosition,
+                position: chartItem.rank,
                 delta: null,
                 track: this.apiHelper.convertTrackApiDto(track, artists, album),
                 timesPlayed,
             });
-
-            lastSeenPlayedValue = timesPlayed;
-            loopIndex += 1;
         }
         
         return chartTracks;
@@ -89,21 +80,17 @@ export class ChartService {
             validateTrue(from < to, "from must be before to");
         }
 
-        const artistPlayedInfoPairs = await this.playedTrackService.getAccountArtistChartsForPeriod(accountId, from, to, ChartService.ACCOUNT_TRACK_CHART_LIMIT);
+        const chartItems = await this.playedTrackService.getAccountArtistChartsForPeriod(accountId, from, to, ChartService.ACCOUNT_ARTIST_CHART_LIMIT);
         
-        const artistIds = artistPlayedInfoPairs.map((pair: ArtistPlayedInfoPair) => pair[0]);
+        const artistIds = chartItems.map((item: ChartItem) => item.itemId);
 
         const artistDaos = await this.catalogueService.getMultipleArtistsById(new Set(artistIds));
 
         const chartArtists: ChartArtistApiDto[] = [];
 
-        let currentPosition = 1;
-        let lastSeenPlayedValue = null;
-        let loopIndex = 1;
-
-        for (const chartEntry of artistPlayedInfoPairs) {
-            const artistId = chartEntry[0];
-            const timesPlayed = chartEntry[1];
+        for (const chartItem of chartItems) {
+            const artistId = chartItem.itemId;
+            const timesPlayed = chartItem.timesPlayed;
 
             const artist = artistDaos.find(artist => artist.id === artistId);
 
@@ -112,30 +99,15 @@ export class ChartService {
                 continue;
             }
 
-            if (this.doesPositionNeedIncreasing(lastSeenPlayedValue, timesPlayed)) {
-                currentPosition = loopIndex;
-            }
-
             chartArtists.push({
-                position: currentPosition,
+                position: chartItem.rank,
                 delta: null,
                 artist: this.apiHelper.convertArtistApiDto(artist) as ArtistApiDto,
                 timesPlayed,
             });
-
-            lastSeenPlayedValue = timesPlayed;
-            loopIndex += 1;
         }
         
         return chartArtists;
-    }
-
-    private doesPositionNeedIncreasing(lastSeenValue: number | null, currentValue: number): boolean {
-        if (currentValue === null) {
-            return false;
-        }
-
-        return lastSeenValue !== currentValue;
     }
 
 }

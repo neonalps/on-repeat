@@ -7,10 +7,9 @@ import { PlayedInfoDao } from "@src/models/classes/dao/played-info";
 import { PaginationParams, SortOrder } from "@src/modules/pagination/constants";
 import { PlayedTrackDetailsDao } from "@src/models/classes/dao/played-track-details";
 import { DateUtils } from "@src/util/date";
+import { ChartItem } from "@src/models/interface/chart-item";
 
-export interface GetPlayedTracksPaginationParams extends PaginationParams<Date> {}
-export type TrackBucketPlayedInfoPair = [number, number];
-export type ArtistPlayedInfoPair = [number, number];
+export interface GetPlayedTracksPaginationParams extends PaginationParams<Date> {};
 
 export class PlayedTrackService {
 
@@ -126,14 +125,14 @@ export class PlayedTrackService {
         return playedInfo;
     }
 
-    public async getAccountTrackChartsForPeriod(accountId: number, from: Date | null, to: Date | null, limit: number): Promise<TrackBucketPlayedInfoPair[]> {
+    public async getAccountTrackChartsForPeriod(accountId: number, from: Date | null, to: Date | null, limit: number): Promise<ChartItem[]> {
         validateNotNull(accountId, "accountId");
         validateNotNull(limit, "limit");
 
         return this.mapper.getAccountTrackChartBucketIdsForPeriod(accountId, from, to, limit);
     }
 
-    public async getAccountArtistChartsForPeriod(accountId: number, from: Date | null, to: Date | null, limit: number): Promise<TrackBucketPlayedInfoPair[]> {
+    public async getAccountArtistChartsForPeriod(accountId: number, from: Date | null, to: Date | null, limit: number): Promise<ChartItem[]> {
         validateNotNull(accountId, "accountId");
         validateNotNull(limit, "limit");
 
