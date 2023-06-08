@@ -5,7 +5,7 @@ import { TrackApiDto } from "@src/models/api/track";
 import { AlbumDao } from "@src/models/classes/dao/album";
 import { ArtistDao } from "@src/models/classes/dao/artist";
 import { TrackDao } from "@src/models/classes/dao/track";
-import { requireNonNull } from "@src/util/common";
+import { removeNull, requireNonNull } from "@src/util/common";
 
 export class ApiHelper {
 
@@ -51,20 +51,26 @@ export class ApiHelper {
         };
     }
 
+    public convertArtistApiDto(artist: ArtistDao): ArtistApiDto | null {
+        if (!artist) {
+            return null;
+        }
+
+        const artistId = artist.id;
+
+        return { 
+            id: artistId, 
+            name: artist.name, 
+            href: this.getArtistResourceUrl(artistId),
+        };
+    }
+
     public convertArtistApiDtos(artists: ArtistDao[]): ArtistApiDto[] {
         if (!artists || artists.length === 0) {
             return [];
         }
 
-        return artists.map(artist => {
-            const artistId = artist.id;
-
-            return { 
-                id: artistId, 
-                name: artist.name, 
-                href: this.getArtistResourceUrl(artistId),
-            };
-        });
+        return artists.map(artist => this.convertArtistApiDto(artist)).filter(removeNull) as ArtistApiDto[];
     }
 
     private getResourceUrl(resourcePath: string, resourceId: string | number): string {

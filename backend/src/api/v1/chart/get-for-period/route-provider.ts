@@ -1,12 +1,11 @@
 import { requireNonNull } from "@src/util/common";
 import { RequestSchema, RouteDefinition, RouteProvider } from "@src/router/types";
 import { CreateChartsForPeriodRequestDto } from "@src/models/api/create-charts-for-period-request";
-import { ChartTrackApiDto } from "@src/models/api/chart-track";
 import { ChartApiDto } from "@src/models/api/chart";
-import { GetChartForPeriodHandler } from "@src/api/v1/chart/get-for-period/handler";
+import { ChartApiItem, GetChartForPeriodHandler } from "@src/api/v1/chart/get-for-period/handler";
 import { CHART_TYPES } from "@src/modules/chart/constants";
 
-export class GetChartForPeriodRouteProvider implements RouteProvider<CreateChartsForPeriodRequestDto, ChartApiDto<ChartTrackApiDto>> {
+export class GetChartForPeriodRouteProvider implements RouteProvider<CreateChartsForPeriodRequestDto, ChartApiDto<ChartApiItem>> {
 
     private readonly handler: GetChartForPeriodHandler;
 
@@ -14,7 +13,7 @@ export class GetChartForPeriodRouteProvider implements RouteProvider<CreateChart
         this.handler = requireNonNull(createChartForPeriodHandler);
     }
 
-    provide(): RouteDefinition<CreateChartsForPeriodRequestDto, ChartApiDto<ChartTrackApiDto>> {
+    provide(): RouteDefinition<CreateChartsForPeriodRequestDto, ChartApiDto<ChartApiItem>> {
         const schema: RequestSchema = {
             querystring: {
                 type: 'object',
