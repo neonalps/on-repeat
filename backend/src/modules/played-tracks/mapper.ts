@@ -11,13 +11,14 @@ import { TrackBucketPlayedInfoDaoInterface } from "@src/models/dao/track-bucket-
 import { isDefined } from "@src/util/common";
 import { ArtistPlayedInfoDaoInterface } from "@src/models/dao/artist-played-info.dao";
 import { ChartItem } from "@src/models/interface/chart-item";
+import { EntitiyId } from "@src/models/interface/id";
 
 export class PlayedTrackMapper {
 
     constructor() {}
 
     public async create(playedTrack: CreatePlayedTrackDto): Promise<number> {
-        const result = await sql`
+        const result = await sql<EntitiyId[]>`
             insert into played_track
                 (account_id, track_id, music_provider_id, played_at, include_in_statistics, created_at)
             values
@@ -84,7 +85,7 @@ export class PlayedTrackMapper {
     }
 
     public async getAllIdsForAccountPaginatedAscending(accountId: number, lastSeenPlayedAt: Date, limit: number): Promise<number[]> {
-        const result = await sql<PlayedTrackDaoInterface[]>`
+        const result = await sql<EntitiyId[]>`
             select
                 id
             from
@@ -106,7 +107,7 @@ export class PlayedTrackMapper {
     }
 
     public async getAllIdsForAccountPaginatedDescending(accountId: number, lastSeenPlayedAt: Date, limit: number): Promise<number[]> {
-        const result = await sql<PlayedTrackDaoInterface[]>`
+        const result = await sql<EntitiyId[]>`
             select
                 id
             from

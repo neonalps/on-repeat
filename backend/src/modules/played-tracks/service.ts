@@ -11,6 +11,10 @@ import { ChartItem } from "@src/models/interface/chart-item";
 
 export interface GetPlayedTracksPaginationParams extends PaginationParams<Date> {};
 
+export interface GetArtistPlayedTracksPaginationParams extends PaginationParams<number> {
+    sortBy: string;
+}
+
 export class PlayedTrackService {
 
     static readonly EMPTY_PLAYED_INFO = PlayedInfoDao.Builder
