@@ -80,7 +80,7 @@ export class DependencyHelper {
         const catalogueService = new CatalogueService(trackService, artistService, albumService);
 
         const playedTrackMapper = new PlayedTrackMapper();
-        const playedTrackService = new PlayedTrackService(playedTrackMapper);
+        const playedTrackService = new PlayedTrackService(catalogueService, playedTrackMapper);
 
         const chartService = new ChartService(apiHelper, catalogueService, playedTrackService);
 

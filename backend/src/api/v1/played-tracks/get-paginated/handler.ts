@@ -24,7 +24,7 @@ export class GetPlayedTracksPaginatedHandler implements RouteHandler<GetPlayedTr
 
     public async handle(context: AuthenticationContext, dto: GetPlayedTracksPaginatedRequestDto): Promise<PaginatedResponseDto<PlayedTrackApiDto>> {
         const accountId = (context.account as AccountDao).id;
-        PaginationService.validateQueryParams(dto);
+        this.paginationService.validateQueryParams(dto);
         const paginationParams = this.getPaginationParams(dto);
         const playedTracks = await this.playedTrackService.getAllForAccountPaginated(accountId, paginationParams);
         const items = playedTracks.map(item => this.mapPlayedTrackDetailDaoToApiDto(item));
@@ -83,14 +83,14 @@ export class GetPlayedTracksPaginatedHandler implements RouteHandler<GetPlayedTr
     }
 
     private buildNextPageKey(items: PlayedTrackApiDto[], oldParams: GetPlayedTracksPaginationParams): string | undefined {
-        if (items.length !== oldParams.limit) {
+        if (items.length < oldParams.limit) {
             return;
         }
 
         const newParams: GetPlayedTracksPaginationParams = {
             limit: oldParams.limit,
             order: oldParams.order,
-            lastSeen: PaginationService.getLastElement(items).playedAt,
+            lastSeen: this.paginationService.getLastElement(items).playedAt,
         };
 
         return this.paginationService.encode(newParams);

@@ -1,5 +1,7 @@
+import { isDefined } from "@src/util/common";
+
 const validateNotNull = (input: unknown, property: string): void => {
-    if (!input) {
+    if (!isDefined(input)) {
         throw new Error(`${property} must not be null or undefined`);
     }
 };

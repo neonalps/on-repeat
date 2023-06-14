@@ -1,7 +1,7 @@
 
 import { AuthenticationContext, RouteHandler } from "@src/router/types";
-import { requireNonNull } from "@src/util/common";
-import { GetArtistPlayedTracksPaginationParams, PlayedTrackService } from "@src/modules/played-tracks/service";
+import { isDefined, isNotDefined, requireNonNull } from "@src/util/common";
+import { GetArtistPlayedTracksPaginationParams, GetArtistPlayedTracksSortKey, PlayedTrackService } from "@src/modules/played-tracks/service";
 import { AccountDao } from "@src/models/classes/dao/account";
 import { IllegalStateError } from "@src/api/error/illegal-state-error";
 import { CatalogueService } from "@src/modules/catalogue/service";
@@ -11,6 +11,8 @@ import { PaginatedResponseDto } from "@src/models/api/paginated-response";
 import { ApiHelper } from "@src/api/helper";
 import { PaginationService } from "@src/modules/pagination/service";
 import { SortOrder } from "@src/modules/pagination/constants";
+import { ArtistPlayedTrackDetailsDao } from "@src/models/classes/dao/artist-track-played";
+import { AlbumApiDto } from "@src/models/api/album";
 
 export class GetArtistPlayedTracksPaginatedHandler implements RouteHandler<GetArtistPlayedTracksPaginatedRequestDto, PaginatedResponseDto<ArtistPlayedTrackApiDto>> {
 
@@ -30,50 +32,80 @@ export class GetArtistPlayedTracksPaginatedHandler implements RouteHandler<GetAr
     
     public async handle(context: AuthenticationContext, dto: GetArtistPlayedTracksPaginatedRequestDto): Promise<PaginatedResponseDto<ArtistPlayedTrackApiDto>> {
         const accountId = (context.account as AccountDao).id;
-        PaginationService.validateQueryParams(dto);
+        this.paginationService.validateQueryParams(dto);
         const paginationParams = this.getPaginationParams(dto);
+
         const artistId = dto.artistId;
         const artist = await this.catalogueService.getArtistById(artistId);
-
         if (!artist) {
             throw new IllegalStateError(GetArtistPlayedTracksPaginatedHandler.ERROR_ARTIST_NOT_FOUND);
         }
 
-        const items: ArtistPlayedTrackApiDto[] = [];
+        const artistTrackPlayedDetails = await this.playedTrackService.getArtistTracksOffsetPaginated(accountId, artistId, paginationParams);
 
-        // TODO load played tracks and their statistics for this artist
+        const items = artistTrackPlayedDetails.map(item => this.mapToApiDto(item));
+
         return {
             nextPageKey: this.buildNextPageKey(items, paginationParams),
             items,
         }
     }
 
+    private mapToApiDto(item: ArtistPlayedTrackDetailsDao): ArtistPlayedTrackApiDto {
+        const trackId = item.trackId;
+
+        const album = this.mapAlbumApiDto(item.albumId, item.albumName);
+
+        return {
+            id: item.trackId,
+            name: item.trackName,
+            href: this.apiHelper.getTrackResourceUrl(trackId),
+            album,
+            additionalArtists: this.apiHelper.convertArtistApiDtos(Array.from(item.additionalArtists)),
+            timesPlayed: item.timesPlayed,
+        };
+    }
+
+    private mapAlbumApiDto(albumId: number | null, albumName: string | null): AlbumApiDto | null {
+        if (albumId === null || albumName === null) {
+            return null;
+        }
+
+        return {
+            id: albumId,
+            name: albumName,
+            href: this.apiHelper.getAlbumResourceUrl(albumId),
+        }
+    }
+
     private getPaginationParams(dto: GetArtistPlayedTracksPaginatedRequestDto): GetArtistPlayedTracksPaginationParams {
-        if (!dto.nextPageKey) {
+        if (isNotDefined(dto.nextPageKey)) {
             const order: SortOrder = dto.order === SortOrder.ASCENDING ? SortOrder.ASCENDING : SortOrder.DESCENDING;
-            const limit: number = dto.limit || 50;
-            const lastSeen: number = 0; // TODO fix
+            const limit: number = isDefined(dto.limit) ? dto.limit as number : 50;
+            const lastSeen: number = 0;
+            const sortBy = isDefined(dto.sortBy) ? dto.sortBy as GetArtistPlayedTracksSortKey : GetArtistPlayedTracksSortKey.TIMES_PLAYED;
 
             return {
                 order,
                 limit,
                 lastSeen,
-                sortBy: "fix me",
+                sortBy,
             };
         }
 
-        return this.paginationService.decode<GetArtistPlayedTracksPaginationParams>(dto.nextPageKey);
+        return this.paginationService.decode<GetArtistPlayedTracksPaginationParams>(dto.nextPageKey as string);
     }
 
     private buildNextPageKey(items: ArtistPlayedTrackApiDto[], oldParams: GetArtistPlayedTracksPaginationParams): string | undefined {
-        if (items.length !== oldParams.limit) {
+        if (items.length < oldParams.limit) {
             return;
         }
 
         const newParams: GetArtistPlayedTracksPaginationParams = {
             limit: oldParams.limit,
             order: oldParams.order,
-            lastSeen: PaginationService.getLastElement(items).playedAt,
+            lastSeen: oldParams.lastSeen + items.length,
+            sortBy: oldParams.sortBy,
         };
 
         return this.paginationService.encode(newParams);

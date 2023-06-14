@@ -2,7 +2,7 @@ import logger from "@src/log/logger";
 import { validateNotNull } from "@src/util/validation";
 import { CreateTrackDto } from "@src/models/classes/dto/create-track";
 import { TrackDao } from "@src/models/classes/dao/track";
-import { requireNonNull } from "@src/util/common";
+import { isDefined, requireNonNull } from "@src/util/common";
 import { AlbumDao } from "@src/models/classes/dao/album";
 import { CreateAlbumDto } from "@src/models/classes/dto/create-album";
 import { UpdateAlbumDto } from "@src/models/classes/dto/update-album";
@@ -15,6 +15,8 @@ import { UpdateTrackDto } from "@src/models/classes/dto/update-track";
 import { UpdateArtistDto } from "@src/models/classes/dto/update-artist";
 import { AlbumImageDao } from "@src/models/classes/dao/album-image";
 import { CreateAlbumImageDto } from "@src/models/classes/dto/create-album-image";
+import { SimpleTrackDetailsDao } from "@src/models/classes/dao/simple-track-details";
+import { SimpleArtistDao } from "@src/models/classes/dao/artist-simple";
 
 interface TrackBucketContext {
     trackId: number;
@@ -75,6 +77,30 @@ export class CatalogueService {
         }
     
         return createdTrack.id;
+    }
+
+    public async getSimpleTrackDetailsById(trackId: number): Promise<SimpleTrackDetailsDao | null> {
+        validateNotNull(trackId, "trackId");
+
+        const track = await this.getTrackById(trackId);
+        if (!track) {
+            return null;
+        }
+
+        const [album, artists] = await Promise.all([
+            this.getAlbumById(track.albumId),
+            this.getMultipleArtistsById(track.artistIds)
+        ]);
+
+        const simpleArtists = artists.map(artist => SimpleArtistDao.fromArtistDao(artist));
+
+        return SimpleTrackDetailsDao.Builder
+            .withTrackId(track.id)
+            .withTrackName(track.name)
+            .withAlbumId(album !== null ? album.id : null)
+            .withAlbumName(album !== null ? album.name : null)
+            .withArtists(new Set(simpleArtists))
+            .build();
     }
 
     public async getArtistById(artistId: number): Promise<ArtistDao | null> {

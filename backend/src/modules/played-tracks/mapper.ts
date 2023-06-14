@@ -7,18 +7,22 @@ import { CreatePlayedTrackDto } from "@src/models/classes/dto/create-played-trac
 import { PlayedInfoDaoInterface } from "@src/models/dao/played-info.dao";
 import { PlayedTrackDetailsDaoInterface } from "@src/models/dao/played-track-details.dao";
 import { PlayedTrackDaoInterface } from "@src/models/dao/played-track.dao";
-import { TrackBucketPlayedInfoDaoInterface } from "@src/models/dao/track-bucket-played-info.dao";
+import { TrackBucketPlayedInfoChartDaoInterface } from "@src/models/dao/track-bucket-played-info-chart.dao";
 import { isDefined } from "@src/util/common";
 import { ArtistPlayedInfoDaoInterface } from "@src/models/dao/artist-played-info.dao";
 import { ChartItem } from "@src/models/interface/chart-item";
-import { EntitiyId } from "@src/models/interface/id";
+import { EntityId } from "@src/models/interface/id";
+import { GetArtistPlayedTracksSortKey } from "@src/modules/played-tracks/service";
+import { SortOrder } from "@src/modules/pagination/constants";
+import { TrackBucketPlayedInfoDaoInterface } from "@src/models/dao/track-bucket-played-info";
+import { PlayedInfoItem } from "@src/models/interface/played-info-item";
 
 export class PlayedTrackMapper {
 
     constructor() {}
 
     public async create(playedTrack: CreatePlayedTrackDto): Promise<number> {
-        const result = await sql<EntitiyId[]>`
+        const result = await sql<EntityId[]>`
             insert into played_track
                 (account_id, track_id, music_provider_id, played_at, include_in_statistics, created_at)
             values
@@ -85,7 +89,7 @@ export class PlayedTrackMapper {
     }
 
     public async getAllIdsForAccountPaginatedAscending(accountId: number, lastSeenPlayedAt: Date, limit: number): Promise<number[]> {
-        const result = await sql<EntitiyId[]>`
+        const result = await sql<EntityId[]>`
             select
                 id
             from
@@ -107,7 +111,7 @@ export class PlayedTrackMapper {
     }
 
     public async getAllIdsForAccountPaginatedDescending(accountId: number, lastSeenPlayedAt: Date, limit: number): Promise<number[]> {
-        const result = await sql<EntitiyId[]>`
+        const result = await sql<EntityId[]>`
             select
                 id
             from
@@ -127,6 +131,42 @@ export class PlayedTrackMapper {
         }
     
         return result.map(item => item.id);
+    }
+
+    public async getArtistTrackBucketsOrderedOffsetPaginatedResult(accountId: number, artistId: number, from: Date | null, to: Date | null, lastSeen: number, limit: number, sortBy: GetArtistPlayedTracksSortKey, sortOrder: SortOrder): Promise<PlayedInfoItem[]> {
+        const sqlSortOrder = PlayedTrackMapper.determineSortOrder(sortOrder);
+        
+        const result = await sql<TrackBucketPlayedInfoDaoInterface[]>`
+            select
+                t.bucket as track_bucket,
+                count(t.bucket)::int as times_played
+            from
+                played_track pt left join
+                track_artists ta on ta.track_id = pt.track_id left join
+                track t on t.id = ta.track_id
+            where
+                pt.account_id = ${ accountId }
+                and ta.artist_id = ${ artistId }
+                ${isDefined(from) ? PlayedTrackMapper.wherePlayedAtFrom(from as Date) : sql``}
+                ${isDefined(to) ? PlayedTrackMapper.wherePlayedAtTo(to as Date) : sql``}
+            group by
+                t.bucket
+            order by
+                count(t.bucket) ${sqlSortOrder}
+            offset ${lastSeen}
+            limit ${limit}
+        `;
+    
+        if (!result || result.length === 0) {
+            return [];
+        }
+
+        return result.map(item => {
+            return {
+                itemId: item.trackBucket,
+                timesPlayed: item.timesPlayed,
+            };
+        });
     }
     
     public async getByAccountIdAndMusicProviderIdAndPlayedAt(accountId: number, musicProviderId: number, playedAt: Date): Promise<PlayedTrackDao | null> {
@@ -245,7 +285,7 @@ export class PlayedTrackMapper {
     }
 
     public async getAccountTrackChartBucketIdsForPeriod(accountId: number, from: Date | null, to: Date | null, rankLimit: number): Promise<ChartItem[]> {
-        const result = await sql<TrackBucketPlayedInfoDaoInterface[]>`
+        const result = await sql<TrackBucketPlayedInfoChartDaoInterface[]>`
             select
                 track_bucket,
                 times_played,
@@ -378,6 +418,10 @@ export class PlayedTrackMapper {
         }
 
         return result;
+    }
+
+    private static determineSortOrder(order: SortOrder) {
+        return order === SortOrder.DESCENDING ? sql`desc` : sql`asc`;
     }
 
     private static wherePlayedAtFrom(from: Date) {

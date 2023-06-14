@@ -5,6 +5,7 @@ import { GetArtistPlayedTracksPaginatedRequestDto } from "@src/models/api/get-ar
 import { PaginatedResponseDto } from "@src/models/api/paginated-response";
 import { ArtistPlayedTrackApiDto } from "@src/models/api/artist-played-track";
 import { GetArtistPlayedTracksPaginatedHandler } from "@src/api/v1/played-tracks/get-artist-played-tracks-paginated/handler";
+import { GetArtistPlayedTracksSortKey } from "@src/modules/played-tracks/service";
 
 export class GetArtistPlayedTracksPaginatedRouteProvider implements RouteProvider<GetArtistPlayedTracksPaginatedRequestDto, PaginatedResponseDto<ArtistPlayedTrackApiDto>> {
 
@@ -20,11 +21,16 @@ export class GetArtistPlayedTracksPaginatedRouteProvider implements RouteProvide
                 type: 'object',
                 required: ['artistId'],
                 properties: {
-                    artistId: { type: 'string' },
-                    sortBy: { type: 'string' },
+                    artistId: { type: 'number' },
+                },
+            },
+            querystring: {
+                type: 'object',
+                properties: {
+                    sortBy: { type: 'string', enum: [ GetArtistPlayedTracksSortKey.TIMES_PLAYED ] },
                     ...PAGINATED_REQUEST_QUERYSTRING_SCHEMA_PROPERTIES,
                 },
-            }
+            },
         };
 
         return {

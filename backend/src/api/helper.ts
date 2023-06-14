@@ -4,8 +4,11 @@ import { ArtistApiDto } from "@src/models/api/artist";
 import { TrackApiDto } from "@src/models/api/track";
 import { AlbumDao } from "@src/models/classes/dao/album";
 import { ArtistDao } from "@src/models/classes/dao/artist";
+import { SimpleArtistDao } from "@src/models/classes/dao/artist-simple";
 import { TrackDao } from "@src/models/classes/dao/track";
 import { removeNull, requireNonNull } from "@src/util/common";
+
+type ArtistLike = ArtistDao | SimpleArtistDao;
 
 export class ApiHelper {
 
@@ -51,7 +54,7 @@ export class ApiHelper {
         };
     }
 
-    public convertArtistApiDto(artist: ArtistDao): ArtistApiDto | null {
+    public convertArtistApiDto(artist: ArtistLike): ArtistApiDto | null {
         if (!artist) {
             return null;
         }
@@ -65,7 +68,7 @@ export class ApiHelper {
         };
     }
 
-    public convertArtistApiDtos(artists: ArtistDao[]): ArtistApiDto[] {
+    public convertArtistApiDtos(artists: ArtistLike[]): ArtistApiDto[] {
         if (!artists || artists.length === 0) {
             return [];
         }
