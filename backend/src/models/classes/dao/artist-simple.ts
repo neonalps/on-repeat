@@ -1,3 +1,5 @@
+import { ArtistDao } from "@src/models/classes/dao/artist";
+
 export class SimpleArtistDao {
     private _id!: number;
     private _name!: string;
@@ -17,6 +19,13 @@ export class SimpleArtistDao {
  
     public static get Builder(): SimpleArtistDaoBuilder {
        return new SimpleArtistDaoBuilder();
+    }
+
+    public static fromArtistDao(artist: ArtistDao): SimpleArtistDao {
+      return this.Builder
+         .withId(artist.id)
+         .withName(artist.name)
+         .build();
     }
  }
  

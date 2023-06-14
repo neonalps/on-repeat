@@ -23,4 +23,10 @@ export const requireNonNull = <T> (arg: T): T => {
     return arg;
 }
 
-export const isDefined = (toCheck: unknown) => toCheck !== null && toCheck !== undefined;
+export function isDefined(toCheck: unknown) {
+    return toCheck !== null && toCheck !== undefined;
+}
+
+export function isNotDefined(toCheck: unknown) {
+    return !isDefined(toCheck);
+}

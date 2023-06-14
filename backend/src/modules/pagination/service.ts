@@ -7,13 +7,13 @@ export class PaginationService {
 
     constructor() {}
 
-    public static validateQueryParams(params: PaginationQueryParams) {
+    public validateQueryParams(params: PaginationQueryParams) {
         if (!!params.nextPageKey && (!!params.order || !!params.limit)) {
             throw new IllegalStateError("When nextPageKey is passed no other query parameters are allowed");
         }
     }
 
-    public static getLastElement<T>(input: T[]): T {
+    public getLastElement<T>(input: T[]): T {
         if (!input || input.length === 0) {
             throw new IllegalStateError("Unable to get last element of undefined or empty array");
         }
@@ -25,7 +25,7 @@ export class PaginationService {
         validateNotBlank(source, "source");
 
         const decoded = JSON.parse(Base64Utils.decode(source)) as T;
-        PaginationService.validateNextPageKey(decoded);
+        this.validateNextPageKey(decoded);
         return decoded;
     }
     
@@ -35,7 +35,7 @@ export class PaginationService {
         return Base64Utils.encode(JSON.stringify(source));
     }
 
-    private static validateNextPageKey(params: any) {
+    private validateNextPageKey(params: any) {
         if (!params.limit || !params.order || !params.lastSeen) {
             throw new IllegalStateError("Invalid next page key passed");
         }
