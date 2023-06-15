@@ -1,14 +1,17 @@
 import { ApiConfig } from "@src/api/config";
 import { AlbumApiDto } from "@src/models/api/album";
 import { ArtistApiDto } from "@src/models/api/artist";
+import { ImageApiDto } from "@src/models/api/image";
 import { TrackApiDto } from "@src/models/api/track";
 import { AlbumDao } from "@src/models/classes/dao/album";
+import { AlbumImageDao } from "@src/models/classes/dao/album-image";
 import { ArtistDao } from "@src/models/classes/dao/artist";
-import { SimpleArtistDao } from "@src/models/classes/dao/artist-simple";
+import { IdNameDao } from "@src/models/classes/dao/id-name";
 import { TrackDao } from "@src/models/classes/dao/track";
 import { removeNull, requireNonNull } from "@src/util/common";
 
-type ArtistLike = ArtistDao | SimpleArtistDao;
+type ArtistLike = ArtistDao | IdNameDao;
+type ImageLike = AlbumImageDao;
 
 export class ApiHelper {
 
@@ -51,6 +54,7 @@ export class ApiHelper {
             id: albumId,
             name: album.name,
             href: this.getAlbumResourceUrl(albumId),
+            images: this.convertImageApiDtos(Array.from(album.images)),
         };
     }
 
@@ -74,6 +78,18 @@ export class ApiHelper {
         }
 
         return artists.map(artist => this.convertArtistApiDto(artist)).filter(removeNull) as ArtistApiDto[];
+    }
+
+    public convertImageApiDtos(images: ImageLike[]): ImageApiDto[] {
+        return images.map(item => this.convertImageApiDto(item));
+    }
+
+    public convertImageApiDto(image: ImageLike): ImageApiDto {
+        return {
+            height: image.height,
+            width: image.width,
+            url: image.url,
+        }
     }
 
     private getResourceUrl(resourcePath: string, resourceId: string | number): string {

@@ -16,7 +16,8 @@ import { UpdateArtistDto } from "@src/models/classes/dto/update-artist";
 import { AlbumImageDao } from "@src/models/classes/dao/album-image";
 import { CreateAlbumImageDto } from "@src/models/classes/dto/create-album-image";
 import { SimpleTrackDetailsDao } from "@src/models/classes/dao/simple-track-details";
-import { SimpleArtistDao } from "@src/models/classes/dao/artist-simple";
+import { createIdNameDao } from "@src/util/dao";
+import { SimpleAlbumDao } from "@src/models/classes/dao/album-simple";
 
 interface TrackBucketContext {
     trackId: number;
@@ -92,14 +93,10 @@ export class CatalogueService {
             this.getMultipleArtistsById(track.artistIds)
         ]);
 
-        const simpleArtists = artists.map(artist => SimpleArtistDao.fromArtistDao(artist));
-
         return SimpleTrackDetailsDao.Builder
-            .withTrackId(track.id)
-            .withTrackName(track.name)
-            .withAlbumId(album !== null ? album.id : null)
-            .withAlbumName(album !== null ? album.name : null)
-            .withArtists(new Set(simpleArtists))
+            .withTrack(createIdNameDao(track.id, track.name))
+            .withAlbum(album !== null ? SimpleAlbumDao.fromAlbumDao(album) : null)
+            .withArtists(new Set(artists.map(artist => createIdNameDao(artist.id, artist.name))))
             .build();
     }
 

@@ -1,6 +1,6 @@
 import { requireNonNull } from "@src/util/common";
 import { RequestSchema, RouteDefinition, RouteProvider } from "@src/router/types";
-import { GetPlayedTracksPaginatedHandler } from "@src/api/v1/played-tracks/get-paginated/handler";
+import { GetPlayedTracksPaginatedHandler } from "@src/api/v1/played-tracks/get-all-paginated/handler";
 import { PAGINATED_REQUEST_QUERYSTRING_SCHEMA_PROPERTIES } from "@src/modules/pagination/constants";
 import { GetPlayedTracksPaginatedRequestDto } from "@src/models/api/get-played-tracks-paginated-request";
 import { PlayedTrackApiDto } from "@src/models/api/played-track";

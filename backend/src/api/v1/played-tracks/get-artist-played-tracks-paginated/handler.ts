@@ -13,6 +13,7 @@ import { PaginationService } from "@src/modules/pagination/service";
 import { SortOrder } from "@src/modules/pagination/constants";
 import { ArtistPlayedTrackDetailsDao } from "@src/models/classes/dao/artist-track-played";
 import { AlbumApiDto } from "@src/models/api/album";
+import { SimpleAlbumDao } from "@src/models/classes/dao/album-simple";
 
 export class GetArtistPlayedTracksPaginatedHandler implements RouteHandler<GetArtistPlayedTracksPaginatedRequestDto, PaginatedResponseDto<ArtistPlayedTrackApiDto>> {
 
@@ -52,30 +53,27 @@ export class GetArtistPlayedTracksPaginatedHandler implements RouteHandler<GetAr
     }
 
     private mapToApiDto(item: ArtistPlayedTrackDetailsDao): ArtistPlayedTrackApiDto {
-        const trackId = item.trackId;
-
-        const album = this.mapAlbumApiDto(item.albumId, item.albumName);
-
         return {
-            id: item.trackId,
-            name: item.trackName,
-            href: this.apiHelper.getTrackResourceUrl(trackId),
-            album,
+            id: item.track.id,
+            name: item.track.name,
+            href: this.apiHelper.getTrackResourceUrl(item.track.id),
+            album: this.mapAlbumApiDto(item.album),
             additionalArtists: this.apiHelper.convertArtistApiDtos(Array.from(item.additionalArtists)),
             timesPlayed: item.timesPlayed,
         };
     }
 
-    private mapAlbumApiDto(albumId: number | null, albumName: string | null): AlbumApiDto | null {
-        if (albumId === null || albumName === null) {
+    private mapAlbumApiDto(album: SimpleAlbumDao | null): AlbumApiDto | null {
+        if (album === null) {
             return null;
         }
 
         return {
-            id: albumId,
-            name: albumName,
-            href: this.apiHelper.getAlbumResourceUrl(albumId),
-        }
+            id: album.id,
+            name: album.name,
+            href: this.apiHelper.getAlbumResourceUrl(album.id),
+            images: this.apiHelper.convertImageApiDtos(Array.from(album.images)),
+        };
     }
 
     private getPaginationParams(dto: GetArtistPlayedTracksPaginatedRequestDto): GetArtistPlayedTracksPaginationParams {
