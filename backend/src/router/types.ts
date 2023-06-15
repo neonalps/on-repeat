@@ -14,6 +14,7 @@ export type RouteDefinition<S, T> = {
     schema: FastifySchema,
     handler: RouteHandler<S, T>,
     authenticated: boolean,
+    response?: ResponseSchema,
 }
 
 export type HandlerFunction<S, T> = (principal: AuthenticationContext, _: S) => Promise<T>;
@@ -30,4 +31,8 @@ export type RequestSchema = {
     body?: unknown,
     params?: unknown,
     querystring?: unknown,
+}
+
+export type ResponseSchema = {
+    statusCode: number,
 }

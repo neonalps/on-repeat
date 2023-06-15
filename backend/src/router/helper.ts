@@ -1,6 +1,6 @@
 import { FastifyError, FastifyInstance, FastifyReply, FastifyRequest, FastifySchema } from "fastify";
 import fastifyJwt from "@fastify/jwt";
-import { AuthenticationContext, RequestSchema, RouteDefinition } from "./types";
+import { AuthenticationContext, RequestSchema, ResponseSchema, RouteDefinition } from "./types";
 import { getProviders } from "../api/providers";
 import { HttpMethod } from "@src/http/constants";
 import logger from "@src/log/logger";
@@ -8,6 +8,7 @@ import dependencyManager from "@src/di/manager";
 import { AccountService } from "@src/modules/account/service";
 import { Dependencies } from "@src/di/dependencies";
 import { IllegalStateError } from "@src/api/error/illegal-state-error";
+import { isDefined } from "@src/util/common";
 
 export class RouterHelper {
 
@@ -103,8 +104,10 @@ export class RouterHelper {
     }
 
     private static sendSuccessResponse(reply: FastifyReply, route: RouteDefinition<unknown, unknown>, responseBody: unknown): void {
+        const statusCode = isDefined(route.response?.statusCode) ? (route.response as ResponseSchema).statusCode : this.getCodeFromMethod(route.method, !responseBody);
+
         reply
-            .code(this.getCodeFromMethod(route.method, !responseBody))
+            .code(statusCode)
             .header('Content-Type', 'application/json; charset=utf-8')
             .send(responseBody);
     }

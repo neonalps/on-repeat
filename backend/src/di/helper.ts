@@ -33,6 +33,7 @@ import { MusicProviderService } from "@src/modules/music-provider/service";
 import { PaginationService } from "@src/modules/pagination/service";
 import { ApiHelper } from "@src/api/helper";
 import { ChartService } from "@src/modules/chart/service";
+import { SearchService } from "@src/modules/search/search";
 
 export class DependencyHelper {
 
@@ -79,6 +80,8 @@ export class DependencyHelper {
 
         const catalogueService = new CatalogueService(trackService, artistService, albumService);
 
+        const searchService = new SearchService(catalogueService);
+
         const playedTrackMapper = new PlayedTrackMapper();
         const playedTrackService = new PlayedTrackService(catalogueService, playedTrackMapper);
 
@@ -114,6 +117,7 @@ export class DependencyHelper {
         dependencies.set(Dependencies.PaginationService, paginationService);
         dependencies.set(Dependencies.PlayedTrackService, playedTrackService);
         dependencies.set(Dependencies.Scheduler, scheduler);
+        dependencies.set(Dependencies.SearchService, searchService);
         dependencies.set(Dependencies.SpotifyClient, spotifyClient);
         dependencies.set(Dependencies.SpotifyMusicProvider, spotifyMusicProvider);
         dependencies.set(Dependencies.UuidSource, uuidSource);

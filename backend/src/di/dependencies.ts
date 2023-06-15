@@ -14,6 +14,7 @@ export enum Dependencies {
     PaginationService,
     PlayedTrackService,
     Scheduler,
+    SearchService,
     SpotifyClient,
     SpotifyMusicProvider,
     UuidSource,
