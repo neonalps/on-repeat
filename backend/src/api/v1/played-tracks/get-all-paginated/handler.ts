@@ -6,9 +6,11 @@ import { PlayedTrackApiDto } from "@src/models/api/played-track";
 import { AccountDao } from "@src/models/classes/dao/account";
 import { GetPlayedTracksPaginationParams, PlayedTrackService } from "@src/modules/played-tracks/service";
 import { AuthenticationContext, RouteHandler } from "@src/router/types";
-import { requireNonNull } from "@src/util/common";
+import { isDefined, requireNonNull } from "@src/util/common";
 import { PlayedTrackDetailsDao } from "@src/models/classes/dao/played-track-details";
 import { ApiHelper } from "@src/api/helper";
+import { AlbumApiDto } from "@src/models/api/album";
+import { SimpleAlbumDao } from "@src/models/classes/dao/album-simple";
 
 export class GetPlayedTracksPaginatedHandler implements RouteHandler<GetPlayedTracksPaginatedRequestDto, PaginatedResponseDto<PlayedTrackApiDto>> {
 
@@ -36,32 +38,33 @@ export class GetPlayedTracksPaginatedHandler implements RouteHandler<GetPlayedTr
     }
 
     private mapPlayedTrackDetailDaoToApiDto(item: PlayedTrackDetailsDao): PlayedTrackApiDto {
-        const artists = [];
-        
-        const albumId = item.albumId;
-        const trackId = item.trackId;
+        let albumApiDto: AlbumApiDto | null = null;
 
-        for (const artist of item.artists) {
-            const artistId = artist.id;
-            artists.push({
-                id: artistId,
-                name: artist.name,
-                href: this.apiHelper.getArtistResourceUrl(artistId),
-            });
+        if (isDefined(item.album)) {
+            const album = item.album as SimpleAlbumDao;
+
+            albumApiDto = {
+                id: album.id,
+                name: album.name,
+                href: this.apiHelper.getAlbumResourceUrl(album.id),
+                images: this.apiHelper.convertImageApiDtos(Array.from(album.images)),
+            }
         }
 
         return {
+            playedTrackId: item.playedTrackId,
             playedAt: item.playedAt,
+            includeInStatistics: item.includeInStatistics,
             track: {
-                id: trackId,
-                name: item.trackName,
-                href: this.apiHelper.getTrackResourceUrl(trackId),
-                artists,
-                album: {
-                    id: albumId,
-                    name: item.albumName,
-                    href: this.apiHelper.getAlbumResourceUrl(albumId),
-                },
+                id: item.track.id,
+                name: item.track.name,
+                href: this.apiHelper.getTrackResourceUrl(item.track.id),
+                artists: this.apiHelper.convertArtistApiDtos(Array.from(item.artists)),
+                album: albumApiDto,
+            },
+            musicProvider: {
+                id: item.musicProvider.id,
+                name: item.musicProvider.name,
             },
         };
     }

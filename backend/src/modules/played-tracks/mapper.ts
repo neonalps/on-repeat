@@ -1,14 +1,12 @@
 import sql from "@src/db/db";
-import { SimpleArtistDao } from "@src/models/classes/dao/artist-simple";
 import { PlayedInfoDao } from "@src/models/classes/dao/played-info";
 import { PlayedTrackDao } from "@src/models/classes/dao/played-track";
-import { PlayedTrackDetailsDao } from "@src/models/classes/dao/played-track-details";
 import { CreatePlayedTrackDto } from "@src/models/classes/dto/create-played-track";
 import { PlayedInfoDaoInterface } from "@src/models/dao/played-info.dao";
 import { PlayedTrackDetailsDaoInterface } from "@src/models/dao/played-track-details.dao";
 import { PlayedTrackDaoInterface } from "@src/models/dao/played-track.dao";
 import { TrackBucketPlayedInfoChartDaoInterface } from "@src/models/dao/track-bucket-played-info-chart.dao";
-import { isDefined } from "@src/util/common";
+import { isDefined, removeNull } from "@src/util/common";
 import { ArtistPlayedInfoDaoInterface } from "@src/models/dao/artist-played-info.dao";
 import { ChartItem } from "@src/models/interface/chart-item";
 import { EntityId } from "@src/models/interface/id";
@@ -16,6 +14,11 @@ import { GetArtistPlayedTracksSortKey } from "@src/modules/played-tracks/service
 import { SortOrder } from "@src/modules/pagination/constants";
 import { TrackBucketPlayedInfoDaoInterface } from "@src/models/dao/track-bucket-played-info";
 import { PlayedInfoItem } from "@src/models/interface/played-info-item";
+import { PlayedTrackHistoryDaoInterface } from "@src/models/dao/played-track-history.dao";
+import { PlayedTrackHistoryDao } from "@src/models/classes/dao/played-track-history";
+import { createIdNameDao } from "@src/util/dao";
+import { IdNameDao } from "@src/models/classes/dao/id-name";
+import { PlayedTrackDetailsNoAlbumImagesDao } from "@src/models/classes/dao/played-track-details-no-album-images";
 
 export class PlayedTrackMapper {
 
@@ -56,7 +59,7 @@ export class PlayedTrackMapper {
         return PlayedTrackDao.fromDaoInterface(result[0]);
     }
 
-    public async getAllForAccountPaginatedDetails(orderedIds: number[]): Promise<PlayedTrackDetailsDao[]> {
+    public async getAllForAccountPaginatedDetails(orderedIds: number[]): Promise<PlayedTrackDetailsNoAlbumImagesDao[]> {
         const result = await sql<PlayedTrackDetailsDaoInterface[]>`
             select
                 pt.id as played_track_id,
@@ -85,32 +88,45 @@ export class PlayedTrackMapper {
             return [];
         }
 
-        return PlayedTrackMapper.convertTrackDetailsResult(result);
+        return this.populateAndConvertTrackDetailsResult(result);
     }
 
-    public async getAllIdsForAccountPaginatedAscending(accountId: number, lastSeenPlayedAt: Date, limit: number): Promise<number[]> {
-        const result = await sql<EntityId[]>`
+    public async getPlayedTrackHistoryForAccountPaginated(accountId: number, trackId: number, from: Date | null, to: Date | null, lastSeenPlayedAt: Date, limit: number, order: SortOrder): Promise<PlayedTrackHistoryDao[]> {
+        const sqlSortOrder = this.determineSortOrder(order);
+
+        const result = await sql<PlayedTrackHistoryDaoInterface[]>`
             select
-                id
+                pt.id as played_track_id,
+                pt.played_at as played_at,
+                mp.id as music_provider_id,
+                mp.name as music_provider_name,
+                pt.include_in_statistics as include_in_statistics
             from
-                played_track
+                played_track pt left join
+                music_provider mp on mp.id = pt.music_provider_id
             where
-                account_id = ${ accountId }
-                and played_at > ${ lastSeenPlayedAt }
+                pt.account_id = ${ accountId }
+                and pt.track_id = ${ trackId }
+                ${isDefined(from) ? this.wherePlayedAtFrom(from as Date) : sql``}
+                ${isDefined(to) ? this.wherePlayedAtTo(to as Date) : sql``}
+                and pt.played_at ${order === SortOrder.ASCENDING ? sql`>` : sql`<`} ${ lastSeenPlayedAt }
             order by
-                played_at asc
-            limit
-                ${ limit }
+                pt.played_at ${ sqlSortOrder }
+            limit ${limit}
         `;
     
         if (!result || result.length === 0) {
             return [];
         }
-    
-        return result.map(item => item.id);
+
+        return result
+            .map(item => PlayedTrackHistoryDao.fromDaoInterface(item))
+            .filter(removeNull) as PlayedTrackHistoryDao[];
     }
 
-    public async getAllIdsForAccountPaginatedDescending(accountId: number, lastSeenPlayedAt: Date, limit: number): Promise<number[]> {
+    public async getAllIdsForAccountPaginated(accountId: number, lastSeenPlayedAt: Date, limit: number, order: SortOrder): Promise<number[]> {
+        const sqlSortOrder = this.determineSortOrder(order);
+
         const result = await sql<EntityId[]>`
             select
                 id
@@ -118,12 +134,10 @@ export class PlayedTrackMapper {
                 played_track
             where
                 account_id = ${ accountId }
-                and played_at < ${ lastSeenPlayedAt }
+                and played_at ${order === SortOrder.ASCENDING ? sql`>` : sql`<`} ${ lastSeenPlayedAt }
             order by
-                played_at desc
-            limit
-                ${ limit }
-
+                played_at ${ sqlSortOrder }
+            limit ${ limit }
         `;
     
         if (!result || result.length === 0) {
@@ -134,7 +148,7 @@ export class PlayedTrackMapper {
     }
 
     public async getArtistTrackBucketsOrderedOffsetPaginatedResult(accountId: number, artistId: number, from: Date | null, to: Date | null, lastSeen: number, limit: number, sortBy: GetArtistPlayedTracksSortKey, sortOrder: SortOrder): Promise<PlayedInfoItem[]> {
-        const sqlSortOrder = PlayedTrackMapper.determineSortOrder(sortOrder);
+        const sqlSortOrder = this.determineSortOrder(sortOrder);
         
         const result = await sql<TrackBucketPlayedInfoDaoInterface[]>`
             select
@@ -147,8 +161,8 @@ export class PlayedTrackMapper {
             where
                 pt.account_id = ${ accountId }
                 and ta.artist_id = ${ artistId }
-                ${isDefined(from) ? PlayedTrackMapper.wherePlayedAtFrom(from as Date) : sql``}
-                ${isDefined(to) ? PlayedTrackMapper.wherePlayedAtTo(to as Date) : sql``}
+                ${isDefined(from) ? this.wherePlayedAtFrom(from as Date) : sql``}
+                ${isDefined(to) ? this.wherePlayedAtTo(to as Date) : sql``}
             group by
                 t.bucket
             order by
@@ -302,8 +316,8 @@ export class PlayedTrackMapper {
                     track t on pt.track_id = t.id
                 where
                     pt.account_id = ${ accountId }
-                    ${isDefined(from) ? PlayedTrackMapper.wherePlayedAtFrom(from as Date) : sql``}
-                    ${isDefined(to) ? PlayedTrackMapper.wherePlayedAtTo(to as Date) : sql``}
+                    ${isDefined(from) ? this.wherePlayedAtFrom(from as Date) : sql``}
+                    ${isDefined(to) ? this.wherePlayedAtTo(to as Date) : sql``}
                     and pt.include_in_statistics = true
                 group by
                     t.bucket
@@ -347,8 +361,8 @@ export class PlayedTrackMapper {
                     artist a on ta.artist_id = a.id
                 where
                     pt.account_id = ${ accountId }
-                    ${isDefined(from) ? PlayedTrackMapper.wherePlayedAtFrom(from as Date) : sql``}
-                    ${isDefined(to) ? PlayedTrackMapper.wherePlayedAtTo(to as Date) : sql``}
+                    ${isDefined(from) ? this.wherePlayedAtFrom(from as Date) : sql``}
+                    ${isDefined(to) ? this.wherePlayedAtTo(to as Date) : sql``}
                     and pt.include_in_statistics = true
                 group by
                     ta.artist_id
@@ -373,17 +387,17 @@ export class PlayedTrackMapper {
         });
     }
 
-    private static convertTrackDetailsResult(items: PlayedTrackDetailsDaoInterface[]): PlayedTrackDetailsDao[] {
+    private async populateAndConvertTrackDetailsResult(items: PlayedTrackDetailsDaoInterface[]): Promise<PlayedTrackDetailsNoAlbumImagesDao[]> {
         const playedTrackDetailsMap = new Map<number, PlayedTrackDetailsDaoInterface>();
-        const trackArtistsMap = new Map<number, SimpleArtistDao[]>();
+        const trackArtistsMap = new Map<number, IdNameDao[]>();
 
         for (const item of items) {
+            const trackId = item.trackId;
             const playedTrackId = item.playedTrackId;
+
             playedTrackDetailsMap.set(playedTrackId, item);
 
-            const trackId = item.trackId;
-
-            const artistDao = SimpleArtistDao.Builder
+            const artistDao = IdNameDao.Builder
                 .withId(item.artistId)
                 .withName(item.artistName)
                 .build();
@@ -398,18 +412,17 @@ export class PlayedTrackMapper {
             }
         }
 
-        const result = [];
+        const result: PlayedTrackDetailsNoAlbumImagesDao[] = [];
         
         for (const item of playedTrackDetailsMap.values()) {
-            const dao = PlayedTrackDetailsDao.Builder
+            const album = isDefined(item.albumId) ? createIdNameDao(item.albumId, item.albumName) : null;
+
+            const dao = PlayedTrackDetailsNoAlbumImagesDao.Builder
                 .withPlayedTrackId(item.playedTrackId)
-                .withTrackId(item.trackId)
-                .withTrackName(item.trackName)
-                .withAlbumId(item.albumId)
-                .withAlbumName(item.albumName)
+                .withTrack(createIdNameDao(item.trackId, item.trackName))
                 .withArtists(new Set(trackArtistsMap.get(item.trackId)))
-                .withMusicProviderId(item.musicProviderId)
-                .withMusicProviderName(item.musicProviderName)
+                .withAlbum(album)
+                .withMusicProvider(createIdNameDao(item.musicProviderId, item.musicProviderName))
                 .withPlayedAt(item.playedAt)
                 .withIncludeInStatistics(item.includeInStatistics)
                 .build();
@@ -420,15 +433,15 @@ export class PlayedTrackMapper {
         return result;
     }
 
-    private static determineSortOrder(order: SortOrder) {
+    private determineSortOrder(order: SortOrder) {
         return order === SortOrder.DESCENDING ? sql`desc` : sql`asc`;
     }
 
-    private static wherePlayedAtFrom(from: Date) {
+    private wherePlayedAtFrom(from: Date) {
         return sql`and pt.played_at >= ${from}`;
     }
 
-    private static wherePlayedAtTo(to: Date) {
+    private wherePlayedAtTo(to: Date) {
         return sql`and pt.played_at >= ${to}`;
     }
 

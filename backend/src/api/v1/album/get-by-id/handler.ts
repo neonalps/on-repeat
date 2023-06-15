@@ -65,6 +65,10 @@ export class GetAlbumByIdHandler implements RouteHandler<GetAlbumByIdRequestDto,
                 lastPlayedAt: playedInfo.lastPlayedAt,
                 timesPlayed: playedInfo.timesPlayed,
             },
+            totalTracks: album.totalTracks,
+            releaseDate: album.releaseDate,
+            releaseDatePrecision: album.releaseDatePrecision,
+            images: this.apiHelper.convertImageApiDtos(Array.from(album.images)),
         }
     }
 

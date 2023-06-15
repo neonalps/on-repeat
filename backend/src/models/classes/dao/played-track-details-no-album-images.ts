@@ -1,16 +1,15 @@
-import { SimpleAlbumDao } from "@src/models/classes/dao/album-simple";
 import { IdNameDao } from "@src/models/classes/dao/id-name";
 
-export class PlayedTrackDetailsDao {
+export class PlayedTrackDetailsNoAlbumImagesDao {
    private _playedTrackId!: number;
    private _track!: IdNameDao;
-   private _album!: SimpleAlbumDao | null;
+   private _album!: IdNameDao | null;
    private _artists!: Set<IdNameDao>;
    private _musicProvider!: IdNameDao;
    private _playedAt!: Date;
    private _includeInStatistics!: boolean;
 
-   constructor(builder: PlayedTrackDetailsDaoBuilder) {
+   constructor(builder: PlayedTrackDetailsNoAlbumImagesDaoBuilder) {
       this._playedTrackId = builder.playedTrackId;
       this._track = builder.track;
       this._album = builder.album;
@@ -28,7 +27,7 @@ export class PlayedTrackDetailsDao {
       return this._track;
    }
 
-   public get album(): SimpleAlbumDao | null {
+   public get album(): IdNameDao | null {
       return this._album;
    }
 
@@ -48,51 +47,51 @@ export class PlayedTrackDetailsDao {
       return this._includeInStatistics;
    }
 
-   public static get Builder(): PlayedTrackDetailsDaoBuilder {
-      return new PlayedTrackDetailsDaoBuilder();
+   public static get Builder(): PlayedTrackDetailsNoAlbumImagesDaoBuilder {
+      return new PlayedTrackDetailsNoAlbumImagesDaoBuilder();
    }
 }
 
-class PlayedTrackDetailsDaoBuilder {
+class PlayedTrackDetailsNoAlbumImagesDaoBuilder {
    private _playedTrackId!: number;
    private _track!: IdNameDao;
-   private _album!: SimpleAlbumDao | null;
+   private _album!: IdNameDao | null;
    private _artists!: Set<IdNameDao>;
    private _musicProvider!: IdNameDao;
    private _playedAt!: Date;
    private _includeInStatistics!: boolean;
 
-   public withPlayedTrackId(playedTrackId: number): PlayedTrackDetailsDaoBuilder {
+   public withPlayedTrackId(playedTrackId: number): PlayedTrackDetailsNoAlbumImagesDaoBuilder {
       this._playedTrackId = playedTrackId;
       return this;
    }
 
-   public withTrack(track: IdNameDao): PlayedTrackDetailsDaoBuilder {
+   public withTrack(track: IdNameDao): PlayedTrackDetailsNoAlbumImagesDaoBuilder {
       this._track = track;
       return this;
    }
 
-   public withAlbum(album: SimpleAlbumDao | null): PlayedTrackDetailsDaoBuilder {
+   public withAlbum(album: IdNameDao | null): PlayedTrackDetailsNoAlbumImagesDaoBuilder {
       this._album = album;
       return this;
    }
 
-   public withArtists(artists: Set<IdNameDao>): PlayedTrackDetailsDaoBuilder {
+   public withArtists(artists: Set<IdNameDao>): PlayedTrackDetailsNoAlbumImagesDaoBuilder {
       this._artists = new Set(artists);
       return this;
    }
 
-   public withMusicProvider(musicProvider: IdNameDao): PlayedTrackDetailsDaoBuilder {
+   public withMusicProvider(musicProvider: IdNameDao): PlayedTrackDetailsNoAlbumImagesDaoBuilder {
       this._musicProvider = musicProvider;
       return this;
    }
 
-   public withPlayedAt(playedAt: Date): PlayedTrackDetailsDaoBuilder {
+   public withPlayedAt(playedAt: Date): PlayedTrackDetailsNoAlbumImagesDaoBuilder {
       this._playedAt = playedAt;
       return this;
    }
 
-   public withIncludeInStatistics(includeInStatistics: boolean): PlayedTrackDetailsDaoBuilder {
+   public withIncludeInStatistics(includeInStatistics: boolean): PlayedTrackDetailsNoAlbumImagesDaoBuilder {
       this._includeInStatistics = includeInStatistics;
       return this;
    }
@@ -105,7 +104,7 @@ class PlayedTrackDetailsDaoBuilder {
       return this._track;
    }
 
-   public get album(): SimpleAlbumDao | null {
+   public get album(): IdNameDao | null {
       return this._album;
    }
 
@@ -125,7 +124,7 @@ class PlayedTrackDetailsDaoBuilder {
       return this._includeInStatistics;
    }
 
-   build(): PlayedTrackDetailsDao {
-      return new PlayedTrackDetailsDao(this);
+   build(): PlayedTrackDetailsNoAlbumImagesDao {
+      return new PlayedTrackDetailsNoAlbumImagesDao(this);
    }
 }

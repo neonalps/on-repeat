@@ -9,4 +9,9 @@ export interface DetailedTrackApiDto {
     album: AlbumApiDto | null;
     playedInfo: PlayedInfoApiDto;
     externalUrls: Record<string, string>;
+    explicit: boolean | null;
+    isrc: string | null;
+    discNumber: number | null;
+    trackNumber: number | null;
+    durationMs: number | null;
 }

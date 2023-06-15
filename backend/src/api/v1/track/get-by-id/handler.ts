@@ -60,6 +60,7 @@ export class GetTrackByIdHandler implements RouteHandler<GetTrackByIdRequestDto,
             id: album.id,
             name: album.name,
             href: this.apiHelper.getAlbumResourceUrl(album.id),
+            images: this.apiHelper.convertImageApiDtos(Array.from(album.images)),
         } : null;
 
         return {
@@ -73,6 +74,11 @@ export class GetTrackByIdHandler implements RouteHandler<GetTrackByIdRequestDto,
                 lastPlayedAt: playedInfo.lastPlayedAt,
                 timesPlayed: playedInfo.timesPlayed,
             },
+            explicit: track.explicit,
+            isrc: track.isrc,
+            discNumber: track.discNumber,
+            trackNumber: track.trackNumber,
+            durationMs: track.durationMs,
         }
     }
 

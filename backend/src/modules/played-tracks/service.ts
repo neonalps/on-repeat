@@ -1,4 +1,4 @@
-import { requireNonNull } from "@src/util/common";
+import { isDefined, removeNull, requireNonNull } from "@src/util/common";
 import { PlayedTrackMapper } from "./mapper";
 import { validateNotNull } from "@src/util/validation";
 import { PlayedTrackDao } from "@src/models/classes/dao/played-track";
@@ -11,8 +11,13 @@ import { ChartItem } from "@src/models/interface/chart-item";
 import { PlayedInfoItem } from "@src/models/interface/played-info-item";
 import { ArtistPlayedTrackDetailsDao } from "@src/models/classes/dao/artist-track-played";
 import { CatalogueService } from "@src/modules/catalogue/service";
+import { PlayedTrackHistoryDao } from "@src/models/classes/dao/played-track-history";
+import { IdNameDao } from "@src/models/classes/dao/id-name";
+import { SimpleAlbumDao } from "@src/models/classes/dao/album-simple";
+import { AlbumDao } from "@src/models/classes/dao/album";
 
 export interface GetPlayedTracksPaginationParams extends PaginationParams<Date> {};
+export interface GetPlayedTrackHistoryPaginationParams extends PaginationParams<Date> {};
 
 export interface GetArtistPlayedTracksPaginationParams extends PaginationParams<number> {
     sortBy: GetArtistPlayedTracksSortKey,
@@ -71,8 +76,51 @@ export class PlayedTrackService {
         const orderedIds = await this.getAllOrderedPaginatedResult(accountId, paginationParams.lastSeen, paginationParams.limit, paginationParams.order);
 
         const playedTrackDetails = await this.mapper.getAllForAccountPaginatedDetails(orderedIds);
-        
-        return playedTrackDetails.sort(PlayedTrackService.playedAtComparator(paginationParams.order));
+
+        const albumIds = playedTrackDetails
+            .map(item => item.album?.id)
+            .filter(item => isDefined(item)) as number[];
+
+        const albums = await this.catalogueService.getMultipleAlbumsById(new Set(albumIds));
+
+        const playedTrackDetailsWithAlbumImages = playedTrackDetails.map(item => {
+            let album: SimpleAlbumDao | null = null;
+            if (isDefined(item.album)) {
+                const albumIdName = item.album as IdNameDao;
+
+                const albumDao = albums.find(albumItem => albumItem.id === albumIdName.id);
+                const albumImages = isDefined(albumDao) ? (albumDao as AlbumDao).images : [];
+
+                album = SimpleAlbumDao.Builder
+                    .withId(albumIdName.id)
+                    .withName(albumIdName.name)
+                    .withImages(new Set(albumImages))
+                    .build();
+            }
+
+            return PlayedTrackDetailsDao.Builder
+                .withPlayedTrackId(item.playedTrackId)
+                .withPlayedAt(item.playedAt)
+                .withTrack(item.track)
+                .withArtists(item.artists)
+                .withAlbum(album)
+                .withMusicProvider(item.musicProvider)
+                .withIncludeInStatistics(item.includeInStatistics)
+                .build();
+        });
+
+        return playedTrackDetailsWithAlbumImages.sort(PlayedTrackService.playedAtComparator(paginationParams.order));
+    }
+
+    public async getPlayedTrackHistoryForAccountPaginated(accountId: number, trackId: number, paginationParams: GetPlayedTrackHistoryPaginationParams): Promise<PlayedTrackHistoryDao[]> {
+        validateNotNull(accountId, "accountId");
+        validateNotNull(trackId, "trackId");
+        validateNotNull(paginationParams, "paginationParams");
+        validateNotNull(paginationParams.limit, "paginationParams.limit");
+        validateNotNull(paginationParams.order, "paginationParams.order");
+        validateNotNull(paginationParams.lastSeen, "paginationParams.lastSeen");
+
+        return this.mapper.getPlayedTrackHistoryForAccountPaginated(accountId, trackId, null, null, paginationParams.lastSeen, paginationParams.limit, paginationParams.order);
     }
 
     public async getArtistTracksOffsetPaginated(accountId: number, artistId: number, paginationParams: GetArtistPlayedTracksPaginationParams): Promise<ArtistPlayedTrackDetailsDao[]> {
@@ -98,10 +146,8 @@ export class PlayedTrackService {
             const additionalArtists = Array.from(trackDetails.artists).filter(artist => artist.id !== artistId);
             
             const item = ArtistPlayedTrackDetailsDao.Builder
-                .withTrackId(trackDetails.trackId)
-                .withTrackName(trackDetails.trackName)
-                .withAlbumId(trackDetails.albumId)
-                .withAlbumName(trackDetails.albumName)
+                .withTrack(trackDetails.track)
+                .withAlbum(trackDetails.album)
                 .withAdditionalArtists(new Set(additionalArtists))
                 .withTimesPlayed(trackBucket.timesPlayed)
                 .build();
@@ -113,11 +159,7 @@ export class PlayedTrackService {
     }
 
     private async getAllOrderedPaginatedResult(accountId: number, lastSeenPlayedAt: Date, limit: number, order: SortOrder): Promise<number[]> {
-        if (order === SortOrder.DESCENDING) {
-            return this.mapper.getAllIdsForAccountPaginatedDescending(accountId, lastSeenPlayedAt, limit);
-        }
-
-        return this.mapper.getAllIdsForAccountPaginatedAscending(accountId, lastSeenPlayedAt, limit);
+        return this.mapper.getAllIdsForAccountPaginated(accountId, lastSeenPlayedAt, limit, order);
     }
 
     private async getArtistTracksOrderedOffsetPaginatedResult(accountId: number, artistId: number, lastSeen: number, limit: number, sortBy: GetArtistPlayedTracksSortKey, order: SortOrder): Promise<PlayedInfoItem[]> {
