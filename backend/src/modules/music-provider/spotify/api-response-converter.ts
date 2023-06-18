@@ -30,7 +30,7 @@ export class SpotifyApiResponseConverter {
     private static convertPlayedTrackItem(item: SpotifyPlayedTrackApiDto): SpotifyPlayedTrackDto {
         return {
             track: SpotifyApiResponseConverter.convertTrack(item.track),
-            playedAt: item.played_at,
+            playedAt: new Date(item.played_at),
         };
     }
 

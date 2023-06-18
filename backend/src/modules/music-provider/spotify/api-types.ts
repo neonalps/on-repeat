@@ -26,7 +26,7 @@ export interface SpotifyCursorDto {
 
 export interface SpotifyPlayedTrackApiDto {
     track: SpotifyTrackApiDto;
-    played_at: Date;
+    played_at: string;
 }
 
 export interface SpotifyPlayedTrackDto {

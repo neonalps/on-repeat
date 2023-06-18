@@ -143,6 +143,7 @@ export class SpotifyClient {
     
         const queryString = getQueryString(queryParams);
         const url = `${this.config.recentlyPlayedTracksUrl}?${queryString}`;
+        console.log(`requesting tracks: ${url}`);
         const response = await http.get<SpotifyRecentlyPlayedTracksApiResponseDto>(url, {
             headers: { 
                 [HEADER.ACCEPT]: CONTENT_TYPE.JSON,
