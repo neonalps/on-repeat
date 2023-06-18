@@ -47,4 +47,10 @@ export class ArtistService {
         await this.mapper.update(id, dto);
     }
 
+    public async fullTextSearch(input: string): Promise<ArtistDao[]> {
+        validateNotBlank(input, "input");
+
+        return this.mapper.fullTextSearch(input);
+    }
+
 }

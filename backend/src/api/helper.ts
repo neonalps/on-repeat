@@ -5,11 +5,14 @@ import { ImageApiDto } from "@src/models/api/image";
 import { TrackApiDto } from "@src/models/api/track";
 import { AlbumDao } from "@src/models/classes/dao/album";
 import { AlbumImageDao } from "@src/models/classes/dao/album-image";
+import { SimpleAlbumDao } from "@src/models/classes/dao/album-simple";
 import { ArtistDao } from "@src/models/classes/dao/artist";
 import { IdNameDao } from "@src/models/classes/dao/id-name";
+import { SimpleTrackDetailsDao } from "@src/models/classes/dao/simple-track-details";
 import { TrackDao } from "@src/models/classes/dao/track";
 import { removeNull, requireNonNull } from "@src/util/common";
 
+type AlbumLike = AlbumDao | SimpleAlbumDao;
 type ArtistLike = ArtistDao | IdNameDao;
 type ImageLike = AlbumImageDao;
 
@@ -43,7 +46,17 @@ export class ApiHelper {
         }
     }
 
-    public convertAlbumApiDto(album?: AlbumDao): AlbumApiDto | null {
+    public convertToTrackApiDtoFromSimpleTrackDetails(item: SimpleTrackDetailsDao): TrackApiDto {
+        return {
+            id: item.track.id,
+            name: item.track.name,
+            album: this.convertAlbumApiDto(item.album),
+            artists: this.convertArtistApiDtos(Array.from(item.artists)),
+            href: this.getTrackResourceUrl(item.track.id),
+        }
+    }
+
+    public convertAlbumApiDto(album?: AlbumLike | null): AlbumApiDto | null {
         if (!album) {
             return null;
         }

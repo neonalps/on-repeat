@@ -2,7 +2,7 @@ import logger from "@src/log/logger";
 import { validateNotNull } from "@src/util/validation";
 import { CreateTrackDto } from "@src/models/classes/dto/create-track";
 import { TrackDao } from "@src/models/classes/dao/track";
-import { isDefined, requireNonNull } from "@src/util/common";
+import { requireNonNull } from "@src/util/common";
 import { AlbumDao } from "@src/models/classes/dao/album";
 import { CreateAlbumDto } from "@src/models/classes/dto/create-album";
 import { UpdateAlbumDto } from "@src/models/classes/dto/update-album";
@@ -35,6 +35,24 @@ export class CatalogueService {
         this.trackService = requireNonNull(trackService);
         this.artistService = requireNonNull(artistService);
         this.albumService = requireNonNull(albumService);
+    }
+
+    public async searchTracksFullText(input: string): Promise<SimpleTrackDetailsDao[]> {
+        const tracks = await this.trackService.fullTextSearch(input);
+
+        const result: SimpleTrackDetailsDao[] = [];
+
+        for (const track of tracks) {
+            const trackDetails = await this.getSimpleTrackDetailsById(track.id);
+
+            if (trackDetails === null) {
+                continue;
+            }
+
+            result.push(trackDetails);
+        }
+
+        return result;
     }
 
     public async getTrackById(trackId: number): Promise<TrackDao | null> {
@@ -98,6 +116,10 @@ export class CatalogueService {
             .withAlbum(album !== null ? SimpleAlbumDao.fromAlbumDao(album) : null)
             .withArtists(new Set(artists.map(artist => createIdNameDao(artist.id, artist.name))))
             .build();
+    }
+
+    public async searchArtistsFullText(input: string): Promise<ArtistDao[]> {
+        return this.artistService.fullTextSearch(input);
     }
 
     public async getArtistById(artistId: number): Promise<ArtistDao | null> {
