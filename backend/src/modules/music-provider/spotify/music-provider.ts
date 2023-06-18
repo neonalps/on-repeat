@@ -26,6 +26,10 @@ export class SpotifyMusicProvider extends MusicProvider {
     private static readonly PROVIDER_ID = 1;
     private static readonly PROVIDER_NAME = "spotify";
     private static readonly DICT_KEY_ISRC = "isrc";
+    
+    private static readonly REQUEST_MAX_ITEMS = 50;
+    private static readonly REQUEST_INITIAL_ITEMS = 5;
+    private static readonly REQUEST_ADDITIONAL_ITEMS = SpotifyMusicProvider.REQUEST_MAX_ITEMS - SpotifyMusicProvider.REQUEST_INITIAL_ITEMS;
 
     private readonly accountTokenService: AccountTokenService;
     private readonly catalogueService: CatalogueService;
@@ -56,10 +60,23 @@ export class SpotifyMusicProvider extends MusicProvider {
     public async fetchAndProcessRecentlyPlayedTracks(accountId: number): Promise<void> {
         const lastSeenPlayedTrack = await this.playedTrackService.getMostRecentPlayedTrackByAccountAndMusicProvider(accountId, this.getProviderId());
 
-        const accountToken = await this.retrieveAccountToken(accountId);
+        const initialRequestSize = lastSeenPlayedTrack === null ? SpotifyMusicProvider.REQUEST_MAX_ITEMS : SpotifyMusicProvider.REQUEST_INITIAL_ITEMS;
 
-        const playedTracksResponse = await this.spotifyClient.getRecentlyPlayedTracks(accountToken.accessToken, 50);
-        await this.processPlayedTracks(accountId, playedTracksResponse.items);
+        const initiallyFetchedTracks = await this.fetchRecentlyPlayedTracksForAccount(accountId, initialRequestSize);
+        if (!initiallyFetchedTracks || initiallyFetchedTracks.length === 0) {
+            return;
+        }
+        await this.processPlayedTracks(accountId, initiallyFetchedTracks);
+
+        if (lastSeenPlayedTrack === null || this.isPlayedAtTimestampInResponse(lastSeenPlayedTrack.playedAt, initiallyFetchedTracks)) {
+            console.log('first fetch or played at timestamp was found in response; no additional fetching necessary');
+            return;
+        }
+
+        // the last seen played at was not in the response, fetch the rest of the available played tracks now
+        const oldestPlayedAtInResponse = this.findOldestPlayedAtTimestamp(initiallyFetchedTracks) as Date;
+        const additionallyFetchedTracksResponse = await this.fetchRecentlyPlayedTracksForAccount(accountId, SpotifyMusicProvider.REQUEST_ADDITIONAL_ITEMS, oldestPlayedAtInResponse.getTime());
+        await this.processPlayedTracks(accountId, additionallyFetchedTracksResponse);
     }
 
     public async processPlayedTracks(accountId: number, playedTracks: SpotifyPlayedTrackDto[]): Promise<void> {
@@ -107,6 +124,32 @@ export class SpotifyMusicProvider extends MusicProvider {
                 console.error(ex);
             }
         }
+    }
+
+    private async fetchRecentlyPlayedTracksForAccount(accountId: number, batchSize: number, before?: number): Promise<SpotifyPlayedTrackDto[]> {
+        const accountToken = await this.retrieveAccountToken(accountId);
+        const playedTracksResponse = await this.spotifyClient.getRecentlyPlayedTracks(accountToken.accessToken, batchSize, before);
+        return playedTracksResponse.items;
+    }
+
+    private isPlayedAtTimestampInResponse(playedAt: Date, tracks: SpotifyPlayedTrackDto[]): boolean {
+        return tracks.some(track => playedAt.getTime() === track.playedAt.getTime());
+    }
+
+    private findOldestPlayedAtTimestamp(tracks: SpotifyPlayedTrackDto[]): Date {
+        let oldestDate: Date | null = null;
+        
+        for (const track of tracks) {
+            if (oldestDate === null || track.playedAt.getTime() < oldestDate.getTime()) {
+                oldestDate = track.playedAt;
+            }
+        }
+
+        if (oldestDate === null) {
+            throw new Error("Illegal state, must pass tracks to findOldestPlayedAtTimestamp");
+        }
+
+        return oldestDate;
     }
 
     private async retrieveAccountToken(accountId: number): Promise<AccountTokenDao> {
