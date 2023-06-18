@@ -3,6 +3,8 @@ import { ArtistDao } from "@src/models/classes/dao/artist";
 import { CreateArtistDto } from "@src/models/classes/dto/create-artist";
 import { UpdateArtistDto } from "@src/models/classes/dto/update-artist";
 import { ArtistDaoInterface } from "@src/models/dao/artist.dao";
+import { removeNull } from "@src/util/common";
+import { PendingQuery, Row } from "postgres";
 
 export class ArtistMapper {
 
@@ -82,6 +84,33 @@ export class ArtistMapper {
             where
                 id = ${ id }
             `;
+    }
+
+    public async fullTextSearch(input: string): Promise<ArtistDao[]> {
+        const result = await sql<ArtistDaoInterface[]>`
+            ${ ArtistMapper.commonArtistSelect() }
+            where
+                name like ${ '%' + input + '%' }
+            limit
+                10
+        `;
+
+        if (!result || result.length === 0) {
+            return [];
+        }
+
+        return result.map(item => ArtistDao.fromDaoInterface(item))
+                     .filter(removeNull) as ArtistDao[];
+    }
+
+    private static commonArtistSelect(): PendingQuery<Row[]> {
+        return sql`select
+                id,
+                name,
+                created_at,
+                updated_at
+            from
+                artist`;
     }
     
 }

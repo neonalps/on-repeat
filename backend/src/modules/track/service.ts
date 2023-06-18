@@ -56,4 +56,10 @@ export class TrackService {
         await this.mapper.updateBucket(id, newBucket);
     }
 
+    public async fullTextSearch(input: string): Promise<TrackDao[]> {
+        validateNotBlank(input, "input");
+
+        return this.mapper.fullTextSearch(input);
+    }
+
 }

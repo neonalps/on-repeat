@@ -4,7 +4,7 @@ import { CreateTrackDto } from "@src/models/classes/dto/create-track";
 import { UpdateTrackDto } from "@src/models/classes/dto/update-track";
 import { TrackArtistDaoInterface } from "@src/models/dao/track-artist.dao";
 import { TrackDaoInterface } from "@src/models/dao/track.dao";
-import postgres from "postgres";
+import postgres, { PendingQuery, Row } from "postgres";
 
 export class TrackMapper {
 
@@ -148,6 +148,22 @@ export class TrackMapper {
             `;
     }
 
+    public async fullTextSearch(input: string): Promise<TrackDao[]> {
+        const result = await sql<TrackDaoInterface[]>`
+            ${ TrackMapper.commonTrackSelect() }
+            where
+                name like ${ '%' + input + '%' }
+            limit
+                10
+        `;
+
+        if (!result || result.length === 0) {
+            return [];
+        }
+
+        return this.convertResultSet(result);
+    }
+
     private static convertToDao(item: TrackDaoInterface, artistIds: number[]): TrackDao {
         return TrackDao.Builder
             .withId(item.id)
@@ -163,6 +179,23 @@ export class TrackMapper {
             .withCreatedAt(item.createdAt)
             .withUpdatedAt(item.updatedAt)
             .build();
+    }
+
+    private static commonTrackSelect(): PendingQuery<Row[]> {
+        return sql`select
+                id,
+                name,
+                album_id,
+                isrc,
+                bucket,
+                disc_number,
+                track_number,
+                duration_ms,
+                explicit,
+                created_at,
+                updated_at
+            from
+                track`;
     }
 
     private async convertResultSet(resultSet: postgres.RowList<TrackDaoInterface[]>): Promise<TrackDao[]> {

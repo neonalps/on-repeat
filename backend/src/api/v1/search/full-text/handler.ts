@@ -18,7 +18,7 @@ export class FullTextSearchHandler implements RouteHandler<FullTextSearchRequest
         const accountId = (context.account as AccountDao).id;
 
         return {
-            results: [],
+            results: await this.searchService.fullText(dto.search, dto.pick),
         };
     }
 
