@@ -12,6 +12,8 @@ export class JobMapper {
                 id,
                 name,
                 enabled,
+                interval_ms,
+                initial_delay_ms,
                 created_at,
                 updated_at
             from

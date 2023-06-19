@@ -7,6 +7,7 @@ import { SpotifyMusicProvider } from "@src/modules/music-provider/spotify/music-
 
 export interface JobProcessor {
     process(executionContext: JobExecutionContext): Promise<void>;
+    getJobId(): number
 }
 
 export class JobRepository {

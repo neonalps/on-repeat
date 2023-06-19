@@ -28,7 +28,7 @@ export interface RouteHandler<S, T> {
 }
 
 export type RequestSchema = {
-    body?: unknown,
+    body?: unknown
     params?: unknown,
     querystring?: unknown,
 }

@@ -1,5 +1,5 @@
 import { JobExecutionContext } from "@src/modules/scheduler/scheduler";
-import { JobProcessor } from "../repository";
+import { JobProcessor } from "@src/modules/job/repository";
 import { requireNonNull } from "@src/util/common";
 import { SpotifyMusicProvider } from "@src/modules/music-provider/spotify/music-provider";
 
@@ -11,6 +11,10 @@ export class FetchSpotifyRecentlyPlayedTracksJob implements JobProcessor {
 
     constructor(spotifyMusicProvider: SpotifyMusicProvider) {
         this.spotifyMusicProvider = requireNonNull(spotifyMusicProvider);
+    }
+
+    public getJobId(): number {
+        return 1;
     }
 
     public async process(executionContext: JobExecutionContext): Promise<void> {
