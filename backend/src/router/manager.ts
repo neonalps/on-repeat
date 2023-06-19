@@ -10,7 +10,7 @@ import { Dependencies } from "@src/di/dependencies";
 import { IllegalStateError } from "@src/api/error/illegal-state-error";
 import { isDefined } from "@src/util/common";
 
-export class RouterHelper {
+export class RouteManager {
 
     private static readonly EMPTY_AUTHENTICATION: AuthenticationContext = {
         authenticated: false,
@@ -36,7 +36,7 @@ export class RouterHelper {
         server.route({
             method: route.method,
             url: route.path,
-            schema: RouterHelper.convertRequestSchema(route.schema),
+            schema: RouteManager.convertRequestSchema(route.schema),
             onRequest: async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
                 if (route.authenticated !== true) {
                     return;
@@ -50,9 +50,9 @@ export class RouterHelper {
                 }
             },
             preHandler: async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
-                const authenticationContext = await RouterHelper.buildAuthenticationContext(route.authenticated, request.user as any);
+                const authenticationContext = await RouteManager.buildAuthenticationContext(route.authenticated, request.user as any);
                 
-                if (route.authenticated === true && !RouterHelper.hasValidAuthenthicationContextForAuthenticatedRequest(authenticationContext)) {
+                if (route.authenticated === true && !RouteManager.hasValidAuthenthicationContextForAuthenticatedRequest(authenticationContext)) {
                     this.sendErrorResponse(reply, route, 401, "Unauthorized");
                     return;
                 }
@@ -62,7 +62,7 @@ export class RouterHelper {
             handler: async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
                 const principal: AuthenticationContext = (request as any)['principal'];
 
-                const body = RouterHelper.mergeRequestContext(request) as unknown;
+                const body = RouteManager.mergeRequestContext(request) as unknown;
 
                 try {
                     const response = await route.handler.handle(principal, body) as any;
@@ -83,7 +83,7 @@ export class RouterHelper {
 
     private static async buildAuthenticationContext(isRouteAuthenticated: boolean, publicUserId: string | null): Promise<AuthenticationContext> {
         if (!isRouteAuthenticated) {
-            return RouterHelper.EMPTY_AUTHENTICATION;
+            return RouteManager.EMPTY_AUTHENTICATION;
         }
 
         if (typeof publicUserId !== 'string') {
