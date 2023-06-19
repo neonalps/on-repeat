@@ -1,9 +1,8 @@
 import fastify from "fastify";
-
 import { getAuthTokenSigningKey, getNodeEnv, getServerHost, getServerPort } from "@src/config";
 import logger from "@src/log/logger";
 import { DependencyHelper } from "@src/di/helper";
-import { RouterHelper } from "@src/router/helper";
+import { RouteManager } from "@src/router/manager";
 import { testDbConnection } from "@src/db/db";
 import dependencyManager from "@src/di/manager";
 import { Scheduler } from "@src/modules/scheduler/scheduler";
@@ -16,8 +15,8 @@ const start = async () =>  {
   await testDbConnection();
   DependencyHelper.initDependencies();
   JobRepository.initJobs();
-  RouterHelper.registerJwtParser(server, getAuthTokenSigningKey());
-  RouterHelper.registerRoutes(server);
+  RouteManager.registerJwtParser(server, getAuthTokenSigningKey());
+  RouteManager.registerRoutes(server);
 
   server.listen({ host: getServerHost(), port: getServerPort() }, async (err, address) => {
     if (err) {
