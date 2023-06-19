@@ -8,6 +8,7 @@ import dependencyManager from "@src/di/manager";
 import { Scheduler } from "@src/modules/scheduler/scheduler";
 import { Dependencies } from "@src/di/dependencies";
 import { JobRepository } from "@src/modules/job/repository";
+import { getRouteProviders } from "@src/api/providers";
 
 const start = async () =>  {
   const server = fastify();
@@ -16,7 +17,7 @@ const start = async () =>  {
   DependencyHelper.initDependencies();
   JobRepository.initJobs();
   RouteManager.registerJwtParser(server, getAuthTokenSigningKey());
-  RouteManager.registerRoutes(server);
+  RouteManager.registerRoutes(server, getRouteProviders());
 
   server.listen({ host: getServerHost(), port: getServerPort() }, async (err, address) => {
     if (err) {

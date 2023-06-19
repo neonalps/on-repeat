@@ -22,7 +22,7 @@ import { getTrackApiRouteProviders } from "@src/api/v1/track/track-route-provide
 import { getChartApiRouteProviders } from "@src/api/v1/chart/chart-route-providers";
 import { getSearchRouteProviders } from "@src/api/v1/search/search-route-providers";
 
-export const getProviders = () => {
+export function getRouteProviders(): RouteProvider<unknown, unknown>[] {
     const accountService = dependencyManager.get<AccountService>(Dependencies.AccountService);
     const accountTokenService = dependencyManager.get<AccountTokenService>(Dependencies.AccountTokenService);
     
