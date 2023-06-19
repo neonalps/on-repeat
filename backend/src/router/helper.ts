@@ -135,11 +135,21 @@ export class RouterHelper {
     }
 
     private static convertRequestSchema(schema: RequestSchema): FastifySchema {
-        return {
-            body: schema.body,
-            params: schema.params,
-            querystring: schema.querystring,
+        let requestSchema = {};
+
+        if (isDefined(schema.body)) {
+            requestSchema = { ...requestSchema, ...schema.body as object };
         }
+
+        if (isDefined(schema.params)) {
+            requestSchema = { ...requestSchema, ...schema.params as object };
+        }
+
+        if (isDefined(schema.querystring)) {
+            requestSchema = { ...requestSchema, ...schema.querystring as object };
+        }
+
+        return requestSchema;
     }
 
     private static mergeRequestContext(request: FastifyRequest): unknown {

@@ -41,7 +41,7 @@ export class ConnectSpotifyAccountHandler implements RouteHandler<ConnectSpotify
         await this.accountTokenService.create(createAccountToken);
 
         if (dto.createFetchRecentlyPlayedTracksJob === true) {
-            await this.jobHelper.insertInitialAccountJobSchedule(accountId, JobHelper.getFetchSpotifyRecentPlayedTracksJobDefinition());
+            await this.jobHelper.insertInitialAccountJobScheduleSpotifyRecentlyPlayedTracks(accountId);
         }
 
         return {

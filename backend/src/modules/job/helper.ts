@@ -10,12 +10,6 @@ import { AccountJobScheduleDao } from "@src/models/classes/dao/account-job-sched
 import { AccountJobDao } from "@src/models/classes/dao/account-job";
 import { AccountService } from "@src/modules/account/service";
 
-export interface JobDefinition {
-    jobId: number;
-    intervalSeconds: number;
-    initialDelaySeconds: number;
-}
-
 export class JobHelper {
 
     public static readonly JOB_ID_FETCH_SPOTIFY_RECENT_PLAYED_TRACKS = 1;
@@ -26,8 +20,6 @@ export class JobHelper {
     static readonly ERROR_JOB_DISABLED_GLOBALLY = "Job has been disabled globally";
     static readonly ERROR_JOB_DISABLED_ACCOUNT = "Job has been disabled for this account";
 
-    private static readonly JOB_FETCH_SPOTIFY_RECENT_PLAYED_TRACKS_DEFAULT_INTERVAL_SECONDS = 600;
-    private static readonly INITIAL_JOB_SCHEDULE_DELAY_SECONDS = 1;
     private static readonly MAXIMUM_FAILURE_COUNT = 5;
     private static readonly BATCH_SIZE = 10;
 
@@ -51,14 +43,23 @@ export class JobHelper {
         this.timeSource = requireNonNull(timeSource);
     }
 
-    public async insertInitialAccountJobSchedule(accountId: number, jobDefinition: JobDefinition): Promise<void> {
+    public async insertInitialAccountJobScheduleSpotifyRecentlyPlayedTracks(accoutnId: number): Promise<void> {
+        await this.insertInitialAccountJobSchedule(accoutnId, JobHelper.JOB_ID_FETCH_SPOTIFY_RECENT_PLAYED_TRACKS);
+    }
+
+    private async insertInitialAccountJobSchedule(accountId: number, jobId: number): Promise<void> {
         validateNotNull(accountId, "accountId");
-        validateNotNull(jobDefinition, "jobDefinition");
+        validateNotNull(jobId, "jobId");
+
+        const job = await this.jobService.getById(jobId);
+        if (!job) {
+            throw new Error(`Job with ID ${jobId} does not exist`);
+        }
 
         const createAccountJob = CreateAccountJobDto.Builder
             .withAccountId(accountId)
-            .withJobId(jobDefinition.jobId)
-            .withIntervalSeconds(jobDefinition.intervalSeconds)
+            .withJobId(job.id)
+            .withIntervalSeconds(job.intervalMs / 1000)
             .withEnabled(true)
             .build();
 
@@ -67,7 +68,7 @@ export class JobHelper {
             throw new Error(JobHelper.ERROR_CREATE_ACCOUNT_JOB);
         }
 
-        const initialScheduleAfter = this.timeSource.getNowPlusSeconds(jobDefinition.initialDelaySeconds);
+        const initialScheduleAfter = this.timeSource.getNowPlusMilliSeconds(job.initialDelayMs);
         const accountJobSchedule = await this.accountJobScheduleService.createNewJobSchedule(accountJob.id, initialScheduleAfter);
         if (!accountJobSchedule) {
             throw new Error(JobHelper.ERROR_CREATE_ACCOUNT_JOB_SCHEDULE);
@@ -175,14 +176,6 @@ export class JobHelper {
 
     public async markJobInstanceFailed(scheduleId: number, reason: string): Promise<void> {
         await this.accountJobScheduleService.markFailed(scheduleId, reason);
-    }
-
-    public static getFetchSpotifyRecentPlayedTracksJobDefinition(): JobDefinition {
-        return {
-            jobId: JobHelper.JOB_ID_FETCH_SPOTIFY_RECENT_PLAYED_TRACKS,
-            intervalSeconds: JobHelper.JOB_FETCH_SPOTIFY_RECENT_PLAYED_TRACKS_DEFAULT_INTERVAL_SECONDS,
-            initialDelaySeconds: JobHelper.INITIAL_JOB_SCHEDULE_DELAY_SECONDS,
-        };
     }
 
     private async getAccountJobFailureCount(accountJobId: number): Promise<number> {

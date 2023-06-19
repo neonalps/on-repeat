@@ -12,6 +12,14 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
             type: 'varchar(100)',
             notNull: true
         },
+        interval_ms: {
+            type: 'integer',
+            notNull: true
+        },
+        initial_delay_ms: {
+            type: 'integer',
+            notNull: true
+        },
         enabled: {
             type: 'boolean',
             notNull: true
