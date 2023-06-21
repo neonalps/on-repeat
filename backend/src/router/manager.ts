@@ -1,7 +1,6 @@
 import { FastifyError, FastifyInstance, FastifyReply, FastifyRequest, FastifySchema } from "fastify";
 import fastifyJwt from "@fastify/jwt";
-import { AuthenticationContext, RequestSchema, ResponseSchema, RouteDefinition } from "./types";
-import { getProviders } from "../api/providers";
+import { AuthenticationContext, RequestSchema, ResponseSchema, RouteDefinition, RouteProvider } from "./types";
 import { HttpMethod } from "@src/http/constants";
 import logger from "@src/log/logger";
 import dependencyManager from "@src/di/manager";
@@ -19,8 +18,8 @@ export class RouteManager {
 
     private constructor() {}
 
-    public static registerRoutes(server: FastifyInstance): void {
-        for (const provider of getProviders()) {
+    public static registerRoutes(server: FastifyInstance, providers: RouteProvider<unknown, unknown>[]): void {
+        for (const provider of providers) {
             this.registerRoute(server, provider.provide() as RouteDefinition<unknown, unknown>);
         }
     }

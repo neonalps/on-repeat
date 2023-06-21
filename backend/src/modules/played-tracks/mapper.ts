@@ -442,7 +442,7 @@ export class PlayedTrackMapper {
     }
 
     private wherePlayedAtTo(to: Date) {
-        return sql`and pt.played_at >= ${to}`;
+        return sql`and pt.played_at < ${to}`;
     }
 
 }

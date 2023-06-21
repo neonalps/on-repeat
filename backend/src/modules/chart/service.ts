@@ -12,8 +12,9 @@ import { ChartItem } from "@src/models/interface/chart-item";
 
 export class ChartService {
 
-    private static readonly ACCOUNT_TRACK_CHART_LIMIT = 5;
-    private static readonly ACCOUNT_ARTIST_CHART_LIMIT = 5;
+    private static readonly CHART_DEFAULT_LIMIT = 10;
+    private static readonly ACCOUNT_TRACK_CHART_MAX_LIMIT = 100;
+    private static readonly ACCOUNT_ARTIST_CHART_MAX_LIMIT = 100;
 
     private readonly apiHelper: ApiHelper;
     private readonly catalogueService: CatalogueService;
@@ -25,14 +26,15 @@ export class ChartService {
         this.playedTrackService = requireNonNull(playedTrackService);
     }
 
-    public async getAccountTrackChartsForPeriod(accountId: number, from: Date | null, to: Date | null): Promise<ChartTrackApiDto[]> {
+    public async getAccountTrackChartsForPeriod(accountId: number, from: Date | null, to: Date | null, limit: number = ChartService.CHART_DEFAULT_LIMIT): Promise<ChartTrackApiDto[]> {
         validateNotNull(accountId, "accountId");
+        validateTrue(limit <= ChartService.ACCOUNT_TRACK_CHART_MAX_LIMIT, `limit must not be larger than ${ChartService.ACCOUNT_TRACK_CHART_MAX_LIMIT}`);
 
         if (from !== null && to !== null) {
             validateTrue(from < to, "from must be before to");
         }
 
-        const chartItems = await this.playedTrackService.getAccountTrackChartsForPeriod(accountId, from, to, ChartService.ACCOUNT_TRACK_CHART_LIMIT);
+        const chartItems = await this.playedTrackService.getAccountTrackChartsForPeriod(accountId, from, to, limit);
         
         const trackIds = chartItems.map((item: ChartItem) => item.itemId);
 
@@ -73,14 +75,15 @@ export class ChartService {
         return chartTracks;
     }
 
-    public async getAccountArtistChartsForPeriod(accountId: number, from: Date | null, to: Date | null): Promise<ChartArtistApiDto[]> {
+    public async getAccountArtistChartsForPeriod(accountId: number, from: Date | null, to: Date | null, limit: number = ChartService.CHART_DEFAULT_LIMIT): Promise<ChartArtistApiDto[]> {
         validateNotNull(accountId, "accountId");
+        validateTrue(limit <= ChartService.ACCOUNT_ARTIST_CHART_MAX_LIMIT, `limit must not be larger than ${ChartService.ACCOUNT_ARTIST_CHART_MAX_LIMIT}`);
 
         if (from !== null && to !== null) {
             validateTrue(from < to, "from must be before to");
         }
 
-        const chartItems = await this.playedTrackService.getAccountArtistChartsForPeriod(accountId, from, to, ChartService.ACCOUNT_ARTIST_CHART_LIMIT);
+        const chartItems = await this.playedTrackService.getAccountArtistChartsForPeriod(accountId, from, to, limit);
         
         const artistIds = chartItems.map((item: ChartItem) => item.itemId);
 

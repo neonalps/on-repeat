@@ -21,21 +21,28 @@ import { RouteProvider } from "@src/router/types";
 import { getTrackApiRouteProviders } from "@src/api/v1/track/track-route-providers";
 import { getChartApiRouteProviders } from "@src/api/v1/chart/chart-route-providers";
 import { getSearchRouteProviders } from "@src/api/v1/search/search-route-providers";
+import { GetDashboardInformationRouteProvider } from "./v1/dashboard/route-provider";
+import { GetDashboardInformationHandler } from "./v1/dashboard/handler";
+import { ChartService } from "@src/modules/chart/service";
+import { TimeSource } from "@src/util/time";
 
-export const getProviders = () => {
+export function getRouteProviders(): RouteProvider<unknown, unknown>[] {
     const accountService = dependencyManager.get<AccountService>(Dependencies.AccountService);
     const accountTokenService = dependencyManager.get<AccountTokenService>(Dependencies.AccountTokenService);
-    
     const authService = dependencyManager.get<AuthService>(Dependencies.AuthService);
+    const chartService = dependencyManager.get<ChartService>(Dependencies.ChartService);
     const jobHelper = dependencyManager.get<JobHelper>(Dependencies.JobHelper);
     const spotifyClient = dependencyManager.get<SpotifyClient>(Dependencies.SpotifyClient);
     const spotifyMusicProvider = dependencyManager.get<SpotifyMusicProvider>(Dependencies.SpotifyMusicProvider);
+    const timeSource = dependencyManager.get<TimeSource>(Dependencies.TimeSource);
 
     const authHandler = new AuthHandler(authService);
     const connectSpotifyAccountHandler = new ConnectSpotifyAccountHandler(accountTokenService, jobHelper, spotifyClient);
     const manualSpotifyResponseUploadHandler = new ManualSpotifyResponseUploadHandler(spotifyMusicProvider);
     
     const oauthLoginHandler = new OauthLoginHandler(authService, accountService, spotifyClient);
+
+    const dashboardHandler = new GetDashboardInformationHandler(chartService, timeSource);
 
     const providers: RouteProvider<any, any>[] = [
         ...getArtistApiRouteProviders(),
@@ -48,6 +55,7 @@ export const getProviders = () => {
         new ConnectSpotifyAccountRouteProvider(connectSpotifyAccountHandler),
         new ManualSpotifyResponseUploadRouteProvider(manualSpotifyResponseUploadHandler),
         new OauthLoginRouteProvider(oauthLoginHandler),
+        new GetDashboardInformationRouteProvider(dashboardHandler),
     ];
 
     return providers;

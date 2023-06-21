@@ -17,5 +17,6 @@ export enum Dependencies {
     SearchService,
     SpotifyClient,
     SpotifyMusicProvider,
+    TimeSource,
     UuidSource,
 };

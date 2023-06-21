@@ -1,4 +1,3 @@
-
 import { AuthenticationContext, RouteHandler } from "@src/router/types";
 import { requireNonNull } from "@src/util/common";
 import { GetArtistByIdRequestDto } from "@src/models/api/get-artist-by-id-request";
