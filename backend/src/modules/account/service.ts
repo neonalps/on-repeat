@@ -1,6 +1,6 @@
 import { validateNotBlank, validateNotNull } from "@src/util/validation";
 import { AccountMapper } from "./mapper";
-import { requireNonNull } from "@src/util/common";
+import { isDefined, requireNonNull } from "@src/util/common";
 import { AccountDao } from "@src/models/classes/dao/account";
 import { CreateAccountDto } from "@src/models/classes/dto/create-account";
 import { CreateSecureAccountDto } from "@src/models/classes/dto/create-secure-account";
@@ -13,17 +13,13 @@ export class AccountService {
     private readonly cryptoService: CryptoService;
     private readonly uuidSource: UuidSource;
 
-    constructor(
-        mapper: AccountMapper, 
-        cryptoService: CryptoService, 
-        uuidSource: UuidSource,
-    ) {
+    constructor(mapper: AccountMapper, cryptoService: CryptoService, uuidSource: UuidSource) {
         this.mapper = requireNonNull(mapper);
         this.cryptoService = requireNonNull(cryptoService);
         this.uuidSource = requireNonNull(uuidSource);
     }
 
-    public async getOrCreate(email: string): Promise<AccountDao | null> {
+    public async getOrCreate(email: string, displayName?: string): Promise<AccountDao | null> {
         validateNotBlank(email, "email");
     
         const existingUser = await this.getByEmail(email);
@@ -34,6 +30,7 @@ export class AccountService {
     
         const account: CreateAccountDto = CreateAccountDto.Builder
             .withPublicId(this.uuidSource.getRandomUuid())
+            .withDisplayName(isDefined(displayName) ? displayName as string : "")
             .withEmail(email)
             .withEnabled(true)
             .build();
@@ -54,6 +51,7 @@ export class AccountService {
 
         const secureAccount = CreateSecureAccountDto.Builder
             .withPublicId(dto.publicId)
+            .withDisplayName(dto.displayName)
             .withHashedEmail(this.cryptoService.hash(dto.email))
             .withEncryptedEmail(null)
             .withEnabled(dto.enabled)
@@ -86,7 +84,7 @@ export class AccountService {
         }
     
         return AccountDao.fromDaoInterface(account);
-    };
+    }
 
     public async getByPublicId(publicId: string): Promise<AccountDao | null> {
         validateNotBlank(publicId, "publicId");
@@ -98,7 +96,14 @@ export class AccountService {
         }
     
         return AccountDao.fromDaoInterface(account);
-    };
+    }
+
+    public async updateDisplayName(id: number, newDisplayName: string): Promise<void> {
+        validateNotNull(id, "id");
+        validateNotBlank(newDisplayName, "newDisplayName");
+
+        await this.mapper.updateDisplayName(id, newDisplayName);
+    }
 
 
 }

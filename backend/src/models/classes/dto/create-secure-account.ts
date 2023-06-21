@@ -1,11 +1,13 @@
 export class CreateSecureAccountDto {
    private _publicId!: string;
+   private _displayName!: string;
    private _hashedEmail!: string;
    private _encryptedEmail!: string | null;
    private _enabled!: boolean;
 
    constructor(builder: CreateSecureAccountDtoBuilder) {
       this._publicId = builder.publicId;
+      this._displayName = builder.displayName;
       this._hashedEmail = builder.hashedEmail;
       this._encryptedEmail = builder.encryptedEmail;
       this._enabled = builder.enabled;
@@ -13,6 +15,10 @@ export class CreateSecureAccountDto {
 
    public get publicId(): string {
       return this._publicId;
+   }
+
+   public get displayName(): string {
+      return this._displayName;
    }
 
    public get hashedEmail(): string {
@@ -34,12 +40,18 @@ export class CreateSecureAccountDto {
 
 class CreateSecureAccountDtoBuilder {
    private _publicId!: string;
+   private _displayName!: string;
    private _hashedEmail!: string;
    private _encryptedEmail!: string | null;
    private _enabled!: boolean;
 
    public withPublicId(publicId: string): CreateSecureAccountDtoBuilder {
       this._publicId = publicId;
+      return this;
+   }
+
+   public withDisplayName(displayName: string): CreateSecureAccountDtoBuilder {
+      this._displayName = displayName;
       return this;
    }
 
@@ -60,6 +72,10 @@ class CreateSecureAccountDtoBuilder {
 
    public get publicId(): string {
       return this._publicId;
+   }
+
+   public get displayName(): string {
+      return this._displayName;
    }
 
    public get hashedEmail(): string {

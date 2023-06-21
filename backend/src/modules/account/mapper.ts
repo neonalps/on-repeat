@@ -10,20 +10,21 @@ export class AccountMapper {
     public async create(account: CreateSecureAccountDto): Promise<number> {
         const result = await sql`
             insert into account
-                (public_id, hashed_email, encrypted_email, enabled, created_at)
+                (public_id, display_name, hashed_email, encrypted_email, enabled, created_at)
             values
-                (${ account.publicId }, ${ account.hashedEmail }, ${ account.encryptedEmail }, ${ account.enabled }, now())
+                (${ account.publicId }, ${ account.displayName }, ${ account.hashedEmail }, ${ account.encryptedEmail }, ${ account.enabled }, now())
             returning id
         `;
     
         return result[0].id;
-    };
+    }
     
     public async getById(id: number): Promise<AccountDao | null> {
         const result = await sql<AccountDaoInterface[]>`
             select
                 id,
                 public_id,
+                display_name,
                 hashed_email,
                 encrypted_email,
                 enabled,
@@ -39,13 +40,14 @@ export class AccountMapper {
         }
     
         return AccountDao.fromDaoInterface(result[0]);
-    };
+    }
 
     public async getByPublicId(publicId: string): Promise<AccountDao | null> {
         const result = await sql<AccountDaoInterface[]>`
             select
                 id,
                 public_id,
+                display_name,
                 hashed_email,
                 encrypted_email,
                 enabled,
@@ -61,13 +63,14 @@ export class AccountMapper {
         }
     
         return AccountDao.fromDaoInterface(result[0]);
-    };
+    }
     
     public async getByHashedEmail(hashedEmail: string): Promise<AccountDao | null> {
         const result = await sql<AccountDaoInterface[]>`
             select
                 id,
                 public_id,
+                display_name,
                 hashed_email,
                 encrypted_email,
                 enabled,
@@ -83,6 +86,18 @@ export class AccountMapper {
         }
     
         return AccountDao.fromDaoInterface(result[0]);
-    };
+    }
+
+    public async updateDisplayName(id: number, newDisplayName: string): Promise<void> {
+        await sql`
+            update
+                account
+            set
+                display_name = ${ newDisplayName },
+                updated_at = now()
+            where
+                id = ${ id }
+        `;
+    }
 
 }

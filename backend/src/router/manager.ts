@@ -137,15 +137,15 @@ export class RouteManager {
         let requestSchema = {};
 
         if (isDefined(schema.body)) {
-            requestSchema = { ...requestSchema, ...schema.body as object };
+            requestSchema = { ...requestSchema, body: { ...schema.body as object } };
         }
 
         if (isDefined(schema.params)) {
-            requestSchema = { ...requestSchema, ...schema.params as object };
+            requestSchema = { ...requestSchema, params: { ...schema.params as object } };
         }
 
         if (isDefined(schema.querystring)) {
-            requestSchema = { ...requestSchema, ...schema.querystring as object };
+            requestSchema = { ...requestSchema, querystring: { ...schema.querystring as object } };
         }
 
         return requestSchema;
