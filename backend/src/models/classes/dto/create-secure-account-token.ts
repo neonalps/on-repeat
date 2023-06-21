@@ -1,5 +1,6 @@
 export class CreateSecureAccountTokenDto {
     private _accountId!: number;
+    private _publicId!: string;
     private _oauthProvider!: string;
     private _scope!: string;
     private _encryptedAccessToken!: string;
@@ -8,6 +9,7 @@ export class CreateSecureAccountTokenDto {
  
     constructor(builder: CreateSecureAccountTokenDtoBuilder) {
        this._accountId = builder.accountId;
+       this._publicId = builder.publicId;
        this._oauthProvider = builder.oauthProvider;
        this._scope = builder.scope;
        this._encryptedAccessToken = builder.encryptedAccessToken;
@@ -17,6 +19,10 @@ export class CreateSecureAccountTokenDto {
  
     public get accountId(): number {
        return this._accountId;
+    }
+
+    public get publicId(): string {
+      return this._publicId;
     }
  
     public get oauthProvider(): string {
@@ -46,6 +52,7 @@ export class CreateSecureAccountTokenDto {
  
  class CreateSecureAccountTokenDtoBuilder {
     private _accountId!: number;
+    private _publicId!: string;
     private _oauthProvider!: string;
     private _scope!: string;
     private _encryptedAccessToken!: string;
@@ -55,6 +62,11 @@ export class CreateSecureAccountTokenDto {
     public withAccountId(accountId: number): CreateSecureAccountTokenDtoBuilder {
        this._accountId = accountId;
        return this;
+    }
+
+    public withPublicId(publicId: string): CreateSecureAccountTokenDtoBuilder {
+      this._publicId = publicId;
+      return this;
     }
  
     public withOauthProvider(oauthProvider: string): CreateSecureAccountTokenDtoBuilder {
@@ -84,6 +96,10 @@ export class CreateSecureAccountTokenDto {
  
     public get accountId(): number {
        return this._accountId;
+    }
+
+    public get publicId(): string {
+      return this._publicId;
     }
  
     public get oauthProvider(): string {

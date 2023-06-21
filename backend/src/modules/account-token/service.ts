@@ -7,6 +7,7 @@ import { CreateSecureAccountTokenDto } from "@src/models/classes/dto/create-secu
 import { AccountTokenDao } from "@src/models/classes/dao/account-token";
 import { SecureAccountTokenDao } from "@src/models/classes/dao/secure-account-token";
 import { TimeSource } from "@src/util/time";
+import { IllegalStateError } from "@src/api/error/illegal-state-error";
 
 export class AccountTokenService {
 
@@ -25,20 +26,27 @@ export class AccountTokenService {
     public async create(dto: CreateAccountTokenDto): Promise<AccountTokenDao | null> {
         validateNotNull(dto, "dto");
         validateNotNull(dto.accountId, "dto.accountId");
+        validateNotBlank(dto.publicId, "dto.publicId");
         validateNotBlank(dto.oauthProvider, "dto.oauthProvider");
         validateNotBlank(dto.scope, "dto.scope");
         validateNotBlank(dto.accessToken, "dto.accessToken");
         validateNotNull(dto.accessTokenExpiresIn, "dto.accessTokenExpiresIn");
         validateNotBlank(dto.refreshToken, "dto.refreshToken");
 
+        const sortedScopes = AccountTokenService.getSortedScopes(dto.scope);
+
+        const existingToken = await this.getByAccountIdAndOauthProviderAndScope(dto.accountId, dto.oauthProvider, sortedScopes);
+        if (existingToken !== null) {
+            throw new IllegalStateError("A token with this scope already exists");
+        }
+
         const encryptedAccessToken = this.cryptoService.encrypt(dto.accessToken);
         const encryptedRefreshToken = this.cryptoService.encrypt(dto.refreshToken);
 
         const accessTokenExpiresAt = this.getSafeTokenExpirationDate(dto.accessTokenExpiresIn);
 
-        const sortedScopes = AccountTokenService.getSortedScopes(dto.scope);
-
         const secureAccountToken = CreateSecureAccountTokenDto.Builder
+            .withPublicId(dto.publicId)
             .withAccountId(dto.accountId)
             .withOauthProvider(dto.oauthProvider)
             .withScope(sortedScopes)
@@ -93,6 +101,12 @@ export class AccountTokenService {
         const newAccessTokenExpiresAt = this.getSafeTokenExpirationDate(newAccessTokenExpiresIn);
 
         await this.mapper.updateAccessToken(accountTokenId, newEncryptedAccessToken, newAccessTokenExpiresAt);
+    }
+
+    public async delete(publicId: string): Promise<void> {
+        validateNotBlank(publicId, "publicId");
+
+        await this.mapper.deleteByPublicId(publicId);
     }
 
     private static getSortedScopes(scopes: string): string {

@@ -10,9 +10,9 @@ export class AccountTokenMapper {
     public async create(accountToken: CreateSecureAccountTokenDto): Promise<number> {
         const result = await sql`
             insert into account_tokens
-                (account_id, oauth_provider, scope, encrypted_access_token, access_token_expires_at, encrypted_refresh_token, created_at, updated_at)
+                (account_id, public_id, oauth_provider, scope, encrypted_access_token, access_token_expires_at, encrypted_refresh_token, created_at, updated_at)
             values
-                (${ accountToken.accountId }, ${ accountToken.oauthProvider }, ${ accountToken.scope }, ${ accountToken.encryptedAccessToken }, ${ accountToken.accessTokenExpiresAt }, ${ accountToken.encryptedRefreshToken }, now(), null)
+                (${ accountToken.accountId }, ${ accountToken.publicId }, ${ accountToken.oauthProvider }, ${ accountToken.scope }, ${ accountToken.encryptedAccessToken }, ${ accountToken.accessTokenExpiresAt }, ${ accountToken.encryptedRefreshToken }, now(), null)
             returning id
         `;
     
@@ -23,6 +23,7 @@ export class AccountTokenMapper {
         const result = await sql<AccountTokenDaoInterface[]>`
             select
                 id,
+                public_id,
                 account_id,
                 oauth_provider,
                 scope,
@@ -48,6 +49,7 @@ export class AccountTokenMapper {
         const result = await sql<AccountTokenDaoInterface[]>`
             select
                 id,
+                public_id,
                 account_id,
                 oauth_provider,
                 scope,
@@ -82,4 +84,11 @@ export class AccountTokenMapper {
                 id = ${ id }
         `;
     }
+
+    public async deleteByPublicId(publicId: string): Promise<void> {
+        await sql`
+            delete from account_tokens where public_id = ${ publicId }
+        `;
+    }
+
 }

@@ -1,5 +1,6 @@
 export class AccountTokenDao {
     private _id!: number;
+    private _publicId!: string;
     private _accountId!: number;
     private _oauthProvider!: string;
     private _scope!: string;
@@ -11,6 +12,7 @@ export class AccountTokenDao {
  
     constructor(builder: AccountTokenDaoBuilder) {
        this._id = builder.id;
+       this._publicId = builder.publicId;
        this._accountId = builder.accountId;
        this._oauthProvider = builder.oauthProvider;
        this._scope = builder.scope;
@@ -23,6 +25,10 @@ export class AccountTokenDao {
  
     public get id(): number {
        return this._id;
+    }
+
+    public get publicId(): string {
+      return this._publicId;
     }
  
     public get accountId(): number {
@@ -64,6 +70,7 @@ export class AccountTokenDao {
  
  class AccountTokenDaoBuilder {
     private _id!: number;
+    private _publicId!: string;
     private _accountId!: number;
     private _oauthProvider!: string;
     private _scope!: string;
@@ -76,6 +83,11 @@ export class AccountTokenDao {
     public withId(id: number): AccountTokenDaoBuilder {
        this._id = id;
        return this;
+    }
+
+    public withPublicId(publicId: string): AccountTokenDaoBuilder {
+      this._publicId = publicId;
+      return this;
     }
  
     public withAccountId(accountId: number): AccountTokenDaoBuilder {
@@ -120,6 +132,10 @@ export class AccountTokenDao {
  
     public get id(): number {
        return this._id;
+    }
+
+    public get publicId(): string {
+      return this._publicId;
     }
  
     public get accountId(): number {

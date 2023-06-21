@@ -1,6 +1,4 @@
 import dependencyManager from "@src/di/manager";
-import { AuthHandler } from "@src/api/auth/handler";
-import { AuthRouteProvider } from "@src/api/auth/route-provider";
 import { AuthService } from "@src/modules/auth/service";
 import { Dependencies } from "@src/di/dependencies";
 import { OauthLoginRouteProvider } from "@src/api/login/oauth/route-provider";
@@ -21,10 +19,11 @@ import { RouteProvider } from "@src/router/types";
 import { getTrackApiRouteProviders } from "@src/api/v1/track/track-route-providers";
 import { getChartApiRouteProviders } from "@src/api/v1/chart/chart-route-providers";
 import { getSearchRouteProviders } from "@src/api/v1/search/search-route-providers";
-import { GetDashboardInformationRouteProvider } from "./v1/dashboard/route-provider";
-import { GetDashboardInformationHandler } from "./v1/dashboard/handler";
+import { GetDashboardInformationRouteProvider } from "@src/api/v1/dashboard/route-provider";
+import { GetDashboardInformationHandler } from "@src/api/v1/dashboard/handler";
 import { ChartService } from "@src/modules/chart/service";
 import { TimeSource } from "@src/util/time";
+import { UuidSource } from "@src/util/uuid";
 
 export function getRouteProviders(): RouteProvider<unknown, unknown>[] {
     const accountService = dependencyManager.get<AccountService>(Dependencies.AccountService);
@@ -35,9 +34,9 @@ export function getRouteProviders(): RouteProvider<unknown, unknown>[] {
     const spotifyClient = dependencyManager.get<SpotifyClient>(Dependencies.SpotifyClient);
     const spotifyMusicProvider = dependencyManager.get<SpotifyMusicProvider>(Dependencies.SpotifyMusicProvider);
     const timeSource = dependencyManager.get<TimeSource>(Dependencies.TimeSource);
+    const uuidSource =dependencyManager.get<UuidSource>(Dependencies.UuidSource);
 
-    const authHandler = new AuthHandler(authService);
-    const connectSpotifyAccountHandler = new ConnectSpotifyAccountHandler(accountTokenService, jobHelper, spotifyClient);
+    const connectSpotifyAccountHandler = new ConnectSpotifyAccountHandler(accountTokenService, jobHelper, spotifyClient, uuidSource);
     const manualSpotifyResponseUploadHandler = new ManualSpotifyResponseUploadHandler(spotifyMusicProvider);
     
     const oauthLoginHandler = new OauthLoginHandler(authService, accountService, spotifyClient);
@@ -51,7 +50,6 @@ export function getRouteProviders(): RouteProvider<unknown, unknown>[] {
         ...getPlayedTracksApiRouteProviders(),
         ...getChartApiRouteProviders(),
         ...getSearchRouteProviders(),
-        new AuthRouteProvider(authHandler),
         new ConnectSpotifyAccountRouteProvider(connectSpotifyAccountHandler),
         new ManualSpotifyResponseUploadRouteProvider(manualSpotifyResponseUploadHandler),
         new OauthLoginRouteProvider(oauthLoginHandler),
