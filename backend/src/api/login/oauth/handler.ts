@@ -65,18 +65,16 @@ export class OauthLoginHandler implements RouteHandler<OauthLoginRequestDto, Log
             throw new Error(OauthLoginHandler.ERROR_FAILED_TO_LOAD_PROFILE);
         }
         
-        const account = await this.accountService.getOrCreate(profile.email);
+        const account = await this.accountService.getOrCreate(profile.email, profile.displayName);
 
         if (!account) {
             throw new Error(OauthLoginHandler.ERROR_FAILED_TO_LOAD_ACCOUNT);
         }
 
-        const displayName = !!profile.displayName ? profile.displayName : null;
-
         return IdentityDto.Builder
             .withPublicId(account.publicId)
+            .withDisplayName(account.displayName)
             .withEmail(profile.email)
-            .withDisplayName(displayName)
             .build();
     }
 

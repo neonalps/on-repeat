@@ -1,11 +1,13 @@
 export class CreateAccountDto {
     private _publicId!: string;
     private _email!: string;
+    private _displayName!: string;
     private _enabled!: boolean;
  
     constructor(builder: CreateAccountDtoBuilder) {
        this._publicId = builder.publicId;
        this._email = builder.email;
+       this._displayName = builder.displayName;
        this._enabled = builder.enabled;
     }
  
@@ -15,6 +17,10 @@ export class CreateAccountDto {
  
     public get email(): string {
        return this._email;
+    }
+
+    public get displayName(): string {
+      return this._displayName;
     }
  
     public get enabled(): boolean {
@@ -29,6 +35,7 @@ export class CreateAccountDto {
  class CreateAccountDtoBuilder {
     private _publicId!: string;
     private _email!: string;
+    private _displayName!: string;
     private _enabled!: boolean;
  
     public withPublicId(publicId: string): CreateAccountDtoBuilder {
@@ -39,6 +46,11 @@ export class CreateAccountDto {
     public withEmail(email: string): CreateAccountDtoBuilder {
        this._email = email;
        return this;
+    }
+
+    public withDisplayName(displayName: string): CreateAccountDtoBuilder {
+      this._displayName = displayName;
+      return this;
     }
  
     public withEnabled(enabled: boolean): CreateAccountDtoBuilder {
@@ -52,6 +64,10 @@ export class CreateAccountDto {
  
     public get email(): string {
        return this._email;
+    }
+
+    public get displayName(): string {
+      return this._displayName;
     }
  
     public get enabled(): boolean {

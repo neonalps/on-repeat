@@ -24,6 +24,7 @@ import { GetDashboardInformationHandler } from "@src/api/v1/dashboard/handler";
 import { ChartService } from "@src/modules/chart/service";
 import { TimeSource } from "@src/util/time";
 import { UuidSource } from "@src/util/uuid";
+import { getAccountRouteProviders } from "@src/api/v1/account/route-providers";
 
 export function getRouteProviders(): RouteProvider<unknown, unknown>[] {
     const accountService = dependencyManager.get<AccountService>(Dependencies.AccountService);
@@ -44,6 +45,7 @@ export function getRouteProviders(): RouteProvider<unknown, unknown>[] {
     const dashboardHandler = new GetDashboardInformationHandler(chartService, timeSource);
 
     const providers: RouteProvider<any, any>[] = [
+        ...getAccountRouteProviders(),
         ...getArtistApiRouteProviders(),
         ...getAlbumApiRouteProviders(),
         ...getTrackApiRouteProviders(),
