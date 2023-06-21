@@ -1,5 +1,7 @@
 export class TimeSource {
 
+    constructor() {}
+
     public getNow(): Date {
         return new Date();
     };
@@ -22,6 +24,22 @@ export class TimeSource {
     
     public getCurrentUnixTimestamp(): number {
         return Math.floor(Date.now() / 1000);
+    }
+
+    public getTodayStartOfDay(): Date {
+        const date = this.getNow();
+        date.setUTCHours(0, 0, 0, 0);
+        return date;
+    }
+
+    public subtractDays(date: Date, toSubtract: number): void {
+        date.setDate(date.getDate() - toSubtract);
+    }
+
+    public getYesterdayEndOfDay(): Date {
+        const date = this.getNow();
+        date.setUTCHours(0, 0, 0, -1);   // sets it to one millisecond before midnight
+        return date;
     }
 
 }

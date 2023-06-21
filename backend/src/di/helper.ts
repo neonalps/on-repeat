@@ -120,6 +120,7 @@ export class DependencyHelper {
         dependencies.set(Dependencies.SearchService, searchService);
         dependencies.set(Dependencies.SpotifyClient, spotifyClient);
         dependencies.set(Dependencies.SpotifyMusicProvider, spotifyMusicProvider);
+        dependencies.set(Dependencies.TimeSource, timeSource);
         dependencies.set(Dependencies.UuidSource, uuidSource);
 
         return dependencies;

@@ -28,12 +28,11 @@ export class ChartService {
 
     public async getAccountTrackChartsForPeriod(accountId: number, from: Date | null, to: Date | null, limit: number = ChartService.CHART_DEFAULT_LIMIT): Promise<ChartTrackApiDto[]> {
         validateNotNull(accountId, "accountId");
+        validateTrue(limit <= ChartService.ACCOUNT_TRACK_CHART_MAX_LIMIT, `limit must not be larger than ${ChartService.ACCOUNT_TRACK_CHART_MAX_LIMIT}`);
 
         if (from !== null && to !== null) {
             validateTrue(from < to, "from must be before to");
         }
-
-        validateTrue(limit <= ChartService.ACCOUNT_TRACK_CHART_MAX_LIMIT, `limit must not be larger than ${ChartService.ACCOUNT_TRACK_CHART_MAX_LIMIT}`);
 
         const chartItems = await this.playedTrackService.getAccountTrackChartsForPeriod(accountId, from, to, limit);
         
@@ -78,12 +77,11 @@ export class ChartService {
 
     public async getAccountArtistChartsForPeriod(accountId: number, from: Date | null, to: Date | null, limit: number = ChartService.CHART_DEFAULT_LIMIT): Promise<ChartArtistApiDto[]> {
         validateNotNull(accountId, "accountId");
+        validateTrue(limit <= ChartService.ACCOUNT_ARTIST_CHART_MAX_LIMIT, `limit must not be larger than ${ChartService.ACCOUNT_ARTIST_CHART_MAX_LIMIT}`);
 
         if (from !== null && to !== null) {
             validateTrue(from < to, "from must be before to");
         }
-
-        validateTrue(limit <= ChartService.ACCOUNT_ARTIST_CHART_MAX_LIMIT, `limit must not be larger than ${ChartService.ACCOUNT_ARTIST_CHART_MAX_LIMIT}`);
 
         const chartItems = await this.playedTrackService.getAccountArtistChartsForPeriod(accountId, from, to, limit);
         

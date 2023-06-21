@@ -8,6 +8,7 @@ import { CreateAccountTokenDto } from "@src/models/classes/dto/create-account-to
 import { SpotifyClient } from "@src/modules/music-provider/spotify/client";
 import { JobHelper } from "@src/modules/job/helper";
 import { OAUTH_PROVIDER_SPOTIFY } from "@src/modules/oauth/constants";
+import { AccountDao } from "@src/models/classes/dao/account";
 
 export class ConnectSpotifyAccountHandler implements RouteHandler<ConnectSpotifyRequestDto, ConnectSpotifyResponseDto> {
 
@@ -22,11 +23,7 @@ export class ConnectSpotifyAccountHandler implements RouteHandler<ConnectSpotify
     }
     
     public async handle(context: AuthenticationContext, dto: ConnectSpotifyRequestDto): Promise<ConnectSpotifyResponseDto> {
-        if (context.account === null) {
-            throw new Error("Illegal state");
-        }
-
-        const accountId = context.account.id;
+        const accountId = (context.account as AccountDao).id;
         const tokenResponse = await this.spotifyClient.exchangeCodeForToken(dto.code);
 
         const createAccountToken = CreateAccountTokenDto.Builder
