@@ -2,16 +2,18 @@
 import { AuthenticationContext, RouteHandler } from "@src/router/types";
 import { AccountTokenService } from "@src/modules/account-token/service";
 import { requireNonNull } from "@src/util/common";
-import { ConnectSpotifyRequestDto } from "@src/models/api/connect-spotify-account";
-import { ConnectSpotifyResponseDto } from "@src/models/api/connect-spotify-account-response";
 import { CreateAccountTokenDto } from "@src/models/classes/dto/create-account-token";
 import { SpotifyClient } from "@src/modules/music-provider/spotify/client";
 import { JobHelper } from "@src/modules/job/helper";
 import { OAUTH_PROVIDER_SPOTIFY } from "@src/modules/oauth/constants";
 import { AccountDao } from "@src/models/classes/dao/account";
 import { UuidSource } from "@src/util/uuid";
+import { CreateAccountTokenRequestDto } from "@src/models/api/create-account-token-request";
+import { CreateAccountTokenResponseDto } from "@src/models/api/create-account-token-response";
+import { OauthTokenResponse } from "@src/models/dto/oauth-token-response";
+import { IllegalStateError } from "@src/api/error/illegal-state-error";
 
-export class ConnectSpotifyAccountHandler implements RouteHandler<ConnectSpotifyRequestDto, ConnectSpotifyResponseDto> {
+export class CreateAccountTokenHandler implements RouteHandler<CreateAccountTokenRequestDto, CreateAccountTokenResponseDto> {
 
     private readonly accountTokenService: AccountTokenService;
     private readonly jobHelper: JobHelper;
@@ -25,15 +27,16 @@ export class ConnectSpotifyAccountHandler implements RouteHandler<ConnectSpotify
         this.uuidSource = requireNonNull(uuidSource);
     }
     
-    public async handle(context: AuthenticationContext, dto: ConnectSpotifyRequestDto): Promise<ConnectSpotifyResponseDto> {
+    public async handle(context: AuthenticationContext, dto: CreateAccountTokenRequestDto): Promise<CreateAccountTokenResponseDto> {
         const accountId = (context.account as AccountDao).id;
-        const publicId = this.uuidSource.getRandomUuid();
-        const tokenResponse = await this.spotifyClient.exchangeCodeForToken(dto.code);
 
+        const tokenResponse = await this.handleForProvider(dto.provider, dto.code);
+
+        const publicId = this.uuidSource.getRandomUuid();
         const createAccountToken = CreateAccountTokenDto.Builder
             .withPublicId(publicId)
             .withAccountId(accountId)
-            .withOauthProvider(OAUTH_PROVIDER_SPOTIFY)
+            .withOauthProvider(dto.provider)
             .withAccessToken(tokenResponse.accessToken)
             .withAccessTokenExpiresIn(tokenResponse.expiresIn)
             .withRefreshToken(tokenResponse.refreshToken)
@@ -43,7 +46,7 @@ export class ConnectSpotifyAccountHandler implements RouteHandler<ConnectSpotify
         await this.accountTokenService.create(createAccountToken);
 
         if (dto.createFetchRecentlyPlayedTracksJob === true) {
-            await this.jobHelper.insertInitialAccountJobScheduleSpotifyRecentlyPlayedTracks(accountId);
+            await this.createFetchRecentlyPlayedTracksJobForProvider(dto.provider, accountId);
         }
 
         return {
@@ -51,6 +54,22 @@ export class ConnectSpotifyAccountHandler implements RouteHandler<ConnectSpotify
         };
     }
 
-    
+    private async handleForProvider(provider: string, code: string): Promise<OauthTokenResponse> {
+        switch (provider) {
+            case OAUTH_PROVIDER_SPOTIFY:
+                return this.spotifyClient.exchangeCodeForToken(code);
+            default:
+                throw new IllegalStateError(`Illegal provider ${provider} detected for creating account token`);
+        }
+    }
+
+    private createFetchRecentlyPlayedTracksJobForProvider(provider: string, accountId: number): Promise<void> {
+        switch (provider) {
+            case OAUTH_PROVIDER_SPOTIFY:
+                return this.jobHelper.insertInitialAccountJobScheduleSpotifyRecentlyPlayedTracks(accountId);
+            default:
+                throw new IllegalStateError(`Illegal provider ${provider} detected for creating recently played tracks job`);
+        }
+    }
 
 }
