@@ -8,6 +8,10 @@ export const shorthands: ColumnDefinitions | undefined = undefined;
 export async function up(pgm: MigrationBuilder): Promise<void> {
     pgm.createTable(TABLE_NAME, {
         id: 'id',
+        public_id: {
+            type: 'varchar(36)',
+            notNull: true
+        },
         account_id: {
             type: 'integer',
             notNull: true,

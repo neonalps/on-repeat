@@ -1,5 +1,6 @@
 export interface AccountTokenDaoInterface {
     id: number;
+    publicId: string;
     accountId: number;
     oauthProvider: string;
     scope: string;

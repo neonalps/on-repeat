@@ -9,24 +9,29 @@ import { SpotifyClient } from "@src/modules/music-provider/spotify/client";
 import { JobHelper } from "@src/modules/job/helper";
 import { OAUTH_PROVIDER_SPOTIFY } from "@src/modules/oauth/constants";
 import { AccountDao } from "@src/models/classes/dao/account";
+import { UuidSource } from "@src/util/uuid";
 
 export class ConnectSpotifyAccountHandler implements RouteHandler<ConnectSpotifyRequestDto, ConnectSpotifyResponseDto> {
 
     private readonly accountTokenService: AccountTokenService;
     private readonly jobHelper: JobHelper;
     private readonly spotifyClient: SpotifyClient;
+    private readonly uuidSource: UuidSource;
     
-    constructor(accountTokenService: AccountTokenService, jobHelper: JobHelper, spotifyClient: SpotifyClient) {
+    constructor(accountTokenService: AccountTokenService, jobHelper: JobHelper, spotifyClient: SpotifyClient, uuidSource: UuidSource) {
         this.accountTokenService = requireNonNull(accountTokenService);
         this.jobHelper = requireNonNull(jobHelper);
         this.spotifyClient = requireNonNull(spotifyClient);
+        this.uuidSource = requireNonNull(uuidSource);
     }
     
     public async handle(context: AuthenticationContext, dto: ConnectSpotifyRequestDto): Promise<ConnectSpotifyResponseDto> {
         const accountId = (context.account as AccountDao).id;
+        const publicId = this.uuidSource.getRandomUuid();
         const tokenResponse = await this.spotifyClient.exchangeCodeForToken(dto.code);
 
         const createAccountToken = CreateAccountTokenDto.Builder
+            .withPublicId(publicId)
             .withAccountId(accountId)
             .withOauthProvider(OAUTH_PROVIDER_SPOTIFY)
             .withAccessToken(tokenResponse.accessToken)

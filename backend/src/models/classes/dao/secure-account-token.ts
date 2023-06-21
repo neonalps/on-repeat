@@ -2,6 +2,7 @@ import { AccountTokenDaoInterface } from "@src/models/dao/account-token.dao";
 
 export class SecureAccountTokenDao {
     private _id!: number;
+    private _publicId!: string;
     private _accountId!: number;
     private _oauthProvider!: string;
     private _scope!: string;
@@ -13,6 +14,7 @@ export class SecureAccountTokenDao {
  
     constructor(builder: SecureAccountTokenDaoBuilder) {
        this._id = builder.id;
+       this._publicId = builder.publicId;
        this._accountId = builder.accountId;
        this._oauthProvider = builder.oauthProvider;
        this._scope = builder.scope;
@@ -25,6 +27,10 @@ export class SecureAccountTokenDao {
  
     public get id(): number {
        return this._id;
+    }
+
+    public get publicId(): string {
+      return this._publicId;
     }
  
     public get accountId(): number {
@@ -70,6 +76,7 @@ export class SecureAccountTokenDao {
 
         return this.Builder
             .withId(item.id)
+            .withPublicId(item.publicId)
             .withAccountId(item.accountId)
             .withOauthProvider(item.oauthProvider)
             .withScope(item.scope)
@@ -84,6 +91,7 @@ export class SecureAccountTokenDao {
  
  class SecureAccountTokenDaoBuilder {
     private _id!: number;
+    private _publicId!: string;
     private _accountId!: number;
     private _oauthProvider!: string;
     private _scope!: string;
@@ -96,6 +104,11 @@ export class SecureAccountTokenDao {
     public withId(id: number): SecureAccountTokenDaoBuilder {
        this._id = id;
        return this;
+    }
+
+    public withPublicId(publicId: string): SecureAccountTokenDaoBuilder {
+      this._publicId = publicId;
+      return this;
     }
  
     public withAccountId(accountId: number): SecureAccountTokenDaoBuilder {
@@ -140,6 +153,10 @@ export class SecureAccountTokenDao {
  
     public get id(): number {
        return this._id;
+    }
+
+    public get publicId(): string {
+      return this._publicId;
     }
  
     public get accountId(): number {
