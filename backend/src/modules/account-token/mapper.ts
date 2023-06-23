@@ -2,6 +2,7 @@ import sql from "@src/db/db";
 import { SecureAccountTokenDao } from "@src/models/classes/dao/secure-account-token";
 import { CreateSecureAccountTokenDto } from "@src/models/classes/dto/create-secure-account-token";
 import { AccountTokenDaoInterface } from "@src/models/dao/account-token.dao";
+import { removeNull } from "@src/util/common";
 
 export class AccountTokenMapper {
 
@@ -43,6 +44,33 @@ export class AccountTokenMapper {
         }
     
         return SecureAccountTokenDao.fromDaoInterface(result[0]);
+    }
+
+    public async getByAccountId(accountId: number): Promise<SecureAccountTokenDao[]> {
+        const result = await sql<AccountTokenDaoInterface[]>`
+            select
+                id,
+                public_id,
+                account_id,
+                oauth_provider,
+                scope,
+                encrypted_access_token,
+                access_token_expires_at,
+                encrypted_refresh_token,
+                created_at,
+                updated_at
+            from
+                account_tokens
+            where
+                account_id = ${ accountId }
+        `;
+    
+        if (!result || result.length === 0) {
+            return [];
+        }
+    
+        return result.map(item => SecureAccountTokenDao.fromDaoInterface(item))
+                    .filter(removeNull) as SecureAccountTokenDao[];
     }
     
     public async getByAccountIdAndOauthProviderAndScope(accountId: number, oauthProvider: string, scope: string): Promise<SecureAccountTokenDao | null> {

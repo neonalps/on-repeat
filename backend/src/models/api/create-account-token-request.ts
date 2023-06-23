@@ -1,4 +1,5 @@
-export interface ConnectSpotifyRequestDto {
+export interface CreateAccountTokenRequestDto {
+    provider: string;
     code: string;
     state: string;
     createFetchRecentlyPlayedTracksJob: boolean;
