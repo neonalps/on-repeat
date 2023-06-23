@@ -91,6 +91,14 @@ export class AccountTokenService {
     
         return this.toAccountTokenDao(secureAccountTokenDao);
     }
+
+    public async getAllForAccountId(accountId: number): Promise<AccountTokenDao[]> {
+        validateNotNull(accountId, "accountId");
+
+        const secureAccountTokenDaos = await this.mapper.getByAccountId(accountId);
+        
+        return secureAccountTokenDaos.map(item => this.toAccountTokenDao(item));
+    }
     
     public async updateAccessToken(accountTokenId: number, newAccessToken: string, newAccessTokenExpiresIn: number): Promise<void> {
         validateNotNull(accountTokenId, "accountTokenId");
@@ -123,6 +131,7 @@ export class AccountTokenService {
 
         return AccountTokenDao.Builder
             .withId(accountTokenDao.id)
+            .withPublicId(accountTokenDao.publicId)
             .withAccountId(accountTokenDao.accountId)
             .withOauthProvider(accountTokenDao.oauthProvider)
             .withScope(accountTokenDao.scope)
