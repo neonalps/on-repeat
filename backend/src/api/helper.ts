@@ -1,9 +1,11 @@
 import { ApiConfig } from "@src/api/config";
+import { AccountJobScheduleApiDto } from "@src/models/api/account-job-schedule";
 import { AccountTokenApiDto } from "@src/models/api/account-token";
 import { AlbumApiDto } from "@src/models/api/album";
 import { ArtistApiDto } from "@src/models/api/artist";
 import { ImageApiDto } from "@src/models/api/image";
 import { TrackApiDto } from "@src/models/api/track";
+import { AccountJobScheduleDao } from "@src/models/classes/dao/account-job-schedule";
 import { AccountTokenDao } from "@src/models/classes/dao/account-token";
 import { AlbumDao } from "@src/models/classes/dao/album";
 import { AlbumImageDao } from "@src/models/classes/dao/album-image";
@@ -120,6 +122,23 @@ export class ApiHelper {
             width: image.width,
             url: image.url,
         }
+    }
+
+    public convertAccountJobScheduleApiDto(item: AccountJobScheduleDao): AccountJobScheduleApiDto | null {
+        if (!item) {
+            return null;
+        }
+
+        return {
+            publicId: item.publicId,
+            state: item.state,
+            createdAt: item.createdAt,
+            scheduledAfter: item.scheduledAfter,
+            scheduledAt: item.scheduledAt || undefined,
+            startedAt: item.startedAt || undefined,
+            finishedAt: item.finishedAt || undefined,
+            errorMessage: item.errorMessage || undefined,
+        };
     }
 
     private getResourceUrl(resourcePath: string, resourceId: string | number): string {

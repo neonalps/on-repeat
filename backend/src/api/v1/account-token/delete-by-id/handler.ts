@@ -18,7 +18,7 @@ export class DeleteAccountTokenByIdHandler implements RouteHandler<DeleteAccount
         const accountId = (context.account as AccountDao).id;
         const accountTokenPublicId = dto.publicId;
 
-        const accountTokenDaos = await this.accountTokenService.getAllForAccountId(accountId);
+        const accountTokenDaos = await this.accountTokenService.getAllByAccountId(accountId);
 
         if (!accountTokenDaos.some(item => item.publicId === accountTokenPublicId)) {
             throw new IllegalStateError("No account token with this ID exists in this account");

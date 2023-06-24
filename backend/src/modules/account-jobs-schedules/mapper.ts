@@ -3,6 +3,10 @@ import { AccountJobScheduleDao } from "@src/models/classes/dao/account-job-sched
 import { CreateAccountJobScheduleDto } from "@src/models/classes/dto/create-account-job-schedule";
 import { AccountJobScheduleDaoInterface } from "@src/models/dao/account-job-schedule.dao";
 import { setEquals } from "@src/util/collection";
+import { PendingQuery, Row } from "postgres";
+import { SortOrder, determineSortComparison, determineSortOrder } from "@src/modules/pagination/constants";
+import { isDefined, removeNull } from "@src/util/common";
+import { JobStatus } from "@src/models/enum/job-status";
 
 export class AccountJobScheduleMapper {
  
@@ -22,19 +26,7 @@ export class AccountJobScheduleMapper {
 
     public async getById(id: number): Promise<AccountJobScheduleDao | null> {
         const result = await sql<AccountJobScheduleDaoInterface[]>`
-            select
-                id,
-                public_id,
-                account_job_id,
-                state,
-                scheduled_after,
-                scheduled_at,
-                started_at,
-                finished_at,
-                error_message,
-                created_at
-            from
-                account_jobs_schedules
+            ${ this.commonAccountJobScheduleSelect() }
             where
                 id = ${ id }
         `;
@@ -44,6 +36,38 @@ export class AccountJobScheduleMapper {
         }
     
         return AccountJobScheduleDao.fromDaoInterface(result[0]);
+    }
+
+    public async getByAccountId(accountId: number, state: JobStatus | null, lastSeen: number, order: SortOrder, limit: number): Promise<AccountJobScheduleDao[]> {
+        const result = await sql<AccountJobScheduleDaoInterface[]>`
+            select
+                ajs.id,
+                ajs.public_id,
+                ajs.account_job_id,
+                ajs.state,
+                ajs.scheduled_after,
+                ajs.scheduled_at,
+                ajs.started_at,
+                ajs.finished_at,
+                ajs.error_message,
+                ajs.created_at
+            from
+                account_jobs_schedules ajs left join
+                account_jobs aj on aj.id = ajs.account_job_id
+            where
+                aj.account_id = ${ accountId }
+                and ajs.id ${determineSortComparison(order)} ${ lastSeen }
+                ${isDefined(state) ? sql`and ajs.state = ${state}` : sql``}
+            order by
+                ajs.id ${determineSortOrder(order)}
+            limit ${limit}
+        `;
+    
+        if (!result || result.length === 0) {
+            return [];
+        }
+    
+        return result.map(item => AccountJobScheduleDao.fromDaoInterface(item)).filter(removeNull) as AccountJobScheduleDao[];
     }
 
     public async scheduleBatch(batchSize: number): Promise<Set<number>> {
@@ -91,5 +115,20 @@ export class AccountJobScheduleMapper {
         `;
     }
 
+    private commonAccountJobScheduleSelect(): PendingQuery<Row[]> {
+        return sql`select
+                id,
+                public_id,
+                account_job_id,
+                state,
+                scheduled_after,
+                scheduled_at,
+                started_at,
+                finished_at,
+                error_message,
+                created_at
+            from
+                account_jobs_schedules`;
+    }
 
 }

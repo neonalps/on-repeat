@@ -92,7 +92,7 @@ export class AccountTokenService {
         return this.toAccountTokenDao(secureAccountTokenDao);
     }
 
-    public async getAllForAccountId(accountId: number): Promise<AccountTokenDao[]> {
+    public async getAllByAccountId(accountId: number): Promise<AccountTokenDao[]> {
         validateNotNull(accountId, "accountId");
 
         const secureAccountTokenDaos = await this.mapper.getByAccountId(accountId);
