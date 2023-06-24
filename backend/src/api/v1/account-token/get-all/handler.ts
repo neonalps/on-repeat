@@ -1,4 +1,3 @@
-
 import { AuthenticationContext, RouteHandler } from "@src/router/types";
 import { AccountTokenService } from "@src/modules/account-token/service";
 import { removeNull, requireNonNull } from "@src/util/common";
@@ -21,7 +20,7 @@ export class GetAllAccountTokensHandler implements RouteHandler<GetAllAccountTok
     public async handle(context: AuthenticationContext, dto: GetAllAccountTokensRequestDto): Promise<PaginatedResponseDto<AccountTokenApiDto>> {
         const accountId = (context.account as AccountDao).id;
 
-        const accountTokenDaos = await this.accountTokenService.getAllForAccountId(accountId);
+        const accountTokenDaos = await this.accountTokenService.getAllByAccountId(accountId);
 
         const items = accountTokenDaos.map(item => this.apiHelper.convertAccountTokenApiDto(item)).filter(removeNull) as AccountTokenApiDto[];
 

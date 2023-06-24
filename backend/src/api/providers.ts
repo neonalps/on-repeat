@@ -21,6 +21,7 @@ import { ChartService } from "@src/modules/chart/service";
 import { TimeSource } from "@src/util/time";
 import { getAccountRouteProviders } from "@src/api/v1/account/route-providers";
 import { getAccountTokenRouteProviders } from "@src/api/v1/account-token/route-providers";
+import { getAccountJobScheduleRouteProviders } from "@src/api/v1/account-job-schedule/route-providers";
 
 export function getRouteProviders(): RouteProvider<unknown, unknown>[] {
     const accountService = dependencyManager.get<AccountService>(Dependencies.AccountService);
@@ -36,6 +37,7 @@ export function getRouteProviders(): RouteProvider<unknown, unknown>[] {
 
     const providers: RouteProvider<any, any>[] = [
         ...getAccountRouteProviders(),
+        ...getAccountJobScheduleRouteProviders(),
         ...getAccountTokenRouteProviders(),
         ...getArtistApiRouteProviders(),
         ...getAlbumApiRouteProviders(),

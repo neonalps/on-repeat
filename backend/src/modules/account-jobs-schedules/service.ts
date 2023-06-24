@@ -5,6 +5,11 @@ import { AccountJobScheduleDao } from "@src/models/classes/dao/account-job-sched
 import { validateNotNull } from "@src/util/validation";
 import { JobStatus } from "@src/models/enum/job-status";
 import { UuidSource } from "@src/util/uuid";
+import { PaginationParams, SortOrder } from "@src/modules/pagination/constants";
+
+export interface GetAccountJobSchedulesPaginationParams extends PaginationParams<number> {
+    state: JobStatus | null,
+};
 
 export class AccountJobScheduleService {
 
@@ -16,7 +21,7 @@ export class AccountJobScheduleService {
         this.uuidSource = requireNonNull(uuidSource);
     }
 
-    public async createNewJobSchedule(accountJobId: number, scheduledAfter: Date): Promise<AccountJobScheduleDao | null> {
+    public async create(accountJobId: number, scheduledAfter: Date): Promise<AccountJobScheduleDao | null> {
         validateNotNull(accountJobId, "accountJobId");
         validateNotNull(scheduledAfter, "scheduledAfter");
 
@@ -44,6 +49,16 @@ export class AccountJobScheduleService {
         validateNotNull(id, "id");
 
         return this.mapper.getById(id);
+    }
+
+    public async getByAccountIdPaginated(accountId: number, params: GetAccountJobSchedulesPaginationParams): Promise<AccountJobScheduleDao[]> {
+        validateNotNull(accountId, "accountId");
+        validateNotNull(params, "params");
+        validateNotNull(params.lastSeen, "params.lastSeen");
+        validateNotNull(params.order, "params.order");
+        validateNotNull(params.limit, "params.limit");
+
+        return this.mapper.getByAccountId(accountId, params.state, params.lastSeen, params.order, params.limit);
     }
 
     public async scheduleBatch(batchSize: number): Promise<Set<number>> {

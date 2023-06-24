@@ -69,7 +69,7 @@ export class JobHelper {
         }
 
         const initialScheduleAfter = this.timeSource.getNowPlusMilliSeconds(job.initialDelayMs);
-        const accountJobSchedule = await this.accountJobScheduleService.createNewJobSchedule(accountJob.id, initialScheduleAfter);
+        const accountJobSchedule = await this.accountJobScheduleService.create(accountJob.id, initialScheduleAfter);
         if (!accountJobSchedule) {
             throw new Error(JobHelper.ERROR_CREATE_ACCOUNT_JOB_SCHEDULE);
         }
@@ -151,7 +151,7 @@ export class JobHelper {
         }
 
         const nextJobExecutionAfter = await this.determineNextJobExecution(scheduleId, accountJob.intervalSeconds);
-        await this.accountJobScheduleService.createNewJobSchedule(accountJobId, nextJobExecutionAfter);
+        await this.accountJobScheduleService.create(accountJobId, nextJobExecutionAfter);
     }
 
     public async markFailed(accountJob: AccountJobDao, accountJobSchedule: AccountJobScheduleDao, reason: string): Promise<void> {
@@ -171,7 +171,7 @@ export class JobHelper {
         }
 
         const nextJobExecutionAfter = await this.determineNextJobExecution(scheduleId, accountJob.intervalSeconds);
-        await this.accountJobScheduleService.createNewJobSchedule(accountJobId, nextJobExecutionAfter);
+        await this.accountJobScheduleService.create(accountJobId, nextJobExecutionAfter);
     }
 
     public async markJobInstanceFailed(scheduleId: number, reason: string): Promise<void> {
