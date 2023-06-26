@@ -1,5 +1,5 @@
 import sql from "@src/db/db";
-import { AlbumImageDao } from "@src/models/classes/dao/album-image";
+import { ImageDao } from "@src/models/classes/dao/image";
 import { AlbumDao } from "@src/models/classes/dao/album";
 import { CreateAlbumDto } from "@src/models/classes/dto/create-album";
 import { CreateAlbumImageDto } from "@src/models/classes/dto/create-album-image";
@@ -118,7 +118,7 @@ export class AlbumMapper {
         return result.map(item => item.artistId);
     };
     
-    public async getAlbumImages(albumId: number): Promise<AlbumImageDao[]> {
+    public async getAlbumImages(albumId: number): Promise<ImageDao[]> {
         const result = await sql<AlbumImageDaoInterface[]>`
             select
                 id,
@@ -134,20 +134,8 @@ export class AlbumMapper {
         if (!result || result.length === 0) {
             return [];
         }
-    
-        const images = [];
-        
-        for (const item of result) {
-            const dao = AlbumImageDao.fromInterface(item);
-            
-            if (dao === null) {
-                continue;
-            }
 
-            images.push(dao);
-        }
-
-        return images;
+        return result.map(item => ImageDao.fromInterface(item)).filter(removeNull) as ImageDao[];
     };
     
     public async update(id: number, dto: UpdateAlbumDto): Promise<void> {

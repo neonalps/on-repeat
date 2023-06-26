@@ -2,6 +2,7 @@ import sql from "@src/db/db";
 import { MusicProviderAlbumDao } from "@src/models/classes/dao/music-provider-album";
 import { MusicProviderArtistDao } from "@src/models/classes/dao/music-provider-artist";
 import { MusicProviderTrackDao } from "@src/models/classes/dao/music-provider-track";
+import { SimpleMusicProviderArtistDao } from "@src/models/classes/dao/simple-music-provider-artist";
 import { CreateMusicProviderAlbumRelationDto } from "@src/models/classes/dto/create-music-provider-album-relation";
 import { CreateMusicProviderArtistRelationDto } from "@src/models/classes/dto/create-music-provider-artist-relation";
 import { CreateMusicProviderTrackRelationDto } from "@src/models/classes/dto/create-music-provider-track-relation";
@@ -9,6 +10,8 @@ import { ArtistExternalUriDaoInterface } from "@src/models/dao/artist-external-u
 import { MusicProviderAlbumDaoInterface } from "@src/models/dao/music-provider-album.dao";
 import { MusicProviderArtistDaoInterface } from "@src/models/dao/music-provider-artist.dao";
 import { MusicProviderTrackDaoInterface } from "@src/models/dao/music-provider-track.dao";
+import { SimpleMusicProviderArtistDaoInterface } from "@src/models/dao/simple-music-provider-artist.dao";
+import { EntityId } from "@src/models/interface/id";
 import postgres from "postgres";
 
 export class MusicProviderMapper {
@@ -154,6 +157,28 @@ export class MusicProviderMapper {
         `;
 
         return MusicProviderMapper.convertResultToRecord(result);
+    }
+
+    public async getArtistIdsWithoutImagesForMusicProvider(musicProviderId: number, artistIds: string[]): Promise<SimpleMusicProviderArtistDao[]> {
+        const result = await sql<SimpleMusicProviderArtistDaoInterface[]>`
+            select 
+                mpa.artist_id,
+                mpa.music_provider_artist_id
+            from
+                music_provider_artists mpa left join 
+                artist a on a.id = mpa.artist_id left join 
+                artist_images ai on ai.artist_id = a.id 
+            where
+                mpa.music_provider_id = ${ musicProviderId } and 
+                mpa.music_provider_artist_id in ${ sql(artistIds) } and 
+                ai.artist_id is null
+        `;
+
+        if (!result || result.length === 0) {
+            return [];
+        }
+
+        return result.map(item => SimpleMusicProviderArtistDao.fromDaoInterface(item));
     }
 
     private static convertResultToRecord(result: postgres.RowList<ArtistExternalUriDaoInterface[]>): Record<string, string> {

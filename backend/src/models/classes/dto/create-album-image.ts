@@ -1,4 +1,4 @@
-import { AlbumImageDao } from "@src/models/classes/dao/album-image";
+import { ImageDao } from "@src/models/classes/dao/image";
 
 export class CreateAlbumImageDto {
     private _height!: number;
@@ -27,7 +27,7 @@ export class CreateAlbumImageDto {
        return new CreateAlbumImageDtoBuilder();
     }
 
-    public static fromDao(dao: AlbumImageDao): CreateAlbumImageDto | null {
+    public static fromDao(dao: ImageDao): CreateAlbumImageDto | null {
         if (!dao) {
             return null;
         }

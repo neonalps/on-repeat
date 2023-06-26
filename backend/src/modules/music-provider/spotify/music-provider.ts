@@ -1,6 +1,5 @@
 import { validateNotNull } from "@src/util/validation";
 import { TrackDao } from "@src/models/classes/dao/track";
-import { MusicProviderMapper } from "../mapper";
 import { CatalogueService } from "@src/modules/catalogue/service";
 import { PlayedTrackService } from "@src/modules/played-tracks/service";
 import { TimeSource } from "@src/util/time";
@@ -14,22 +13,26 @@ import { AlbumDao } from "@src/models/classes/dao/album";
 import { ArtistDto } from "@src/models/dto/artist";
 import { ArtistDao } from "@src/models/classes/dao/artist";
 import { TrackDto } from "@src/models/dto/track";
-import { AlbumImageDao } from "@src/models/classes/dao/album-image";
 import { CreatePlayedTrackDto } from "@src/models/classes/dto/create-played-track";
-import { requireNonNull } from "@src/util/common";
+import { isDefined, isNotDefined, requireNonNull } from "@src/util/common";
+import { ImageDao } from "@src/models/classes/dao/image";
+import { MusicProviderService } from "@src/modules/music-provider/service";
+import { CreateArtistImageDto } from "@src/models/classes/dto/create-artist-image";
+import { SimpleMusicProviderArtistDao } from "@src/models/classes/dao/simple-music-provider-artist";
 
 export class SpotifyMusicProvider extends MusicProvider {
 
     private static readonly ERROR_NO_ACCOUNT_TOKEN_STORED = "No account token stored";
     private static readonly ERROR_DURING_ACCOUNT_TOKEN_UPDATE = "Something unexpected went wrong during the account token update";
-    private static readonly OAUTH_SCOPE_EMAIL_AND_RECENTLY_PLAYED = "user-read-email user-read-recently-played user-read-private";
     private static readonly PROVIDER_ID = 1;
     private static readonly PROVIDER_NAME = "spotify";
     private static readonly DICT_KEY_ISRC = "isrc";
     
-    private static readonly REQUEST_MAX_ITEMS = 50;
-    private static readonly REQUEST_INITIAL_ITEMS = 5;
-    private static readonly REQUEST_ADDITIONAL_ITEMS = SpotifyMusicProvider.REQUEST_MAX_ITEMS - SpotifyMusicProvider.REQUEST_INITIAL_ITEMS;
+    private static readonly RECENTLY_PLAYED_TRACKS_REQUEST_MAX_ITEMS = 50;
+    private static readonly RECENTLY_PLAYED_TRACKS_REQUEST_INITIAL_ITEMS = 5;
+    private static readonly REQUEST_ADDITIONAL_ITEMS = SpotifyMusicProvider.RECENTLY_PLAYED_TRACKS_REQUEST_MAX_ITEMS - SpotifyMusicProvider.RECENTLY_PLAYED_TRACKS_REQUEST_INITIAL_ITEMS;
+
+    private static readonly SEVERAL_ARTIST_DETAILS_REQUEST_MAX_ITEMS = 50;
 
     private readonly accountTokenService: AccountTokenService;
     private readonly catalogueService: CatalogueService;
@@ -37,15 +40,15 @@ export class SpotifyMusicProvider extends MusicProvider {
     private readonly spotifyClient: SpotifyClient;
     private readonly timeSource: TimeSource;
     
-    constructor(
-        mapper: MusicProviderMapper, 
+    constructor( 
         accountTokenService: AccountTokenService,
         catalogueService: CatalogueService,
+        musicProviderService: MusicProviderService,
         playedTrackService: PlayedTrackService,
         spotifyClient: SpotifyClient,
         timeSource: TimeSource,
     ) {
-        super(SpotifyMusicProvider.PROVIDER_ID, SpotifyMusicProvider.PROVIDER_NAME, mapper);
+        super(SpotifyMusicProvider.PROVIDER_ID, SpotifyMusicProvider.PROVIDER_NAME, musicProviderService);
         this.accountTokenService = requireNonNull(accountTokenService);
         this.catalogueService = requireNonNull(catalogueService);
         this.playedTrackService = requireNonNull(playedTrackService);
@@ -53,22 +56,22 @@ export class SpotifyMusicProvider extends MusicProvider {
         this.timeSource = requireNonNull(timeSource);
     }
 
-    public static get oauthScopeRecentlyPlayed(): string {
-        return SpotifyMusicProvider.OAUTH_SCOPE_EMAIL_AND_RECENTLY_PLAYED;
-    }
-
     public async fetchAndProcessRecentlyPlayedTracks(accountId: number): Promise<void> {
+        validateNotNull(accountId, "accountId");
+
         const lastSeenPlayedTrack = await this.playedTrackService.getMostRecentPlayedTrackByAccountAndMusicProvider(accountId, this.getProviderId());
 
-        const initialRequestSize = lastSeenPlayedTrack === null ? SpotifyMusicProvider.REQUEST_MAX_ITEMS : SpotifyMusicProvider.REQUEST_INITIAL_ITEMS;
+        const initialRequestSize = lastSeenPlayedTrack === null ? SpotifyMusicProvider.RECENTLY_PLAYED_TRACKS_REQUEST_MAX_ITEMS : SpotifyMusicProvider.RECENTLY_PLAYED_TRACKS_REQUEST_INITIAL_ITEMS;
 
         const initiallyFetchedTracks = await this.fetchRecentlyPlayedTracksForAccount(accountId, initialRequestSize);
         if (!initiallyFetchedTracks || initiallyFetchedTracks.length === 0) {
             return;
         }
+        const initiallyFetchedSpotifyArtistIds = this.findSpotifyArtistIds(initiallyFetchedTracks);
         await this.processPlayedTracks(accountId, initiallyFetchedTracks);
 
         if (lastSeenPlayedTrack === null || this.isPlayedAtTimestampInResponse(lastSeenPlayedTrack.playedAt, initiallyFetchedTracks)) {
+            await this.fetchAndProcessMissingArtistImages(accountId, initiallyFetchedSpotifyArtistIds);
             console.log('first fetch or played at timestamp was found in response; no additional fetching necessary');
             return;
         }
@@ -76,7 +79,11 @@ export class SpotifyMusicProvider extends MusicProvider {
         // the last seen played at was not in the response, fetch the rest of the available played tracks now
         const oldestPlayedAtInResponse = this.findOldestPlayedAtTimestamp(initiallyFetchedTracks) as Date;
         const additionallyFetchedTracksResponse = await this.fetchRecentlyPlayedTracksForAccount(accountId, SpotifyMusicProvider.REQUEST_ADDITIONAL_ITEMS, oldestPlayedAtInResponse.getTime());
+        const additionallyFetchedSpotifyArtistIds = this.findSpotifyArtistIds(additionallyFetchedTracksResponse);
         await this.processPlayedTracks(accountId, additionallyFetchedTracksResponse);
+
+        const combinedFetchedArtistIds = Array.from(new Set([...initiallyFetchedSpotifyArtistIds, ...additionallyFetchedSpotifyArtistIds]));
+        await this.fetchAndProcessMissingArtistImages(accountId, combinedFetchedArtistIds);
     }
 
     public async processPlayedTracks(accountId: number, playedTracks: SpotifyPlayedTrackDto[]): Promise<void> {
@@ -126,6 +133,49 @@ export class SpotifyMusicProvider extends MusicProvider {
         }
     }
 
+    public async fetchAndProcessMissingArtistImages(accountId: number, artistIds: string[]): Promise<void> {
+        const artistIdsWithMissingImages = await this.musicProviderService.getArtistIdsWithoutImagesForMusicProvider(this.getProviderId(), artistIds);
+
+        if (artistIdsWithMissingImages.length === 0) {
+            console.log('no artists with missing images');
+            return;
+        }
+
+        console.log(`${artistIdsWithMissingImages.length} artist${artistIdsWithMissingImages.length === 1 ? '' : 's'} need image fetching`);
+
+        const createArtistImageDtos: CreateArtistImageDto[] = [];
+
+        while (artistIdsWithMissingImages.length > 0) {
+            const artistIdBatch = artistIdsWithMissingImages.splice(0, SpotifyMusicProvider.SEVERAL_ARTIST_DETAILS_REQUEST_MAX_ITEMS);
+
+            const accountToken = await this.retrieveAccountToken(accountId);
+            const artistDetailsDtos = await this.spotifyClient.fetchSeveralArtistDetails(accountToken.accessToken, artistIdBatch.map(item => item.musicProviderArtistId));
+
+            for (const artistDetails of artistDetailsDtos) {
+                const musicProviderArtistId = artistDetails.id;
+                const batchItem = artistIdBatch.find(item => item.musicProviderArtistId === musicProviderArtistId);
+                const images = artistDetails.images;
+
+                if (isNotDefined(batchItem) || isNotDefined(images) || images.length === 0) {
+                    console.log(`skipping item ${artistDetails.id}`);
+                    continue;
+                }
+
+                const artistId = (batchItem as SimpleMusicProviderArtistDao).artistId;
+                createArtistImageDtos.push(...images.map(item => {
+                    return CreateArtistImageDto.Builder
+                        .withArtistId(artistId)
+                        .withHeight(item.height)
+                        .withWidth(item.width)
+                        .withUrl(item.url)
+                        .build();
+                }));
+            }
+        }
+
+        await this.catalogueService.createArtistImageRelations(createArtistImageDtos);
+    }
+
     private async fetchRecentlyPlayedTracksForAccount(accountId: number, batchSize: number, before?: number): Promise<SpotifyPlayedTrackDto[]> {
         const accountToken = await this.retrieveAccountToken(accountId);
         const playedTracksResponse = await this.spotifyClient.getRecentlyPlayedTracks(accountToken.accessToken, batchSize, before);
@@ -152,8 +202,28 @@ export class SpotifyMusicProvider extends MusicProvider {
         return oldestDate;
     }
 
+    private findSpotifyArtistIds(playedTracks: SpotifyPlayedTrackDto[]): string[] {
+        const artistIds = new Set<string>();
+
+        for (const playedTrack of playedTracks) {
+            if (isDefined(playedTrack.track.album?.artists)) {
+                playedTrack.track.album.artists
+                    .map(item => item.id)
+                    .forEach(item => artistIds.add(item));
+            }
+
+            if (isDefined(playedTrack.track.artists)) {
+                playedTrack.track.artists
+                    .map(item => item.id)
+                    .forEach(item => artistIds.add(item));
+            }
+        }
+
+        return Array.from(artistIds);
+    }
+
     private async retrieveAccountToken(accountId: number): Promise<AccountTokenDao> {
-        const storedAccountToken = await this.accountTokenService.getByAccountIdAndOauthProviderAndScope(accountId, this.getProviderName(), SpotifyMusicProvider.oauthScopeRecentlyPlayed);
+        const storedAccountToken = await this.accountTokenService.getByAccountIdAndOauthProviderAndScope(accountId, this.getProviderName(), this.spotifyClient.getScopeRecentlyPlayedTracks());
         if (!storedAccountToken) {
             throw new Error(SpotifyMusicProvider.ERROR_NO_ACCOUNT_TOKEN_STORED);
         }
@@ -177,19 +247,16 @@ export class SpotifyMusicProvider extends MusicProvider {
         const spotifyAlbumId = albumToProcess.id;
         const spotifyAlbumHref = albumToProcess.href;
 
-        const storedAlbum = await this.getAlbumIdByProviderAlbumId(spotifyAlbumId);
+        const storedAlbum = await this.getAlbumByProviderAlbumId(spotifyAlbumId);
         const storedAlbumId = storedAlbum !== null ? storedAlbum.albumId : null;
 
-        const albumImages = new Set<AlbumImageDao>();
-        for (const image of albumToProcess.images) {
-            const albumImage = AlbumImageDao.fromInterface(image);
-            
-            if (albumImage === null) {
-                continue;
-            }
-
-            albumImages.add(albumImage);
-        }
+        const albumImages = albumToProcess.images.map(item => {
+            return ImageDao.Builder
+                .withHeight(item.height)
+                .withWidth(item.width)
+                .withUrl(item.url)
+                .build();
+        })
 
         const album = AlbumDao.Builder
             .withName(albumToProcess.name)
@@ -199,10 +266,10 @@ export class SpotifyMusicProvider extends MusicProvider {
             .withTotalTracks(albumToProcess.totalTracks)
             .withReleaseDate(albumToProcess.releaseDate)
             .withReleaseDatePrecision(albumToProcess.releaseDatePrecision)
-            .withImages(albumImages)
+            .withImages(new Set(albumImages))
             .build();
 
-        const catalogueAlbumId = await this.catalogueService.upsertAlbum(storedAlbumId, album as AlbumDao);
+        const catalogueAlbumId = await this.catalogueService.upsertAlbum(storedAlbumId, album);
 
         if (!storedAlbumId) {
             await this.addMusicProviderAlbumRelation(catalogueAlbumId, spotifyAlbumId, spotifyAlbumHref);
@@ -234,6 +301,7 @@ export class SpotifyMusicProvider extends MusicProvider {
 
         const artist = ArtistDao.Builder
             .withName(artistToProcess.name)
+            .withImages(new Set())
             .build();
 
         const catalogueArtistId = await this.catalogueService.upsertArtist(storedArtistId, artist as ArtistDao);

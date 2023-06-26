@@ -94,7 +94,7 @@ export class DependencyHelper {
         const musicProviderMapper = new MusicProviderMapper();
         const musicProviderService = new MusicProviderService(musicProviderMapper);
 
-        const spotifyMusicProvider = new SpotifyMusicProvider(musicProviderMapper, accountTokenService, catalogueService, playedTrackService, spotifyClient, timeSource);
+        const spotifyMusicProvider = new SpotifyMusicProvider(accountTokenService, catalogueService, musicProviderService, playedTrackService, spotifyClient, timeSource);
 
         const scheduler = new Scheduler(jobHelper);
 

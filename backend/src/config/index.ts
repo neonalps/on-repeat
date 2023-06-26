@@ -26,6 +26,9 @@ const spotifyAuthorizeUrl = env.get("SPOTIFY_AUTHORIZE_URL").required().asString
 const spotifyTokenUrl = env.get("SPOTIFY_TOKEN_URL").required().asString();
 const spotifyUserProfileUrl = env.get("SPOTIFY_USER_PROFILE_URL").required().asString();
 const spotifyRecentlyPlayedUrl = env.get("SPOTIFY_RECENTLY_PLAYED_TRACKS_URL").required().asString();
+const spotifyArtistDetailsUrl = env.get("SPOTIFY_ARTIST_DETAILS_URL").required().asString();
+const spotifyScopeOauthLogin = env.get("SPOTIFY_SCOPE_OAUTH_LOGIN").required().asString();
+const spotifyScopeRecentlyPlayedTracks = env.get("SPOTIFY_SCOPE_RECENTLY_PLAYED_TRACKS").required().asString();
 
 const apiConfig: ApiConfig = {
     baseUrl: apiBaseUrlV1,
@@ -42,6 +45,9 @@ const spotifyClientConfig: SpotifyClientConfig = {
     tokenUrl: spotifyTokenUrl,
     userProfileUrl: spotifyUserProfileUrl,
     recentlyPlayedTracksUrl: spotifyRecentlyPlayedUrl,
+    artistDetailsUrl: spotifyArtistDetailsUrl,
+    scopeOauthLogin: spotifyScopeOauthLogin,
+    scopeRecentlyPlayedTracks: spotifyScopeRecentlyPlayedTracks,
 };
 
 const tokenConfig: TokenConfig = {

@@ -7,7 +7,7 @@ import { SpotifyMusicProvider } from "@src/modules/music-provider/spotify/music-
 
 export interface JobProcessor {
     process(executionContext: JobExecutionContext): Promise<void>;
-    getJobId(): number
+    getJobId(): number;
 }
 
 export class JobRepository {
@@ -16,7 +16,7 @@ export class JobRepository {
 
     private constructor() {}
 
-    public static initJobs() {
+    public static initJobs(): void {
         const spotifyMusicProvider = dependencyManager.get<SpotifyMusicProvider>(Dependencies.SpotifyMusicProvider);
 
         const fetchSpotifyRecentlyPlayedTracksJob = new FetchSpotifyRecentlyPlayedTracksJob(spotifyMusicProvider);

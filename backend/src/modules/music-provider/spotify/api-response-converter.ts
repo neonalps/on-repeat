@@ -1,4 +1,4 @@
-import { SpotifyAlbumApiDto, SpotifyAlbumDto, SpotifyArtistApiDto, SpotifyArtistDto, SpotifyCursorApiDto, SpotifyCursorDto, SpotifyImageApiDto, SpotifyImageDto, SpotifyPlayedTrackApiDto, SpotifyPlayedTrackDto, SpotifyRecentlyPlayedTracksApiResponseDto, SpotifyRecentlyPlayedTracksResponseDto, SpotifyTrackApiDto, SpotifyTrackDto } from "./api-types";
+import { SpotifyAlbumApiDto, SpotifyAlbumDto, SpotifyArtistApiDto, SpotifyArtistDetailsApiDto, SpotifyArtistDetailsDto, SpotifyArtistDto, SpotifyCursorApiDto, SpotifyCursorDto, SpotifyImageApiDto, SpotifyImageDto, SpotifyPlayedTrackApiDto, SpotifyPlayedTrackDto, SpotifyRecentlyPlayedTracksApiResponseDto, SpotifyRecentlyPlayedTracksResponseDto, SpotifyTrackApiDto, SpotifyTrackDto, SpotifyFollowerInfoApiDto, SpotifyFollowerInfoDto, SpotifySeveralArtistDetailsApiResponseDto } from "./api-types";
 
 export class SpotifyApiResponseConverter {
 
@@ -10,6 +10,32 @@ export class SpotifyApiResponseConverter {
             limit: apiResponse.limit,
             next: apiResponse.next,
         }
+    }
+
+    public static convertArtistDetailsApiResponse(apiResponse: SpotifyArtistDetailsApiDto): SpotifyArtistDetailsDto {
+        return {
+            externalUrls: apiResponse.external_urls,
+            genres: apiResponse.genres,
+            images: SpotifyApiResponseConverter.convertImages(apiResponse.images),
+            href: apiResponse.href,
+            id: apiResponse.id,
+            name: apiResponse.name,
+            type: apiResponse.type,
+            popularity: apiResponse.popularity,
+            uri: apiResponse.uri,
+            followers: SpotifyApiResponseConverter.convertFollowerInfo(apiResponse.followers),
+        }
+    }
+
+    public static convertSeveralArtistDetailsApiResponse(apiResponse: SpotifySeveralArtistDetailsApiResponseDto): SpotifyArtistDetailsDto[] {
+        return apiResponse.artists.map(item => SpotifyApiResponseConverter.convertArtistDetailsApiResponse(item));
+    }
+
+    private static convertFollowerInfo(item: SpotifyFollowerInfoApiDto): SpotifyFollowerInfoDto {
+        return {
+            href: item.href,
+            total: item.total,
+        };
     }
 
     private static convertCursors(cursor: SpotifyCursorApiDto): SpotifyCursorDto {
@@ -61,7 +87,7 @@ export class SpotifyApiResponseConverter {
             return [];
         }
 
-        return items.map(SpotifyApiResponseConverter.convertArtist);
+        return items.map(item => SpotifyApiResponseConverter.convertArtist(item));
     }
 
     private static convertArtist(item: SpotifyArtistApiDto): SpotifyArtistDto {
@@ -100,7 +126,7 @@ export class SpotifyApiResponseConverter {
             return [];
         }
 
-        return items.map(SpotifyApiResponseConverter.convertImage);
+        return items.map(item => SpotifyApiResponseConverter.convertImage(item));
     }
 
     private static convertImage(item: SpotifyImageApiDto): SpotifyImageDto {
