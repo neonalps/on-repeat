@@ -14,6 +14,10 @@ export interface SpotifyRecentlyPlayedTracksApiResponseDto {
     href: string;
 }
 
+export interface SpotifySeveralArtistDetailsApiResponseDto {
+    artists: SpotifyArtistDetailsApiDto[];
+}
+
 export interface SpotifyCursorApiDto {
     after: string;
     before: string;
@@ -138,4 +142,40 @@ export interface SpotifyImageDto {
     height: number;
     url: string;
     width: number;
+}
+
+export interface SpotifyFollowerInfoApiDto {
+    href: string | null;
+    total: number;
+}
+
+export interface SpotifyFollowerInfoDto {
+    href: string | null;
+    total: number;
+}
+
+export interface SpotifyArtistDetailsApiDto {
+    external_urls: Record<string, string>;
+    followers: SpotifyFollowerInfoApiDto;
+    genres: string[];
+    href: string;
+    id: string;
+    images: SpotifyImageApiDto[];
+    name: string;
+    popularity: number;
+    type: string;
+    uri: string;
+}
+
+export interface SpotifyArtistDetailsDto {
+    externalUrls: Record<string, string>;
+    followers: SpotifyFollowerInfoDto;
+    genres: string[];
+    href: string;
+    id: string;
+    images: SpotifyImageDto[];
+    name: string;
+    popularity: number;
+    type: string;
+    uri: string;
 }

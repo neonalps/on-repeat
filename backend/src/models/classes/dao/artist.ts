@@ -1,14 +1,16 @@
-import { ArtistDaoInterface } from "@src/models/dao/artist.dao";
+import { ImageDao } from "@src/models/classes/dao/image";
 
 export class ArtistDao {
   private _id!: number;
   private _name!: string;
+  private _images!: Set<ImageDao>;
   private _createdAt!: Date;
   private _updatedAt!: Date | null;
 
   constructor(builder: ArtistDaoBuilder) {
      this._id = builder.id;
      this._name = builder.name;
+     this._images = new Set(builder.images);
      this._createdAt = builder.createdAt;
      this._updatedAt = builder.updatedAt;
   }
@@ -19,6 +21,10 @@ export class ArtistDao {
 
   public get name(): string {
      return this._name;
+  }
+
+  public get images(): Set<ImageDao> {
+      return new Set(this._images);
   }
 
   public get createdAt(): Date {
@@ -44,24 +50,12 @@ export class ArtistDao {
   public static get Builder(): ArtistDaoBuilder {
      return new ArtistDaoBuilder();
   }
-
-  public static fromDaoInterface(item: ArtistDaoInterface): ArtistDao | null {
-    if (!item) {
-      return null;
-    }
-
-    return this.Builder
-      .withId(item.id)
-      .withName(item.name)
-      .withCreatedAt(item.createdAt)
-      .withUpdatedAt(item.updatedAt)
-      .build();
-  }
 }
 
 class ArtistDaoBuilder {
   private _id!: number;
   private _name!: string;
+  private _images!: Set<ImageDao>;
   private _createdAt!: Date;
   private _updatedAt!: Date | null;
 
@@ -72,6 +66,11 @@ class ArtistDaoBuilder {
 
   public withName(name: string): ArtistDaoBuilder {
      this._name = name;
+     return this;
+  }
+
+  public withImages(images: Set<ImageDao>): ArtistDaoBuilder {
+     this._images = new Set(images);
      return this;
   }
 
@@ -91,6 +90,10 @@ class ArtistDaoBuilder {
 
   public get name(): string {
      return this._name;
+  }
+
+  public get images(): Set<ImageDao> {
+     return new Set(this._images);
   }
 
   public get createdAt(): Date {

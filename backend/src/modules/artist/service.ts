@@ -1,9 +1,10 @@
 import { validateNotBlank, validateNotNull } from "@src/util/validation";
-import { ArtistMapper } from "./mapper";
+import { ArtistMapper } from "@src/modules/artist/mapper";
 import { requireNonNull } from "@src/util/common";
 import { ArtistDao } from "@src/models/classes/dao/artist";
 import { CreateArtistDto } from "@src/models/classes/dto/create-artist";
 import { UpdateArtistDto } from "@src/models/classes/dto/update-artist";
+import { CreateArtistImageDto } from "@src/models/classes/dto/create-artist-image";
 
 export class ArtistService {
 
@@ -22,16 +23,23 @@ export class ArtistService {
         return this.getById(createdArtistId);
     }
 
+    public async createArtistImageRelations(dtos: CreateArtistImageDto[]): Promise<void> {
+        validateNotNull(dtos, "dtos");
+
+        for (const dto of dtos) {
+            validateNotNull(dto.artistId, "dto.artistId");
+            validateNotNull(dto.height, "dto.height");
+            validateNotNull(dto.width, "dto.width");
+            validateNotBlank(dto.url, "dto.url");
+        }
+
+        await this.mapper.createArtistImageRelations(dtos);
+    }
+
     public async getById(id: number): Promise<ArtistDao | null> {
         validateNotNull(id, "id");
     
-        const artist = await this.mapper.getById(id);
-        
-        if (!artist) {
-            return null;
-        }
-    
-        return artist;
+        return this.mapper.getById(id);
     }
 
     public async getMultipleById(ids: Set<number>): Promise<ArtistDao[]> {

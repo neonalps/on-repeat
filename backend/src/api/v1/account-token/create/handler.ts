@@ -33,6 +33,7 @@ export class CreateAccountTokenHandler implements RouteHandler<CreateAccountToke
         const tokenResponse = await this.handleForProvider(dto.provider, dto.code);
 
         const publicId = this.uuidSource.getRandomUuid();
+
         const createAccountToken = CreateAccountTokenDto.Builder
             .withPublicId(publicId)
             .withAccountId(accountId)
@@ -46,7 +47,7 @@ export class CreateAccountTokenHandler implements RouteHandler<CreateAccountToke
         await this.accountTokenService.create(createAccountToken);
 
         if (dto.createFetchRecentlyPlayedTracksJob === true) {
-            await this.createFetchRecentlyPlayedTracksJobForProvider(dto.provider, accountId);
+            await this.createInitialJobSchedulesForProvider(dto.provider, accountId);
         }
 
         return {
@@ -63,12 +64,12 @@ export class CreateAccountTokenHandler implements RouteHandler<CreateAccountToke
         }
     }
 
-    private createFetchRecentlyPlayedTracksJobForProvider(provider: string, accountId: number): Promise<void> {
+    private async createInitialJobSchedulesForProvider(provider: string, accountId: number): Promise<void> {
         switch (provider) {
             case OAUTH_PROVIDER_SPOTIFY:
                 return this.jobHelper.insertInitialAccountJobScheduleSpotifyRecentlyPlayedTracks(accountId);
             default:
-                throw new IllegalStateError(`Illegal provider ${provider} detected for creating recently played tracks job`);
+                throw new IllegalStateError(`Illegal provider ${provider} detected for creating initial account job schedules`);
         }
     }
 

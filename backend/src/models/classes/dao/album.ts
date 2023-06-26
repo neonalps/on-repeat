@@ -1,4 +1,4 @@
-import { AlbumImageDao } from "@src/models/classes/dao/album-image";
+import { ImageDao } from "@src/models/classes/dao/image";
 
 export class AlbumDao {
     private _id!: number;
@@ -9,7 +9,7 @@ export class AlbumDao {
     private _totalTracks!: number | null;
     private _releaseDate!: Date | null;
     private _releaseDatePrecision!: string | null;
-    private _images!: Set<AlbumImageDao>;
+    private _images!: Set<ImageDao>;
     private _createdAt!: Date;
     private _updatedAt!: Date | null;
  
@@ -59,7 +59,7 @@ export class AlbumDao {
        return this._releaseDatePrecision;
     }
  
-    public get images(): Set<AlbumImageDao> {
+    public get images(): Set<ImageDao> {
        return new Set(this._images);
     }
  
@@ -103,7 +103,7 @@ export class AlbumDao {
     private _totalTracks!: number | null;
     private _releaseDate!: Date | null;
     private _releaseDatePrecision!: string | null;
-    private _images!: Set<AlbumImageDao>;
+    private _images!: Set<ImageDao>;
     private _createdAt!: Date;
     private _updatedAt!: Date | null;
  
@@ -147,7 +147,7 @@ export class AlbumDao {
        return this;
     }
  
-    public withImages(images: Set<AlbumImageDao>): AlbumDaoBuilder {
+    public withImages(images: Set<ImageDao>): AlbumDaoBuilder {
        this._images = new Set(images);
        return this;
     }
@@ -194,7 +194,7 @@ export class AlbumDao {
        return this._releaseDatePrecision;
     }
  
-    public get images(): Set<AlbumImageDao> {
+    public get images(): Set<ImageDao> {
        return new Set(this._images);
     }
  

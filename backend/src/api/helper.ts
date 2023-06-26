@@ -8,17 +8,17 @@ import { TrackApiDto } from "@src/models/api/track";
 import { AccountJobScheduleDao } from "@src/models/classes/dao/account-job-schedule";
 import { AccountTokenDao } from "@src/models/classes/dao/account-token";
 import { AlbumDao } from "@src/models/classes/dao/album";
-import { AlbumImageDao } from "@src/models/classes/dao/album-image";
 import { SimpleAlbumDao } from "@src/models/classes/dao/album-simple";
 import { ArtistDao } from "@src/models/classes/dao/artist";
 import { IdNameDao } from "@src/models/classes/dao/id-name";
+import { ImageDao } from "@src/models/classes/dao/image";
 import { SimpleTrackDetailsDao } from "@src/models/classes/dao/simple-track-details";
 import { TrackDao } from "@src/models/classes/dao/track";
 import { isDefined, removeNull, requireNonNull } from "@src/util/common";
 
 type AlbumLike = AlbumDao | SimpleAlbumDao;
 type ArtistLike = ArtistDao | IdNameDao;
-type ImageLike = AlbumImageDao;
+type ImageLike = ImageDao;
 
 export class ApiHelper {
 

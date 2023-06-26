@@ -2,10 +2,9 @@ import { JobExecutionContext } from "@src/modules/scheduler/scheduler";
 import { JobProcessor } from "@src/modules/job/repository";
 import { requireNonNull } from "@src/util/common";
 import { SpotifyMusicProvider } from "@src/modules/music-provider/spotify/music-provider";
+import { JobHelper } from "@src/modules/job/helper";
 
 export class FetchSpotifyRecentlyPlayedTracksJob implements JobProcessor {
-
-    static ERROR_NO_ACCOUNT_TOKEN_AVAILABLE = "No account token available";
 
     private readonly spotifyMusicProvider: SpotifyMusicProvider;
 
@@ -14,7 +13,7 @@ export class FetchSpotifyRecentlyPlayedTracksJob implements JobProcessor {
     }
 
     public getJobId(): number {
-        return 1;
+        return JobHelper.JOB_ID_FETCH_SPOTIFY_RECENT_PLAYED_TRACKS;
     }
 
     public async process(executionContext: JobExecutionContext): Promise<void> {

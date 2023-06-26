@@ -13,11 +13,12 @@ import { ArtistService } from "@src/modules/artist/service";
 import { AlbumService } from "@src/modules/album/service";
 import { UpdateTrackDto } from "@src/models/classes/dto/update-track";
 import { UpdateArtistDto } from "@src/models/classes/dto/update-artist";
-import { AlbumImageDao } from "@src/models/classes/dao/album-image";
 import { CreateAlbumImageDto } from "@src/models/classes/dto/create-album-image";
 import { SimpleTrackDetailsDao } from "@src/models/classes/dao/simple-track-details";
 import { createIdNameDao } from "@src/util/dao";
 import { SimpleAlbumDao } from "@src/models/classes/dao/album-simple";
+import { CreateArtistImageDto } from "@src/models/classes/dto/create-artist-image";
+import { ImageDao } from "@src/models/classes/dao/image";
 
 interface TrackBucketContext {
     trackId: number;
@@ -152,8 +153,20 @@ export class CatalogueService {
     }
     
     public async insertArtist(artistToCreate: ArtistDao): Promise<number> {
-        const createArtistDto = CreateArtistDto.createFromArtistDao(artistToCreate);
-        const createdArtist = await this.artistService.create(createArtistDto as CreateArtistDto);
+        const artistImages = Array.from(artistToCreate.images).map(item => {
+            return CreateArtistImageDto.Builder
+                .withHeight(item.height)
+                .withWidth(item.width)
+                .withUrl(item.url)
+                .build();
+        })
+
+        const createArtistDto: CreateArtistDto = CreateArtistDto.Builder
+            .withName(artistToCreate.name)
+            .withImages(new Set(artistImages))
+            .build();
+
+        const createdArtist = await this.artistService.create(createArtistDto);
     
         if (!createdArtist) {
             logger.error("failed to insert artist during upset", createArtistDto);
@@ -161,6 +174,10 @@ export class CatalogueService {
         }
     
         return createdArtist.id;
+    }
+
+    public async createArtistImageRelations(dtos: CreateArtistImageDto[]): Promise<void> {
+        await this.artistService.createArtistImageRelations(dtos);
     }
 
     public async getAlbumById(albumId: number | null): Promise<AlbumDao | null> {
@@ -335,7 +352,7 @@ export class CatalogueService {
         };
     }
 
-    private static convertAlbumImages(images: Set<AlbumImageDao>): Set<CreateAlbumImageDto> {
+    private static convertAlbumImages(images: Set<ImageDao>): Set<CreateAlbumImageDto> {
         if (!images || images.size === 0) {
             return new Set();
         }

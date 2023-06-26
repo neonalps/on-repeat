@@ -4,8 +4,8 @@ import { AccountJobService } from "@src/modules/account-jobs/service";
 import { requireNonNull } from "@src/util/common";
 import { TimeSource } from "@src/util/time";
 import { validateNotNull } from "@src/util/validation";
-import { JobService } from "./service";
-import { JobExecutionContext } from "../scheduler/scheduler";
+import { JobService } from "@src/modules/job/service";
+import { JobExecutionContext } from "@src/modules/scheduler/scheduler";
 import { AccountJobScheduleDao } from "@src/models/classes/dao/account-job-schedule";
 import { AccountJobDao } from "@src/models/classes/dao/account-job";
 import { AccountService } from "@src/modules/account/service";
@@ -34,7 +34,7 @@ export class JobHelper {
         jobService: JobService,
         accountJobService: AccountJobService, 
         accountJobScheduleService: AccountJobScheduleService, 
-        timeSource: TimeSource
+        timeSource: TimeSource,
     ) {
         this.accountService = requireNonNull(accountService);
         this.jobService = requireNonNull(jobService);
@@ -43,8 +43,8 @@ export class JobHelper {
         this.timeSource = requireNonNull(timeSource);
     }
 
-    public async insertInitialAccountJobScheduleSpotifyRecentlyPlayedTracks(accoutnId: number): Promise<void> {
-        await this.insertInitialAccountJobSchedule(accoutnId, JobHelper.JOB_ID_FETCH_SPOTIFY_RECENT_PLAYED_TRACKS);
+    public async insertInitialAccountJobScheduleSpotifyRecentlyPlayedTracks(accountId: number): Promise<void> {
+        await this.insertInitialAccountJobSchedule(accountId, JobHelper.JOB_ID_FETCH_SPOTIFY_RECENT_PLAYED_TRACKS);
     }
 
     private async insertInitialAccountJobSchedule(accountId: number, jobId: number): Promise<void> {

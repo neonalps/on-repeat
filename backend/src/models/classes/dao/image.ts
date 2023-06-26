@@ -1,12 +1,12 @@
 import { AlbumImageDaoInterface } from "@src/models/dao/album-image.dao";
 import { ImageDto } from "@src/models/dto/image";
 
-export class AlbumImageDao {
+export class ImageDao {
     private _height!: number;
     private _width!: number;
     private _url!: string;
  
-    constructor(builder: AlbumImageDaoBuilder) {
+    constructor(builder: ImageDaoBuilder) {
        this._height = builder.height;
        this._width = builder.width;
        this._url = builder.url;
@@ -24,7 +24,7 @@ export class AlbumImageDao {
        return this._url;
     }
 
-    public equals(other: AlbumImageDao): boolean {
+    public equals(other: ImageDao): boolean {
         if (!other) {
             return false;
         }
@@ -38,11 +38,11 @@ export class AlbumImageDao {
             this.url === other.url;
     }
  
-    public static get Builder(): AlbumImageDaoBuilder {
-       return new AlbumImageDaoBuilder();
+    public static get Builder(): ImageDaoBuilder {
+       return new ImageDaoBuilder();
     }
 
-    public static fromInterface(item: AlbumImageDaoInterface | ImageDto): AlbumImageDao | null {
+    public static fromInterface(item: AlbumImageDaoInterface | ImageDto): ImageDao | null {
         if (!item) {
             return null;
         }
@@ -55,22 +55,22 @@ export class AlbumImageDao {
     }
  }
  
- class AlbumImageDaoBuilder {
+ class ImageDaoBuilder {
     private _height!: number;
     private _width!: number;
     private _url!: string;
  
-    public withHeight(height: number): AlbumImageDaoBuilder {
+    public withHeight(height: number): ImageDaoBuilder {
        this._height = height;
        return this;
     }
  
-    public withWidth(width: number): AlbumImageDaoBuilder {
+    public withWidth(width: number): ImageDaoBuilder {
        this._width = width;
        return this;
     }
  
-    public withUrl(url: string): AlbumImageDaoBuilder {
+    public withUrl(url: string): ImageDaoBuilder {
        this._url = url;
        return this;
     }
@@ -87,7 +87,7 @@ export class AlbumImageDao {
        return this._url;
     }
  
-    build(): AlbumImageDao {
-       return new AlbumImageDao(this);
+    build(): ImageDao {
+       return new ImageDao(this);
     }
  }

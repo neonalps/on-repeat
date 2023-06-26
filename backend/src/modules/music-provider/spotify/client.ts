@@ -3,7 +3,7 @@ import { AUTHORIZATION, CONTENT_TYPE, HEADER, HTTP_STATUS } from "@src/http/cons
 import { generateRandomString, getQueryString, requireNonNull } from "@src/util/common";
 import { OAUTH_GRANT_TYPE_AUTHORIZATION_CODE, OAUTH_GRANT_TYPE_REFRESH_TOKEN, OAUTH_RESPONSE_TYPE_CODE } from "@src/modules/oauth/constants";
 import { validateNotBlank, validateNotNull } from "@src/util/validation";
-import { SpotifyRecentlyPlayedTracksResponseDto, SpotifyRecentlyPlayedTracksApiResponseDto } from "./api-types";
+import { SpotifyRecentlyPlayedTracksResponseDto, SpotifyRecentlyPlayedTracksApiResponseDto, SpotifyArtistDetailsApiDto, SpotifyArtistDetailsDto, SpotifySeveralArtistDetailsApiResponseDto } from "./api-types";
 import { SpotifyApiResponseConverter } from "@src/modules/music-provider/spotify/api-response-converter";
 import { OauthTokenResponse } from "@src/models/dto/oauth-token-response";
 import { SpotifyUserProfile } from "@src/models/dto/user-profile";
@@ -18,12 +18,13 @@ export interface SpotifyClientConfig {
     authorizeUrl: string;
     tokenUrl: string;
     userProfileUrl: string;
+    artistDetailsUrl: string;
     recentlyPlayedTracksUrl: string;
+    scopeOauthLogin: string;
+    scopeRecentlyPlayedTracks: string;
 }
 
 export class SpotifyClient {
-
-    public static OAUTH_SCOPE_EMAIL = "user-read-private user-read-email";
     
     private static OAUTH_STATE_PARAM_LENGTH = 12;
 
@@ -35,6 +36,10 @@ export class SpotifyClient {
         this.validateConfig();
     }
 
+    public getScopeRecentlyPlayedTracks(): string {
+        return this.config.scopeRecentlyPlayedTracks;
+    }
+
     public getAuthorizeUrl(): string {
         const state = generateRandomString(SpotifyClient.OAUTH_STATE_PARAM_LENGTH);
 
@@ -42,7 +47,7 @@ export class SpotifyClient {
             state,
             response_type: OAUTH_RESPONSE_TYPE_CODE,
             client_id: this.config.clientId,
-            scope: SpotifyClient.OAUTH_SCOPE_EMAIL,
+            scope: this.config.scopeOauthLogin,
             redirect_uri: this.config.redirectUrl
         };
     
@@ -127,6 +132,52 @@ export class SpotifyClient {
         };
     }
 
+    public async fetchArtistDetails(accessToken: string, artistId: string): Promise<SpotifyArtistDetailsDto> {
+        validateNotBlank(accessToken, "accessToken");
+        validateNotBlank(artistId, "artistId");
+
+        const url = `${this.config.artistDetailsUrl}/${artistId}`;
+
+        const response = await http.get<SpotifyArtistDetailsApiDto>(url, {
+            headers: { 
+                [HEADER.ACCEPT]: CONTENT_TYPE.JSON,
+                [HEADER.AUTHORIZATION]: `${AUTHORIZATION.BEARER} ${accessToken}`,
+                [HEADER.CONTENT_TYPE]: CONTENT_TYPE.JSON,
+            }
+        });
+    
+        if (response.statusCode !== HTTP_STATUS.OK) {
+            throw new Error("something went wrong while getting artist details");
+        }
+    
+        return SpotifyApiResponseConverter.convertArtistDetailsApiResponse(response.body);
+    }
+
+    public async fetchSeveralArtistDetails(accessToken: string, artistIds: string[]): Promise<SpotifyArtistDetailsDto[]> {
+        validateNotBlank(accessToken, "accessToken");
+        validateNotNull(artistIds, "artistIds");
+
+        if (artistIds.length === 0) {
+            return [];
+        }
+
+        const url = `${this.config.artistDetailsUrl}?ids=${artistIds.join(",")}`;
+
+        const response = await http.get<SpotifySeveralArtistDetailsApiResponseDto>(url, {
+            headers: { 
+                [HEADER.ACCEPT]: CONTENT_TYPE.JSON,
+                [HEADER.AUTHORIZATION]: `${AUTHORIZATION.BEARER} ${accessToken}`,
+                [HEADER.CONTENT_TYPE]: CONTENT_TYPE.JSON,
+            }
+        });
+    
+        if (response.statusCode !== HTTP_STATUS.OK) {
+            throw new Error("something went wrong while getting several artist details");
+        }
+    
+        return SpotifyApiResponseConverter.convertSeveralArtistDetailsApiResponse(response.body);
+    }
+
     public async getRecentlyPlayedTracks(accessToken: string, requestSize: number, before?: number): Promise<SpotifyRecentlyPlayedTracksResponseDto> {
         validateNotBlank(accessToken, "accessToken");
         validateNotNull(requestSize, "requestSize");
@@ -167,6 +218,9 @@ export class SpotifyClient {
         validateNotBlank(this.config.recentlyPlayedTracksUrl, "config.recentlyPlayedTracksUrl");
         validateNotBlank(this.config.userProfileUrl, "config.userProfileUrl");
         validateNotBlank(this.config.tokenUrl, "config.tokenUrl");
+        validateNotBlank(this.config.artistDetailsUrl, "config.artistDetailsUrl");
+        validateNotBlank(this.config.scopeOauthLogin, "config.scopeOauthLogin");
+        validateNotBlank(this.config.scopeRecentlyPlayedTracks, "config.scopeRecentlyPlayedTracks");
     }
 
     private getAuthHeaderValue(): string {

@@ -1,10 +1,10 @@
-import { AlbumImageDao } from "@src/models/classes/dao/album-image";
 import { AlbumDao } from "@src/models/classes/dao/album";
+import { ImageDao } from "@src/models/classes/dao/image";
 
 export class SimpleAlbumDao {
    private _id!: number;
    private _name!: string;
-   private _images!: Set<AlbumImageDao>;
+   private _images!: Set<ImageDao>;
 
    constructor(builder: SimpleAlbumDaoBuilder) {
       this._id = builder.id;
@@ -20,7 +20,7 @@ export class SimpleAlbumDao {
       return this._name;
    }
 
-   public get images(): Set<AlbumImageDao> {
+   public get images(): Set<ImageDao> {
       return new Set(this._images);
    }
 
@@ -40,7 +40,7 @@ export class SimpleAlbumDao {
 class SimpleAlbumDaoBuilder {
    private _id!: number;
    private _name!: string;
-   private _images!: Set<AlbumImageDao>;
+   private _images!: Set<ImageDao>;
 
    public withId(id: number): SimpleAlbumDaoBuilder {
       this._id = id;
@@ -52,7 +52,7 @@ class SimpleAlbumDaoBuilder {
       return this;
    }
 
-   public withImages(images: Set<AlbumImageDao>): SimpleAlbumDaoBuilder {
+   public withImages(images: Set<ImageDao>): SimpleAlbumDaoBuilder {
       this._images = new Set(images);
       return this;
    }
@@ -65,7 +65,7 @@ class SimpleAlbumDaoBuilder {
       return this._name;
    }
 
-   public get images(): Set<AlbumImageDao> {
+   public get images(): Set<ImageDao> {
       return new Set(this._images);
    }
 
