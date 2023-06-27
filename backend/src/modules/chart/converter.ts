@@ -8,43 +8,28 @@ export class ChartApiDtoConverter {
     constructor() {}
 
     public static convertToAlbumChartApiDto(items: ChartApiItem[], from: Date | null, to: Date | null): ChartApiDto<ChartApiItem> {
-        if (isDefined(from) && isDefined(to)) {
-            return ChartApiDtoConverter.convertToChartApiDtoWithPeriod(CHART_TYPE_ALBUMS, items, from as Date, to as Date);
-        }
-
-        return ChartApiDtoConverter.convertToChartApiDtoWithoutPeriod(CHART_TYPE_ALBUMS, items);
+        return ChartApiDtoConverter.convertToChartApiDto(CHART_TYPE_ALBUMS, items, ChartApiDtoConverter.getNullableDate(from), ChartApiDtoConverter.getNullableDate(to));
     }
 
     public static convertToArtistChartApiDto(items: ChartApiItem[], from: Date | null, to: Date | null): ChartApiDto<ChartApiItem> {
-        if (isDefined(from) && isDefined(to)) {
-            return ChartApiDtoConverter.convertToChartApiDtoWithPeriod(CHART_TYPE_ARTISTS, items, from as Date, to as Date);
-        }
-
-        return ChartApiDtoConverter.convertToChartApiDtoWithoutPeriod(CHART_TYPE_ARTISTS, items);
+        return ChartApiDtoConverter.convertToChartApiDto(CHART_TYPE_ARTISTS, items, ChartApiDtoConverter.getNullableDate(from), ChartApiDtoConverter.getNullableDate(to));
     }
 
     public static convertToTrackChartApiDto(items: ChartApiItem[], from: Date | null, to: Date | null): ChartApiDto<ChartApiItem> {
-        if (isDefined(from) && isDefined(to)) {
-            return ChartApiDtoConverter.convertToChartApiDtoWithPeriod(CHART_TYPE_TRACKS, items, from as Date, to as Date);
-        }
-
-        return ChartApiDtoConverter.convertToChartApiDtoWithoutPeriod(CHART_TYPE_TRACKS, items);
+        return ChartApiDtoConverter.convertToChartApiDto(CHART_TYPE_TRACKS, items, ChartApiDtoConverter.getNullableDate(from), ChartApiDtoConverter.getNullableDate(to));
     }
 
-    public static convertToChartApiDtoWithoutPeriod(type: string, items: ChartApiItem[]): ChartApiDto<ChartApiItem> {
+    private static convertToChartApiDto(type: string, items: ChartApiItem[], from?: Date, to?: Date): ChartApiDto<ChartApiItem> {
         return {
-           type,
-           items,
-        }
+            type,
+            from,
+            to,
+            items,
+        };
     }
 
-    public static convertToChartApiDtoWithPeriod(type: string, items: ChartApiItem[], from: Date, to: Date): ChartApiDto<ChartApiItem> {
-        return {
-           type,
-           from,
-           to,
-           items,
-        }
+    private static getNullableDate(date: Date | null | undefined): Date | undefined {
+        return isDefined(date) ? date as Date : undefined;
     }
 
 }
