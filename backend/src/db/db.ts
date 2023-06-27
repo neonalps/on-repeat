@@ -8,7 +8,7 @@ const sql = postgres(getDbConnectionUrl(), {
     }
 });
 
-export const testDbConnection = async () => {
+export const initAndTestDatabaseConnection = async () => {
     await sql`select 1`
 };
 

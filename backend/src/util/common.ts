@@ -1,5 +1,6 @@
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 const charactersLength = characters.length;
+const allowedHttpMethods = ["GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS", "TRACE", "PATCH"];
 
 export const getQueryString = (params: Record<string, any>): string => {
     return new URLSearchParams(params).toString();
@@ -29,4 +30,12 @@ export function isDefined(toCheck: unknown) {
 
 export function isNotDefined(toCheck: unknown) {
     return !isDefined(toCheck);
+}
+
+export function checkValidHttpMethod(method: string): boolean {
+    return allowedHttpMethods.includes(method);
+}
+
+export function getAllowedHttpMethods(): string[] {
+    return [...allowedHttpMethods];
 }
