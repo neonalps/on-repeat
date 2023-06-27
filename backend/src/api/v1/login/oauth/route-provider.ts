@@ -6,33 +6,31 @@ import { LoginResponseDto } from "@src/models/api/login-response";
 
 export class OauthLoginRouteProvider implements RouteProvider<OauthLoginRequestDto, LoginResponseDto> {
 
-    private readonly oauthLoginHandler: OauthLoginHandler;
+    private readonly handler: OauthLoginHandler;
 
-    constructor(oauthLoginHandler: OauthLoginHandler) {
-        this.oauthLoginHandler = requireNonNull(oauthLoginHandler);
+    constructor(handler: OauthLoginHandler) {
+        this.handler = requireNonNull(handler);
     }
 
     provide(): RouteDefinition<OauthLoginRequestDto, LoginResponseDto> {
-        const oauthLoginRequestDtoJsonSchema = {
-            type: 'object',
-            required: ['provider', 'code'],
-            properties: {
-                provider: { type: 'string', enum: ['spotify', 'google'] },
-                code: { type: 'string' },
-                state: { type: 'string' },
+        const schema: RequestSchema = {
+            body: {
+                type: 'object',
+                required: ['provider', 'code'],
+                properties: {
+                    provider: { type: 'string', enum: ['spotify', 'google'] },
+                    code: { type: 'string' },
+                    state: { type: 'string' },
+                },
             }
-        };
-
-        const oauthLoginRequestSchema: RequestSchema = {
-            body: oauthLoginRequestDtoJsonSchema
         };
 
         return {
             name: 'OauthLogin',
             method: 'POST',
             path: '/api/v1/oauth/login',
-            schema: oauthLoginRequestSchema, 
-            handler: this.oauthLoginHandler,
+            schema, 
+            handler: this.handler,
             authenticated: false,
         };
     }

@@ -1,10 +1,5 @@
 import dependencyManager from "@src/di/manager";
-import { AuthService } from "@src/modules/auth/service";
 import { Dependencies } from "@src/di/dependencies";
-import { OauthLoginRouteProvider } from "@src/api/login/oauth/route-provider";
-import { OauthLoginHandler } from "@src/api/login/oauth/handler";
-import { AccountService } from "@src/modules/account/service";
-import { SpotifyClient } from "@src/modules/music-provider/spotify/client";
 import { ManualSpotifyResponseUploadHandler } from "@src/api/v1/manual-spotify-response-upload/handler";
 import { SpotifyMusicProvider } from "@src/modules/music-provider/spotify/music-provider";
 import { ManualSpotifyResponseUploadRouteProvider } from "@src/api/v1/manual-spotify-response-upload/route-provider";
@@ -22,17 +17,14 @@ import { TimeSource } from "@src/util/time";
 import { getAccountRouteProviders } from "@src/api/v1/account/route-providers";
 import { getAccountTokenRouteProviders } from "@src/api/v1/account-token/route-providers";
 import { getAccountJobScheduleRouteProviders } from "@src/api/v1/account-job-schedule/route-providers";
+import { getLoginRouteProviders } from "./v1/login/route-providers";
 
 export function getRouteProviders(): RouteProvider<unknown, unknown>[] {
-    const accountService = dependencyManager.get<AccountService>(Dependencies.AccountService);
-    const authService = dependencyManager.get<AuthService>(Dependencies.AuthService);
     const chartService = dependencyManager.get<ChartService>(Dependencies.ChartService);
-    const spotifyClient = dependencyManager.get<SpotifyClient>(Dependencies.SpotifyClient);
     const spotifyMusicProvider = dependencyManager.get<SpotifyMusicProvider>(Dependencies.SpotifyMusicProvider);
     const timeSource = dependencyManager.get<TimeSource>(Dependencies.TimeSource);
 
     const manualSpotifyResponseUploadHandler = new ManualSpotifyResponseUploadHandler(spotifyMusicProvider);
-    const oauthLoginHandler = new OauthLoginHandler(authService, accountService, spotifyClient);
     const dashboardHandler = new GetDashboardInformationHandler(chartService, timeSource);
 
     const providers: RouteProvider<any, any>[] = [
@@ -41,12 +33,12 @@ export function getRouteProviders(): RouteProvider<unknown, unknown>[] {
         ...getAccountTokenRouteProviders(),
         ...getArtistApiRouteProviders(),
         ...getAlbumApiRouteProviders(),
+        ...getChartApiRouteProviders(),
+        ...getLoginRouteProviders(),
         ...getTrackApiRouteProviders(),
         ...getPlayedTracksApiRouteProviders(),
-        ...getChartApiRouteProviders(),
         ...getSearchRouteProviders(),
         new ManualSpotifyResponseUploadRouteProvider(manualSpotifyResponseUploadHandler),
-        new OauthLoginRouteProvider(oauthLoginHandler),
         new GetDashboardInformationRouteProvider(dashboardHandler),
     ];
 
