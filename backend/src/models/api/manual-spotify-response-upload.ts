@@ -2,4 +2,5 @@ import { SpotifyRecentlyPlayedTracksApiResponseDto } from "@src/modules/music-pr
 
 export interface ManualSpotifyResponseUploadDto {
     response: SpotifyRecentlyPlayedTracksApiResponseDto;
+    fetchMissingArtistImages: boolean;
 }

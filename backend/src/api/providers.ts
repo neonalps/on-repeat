@@ -1,8 +1,5 @@
 import dependencyManager from "@src/di/manager";
 import { Dependencies } from "@src/di/dependencies";
-import { ManualSpotifyResponseUploadHandler } from "@src/api/v1/manual-spotify-response-upload/handler";
-import { SpotifyMusicProvider } from "@src/modules/music-provider/spotify/music-provider";
-import { ManualSpotifyResponseUploadRouteProvider } from "@src/api/v1/manual-spotify-response-upload/route-provider";
 import { getArtistApiRouteProviders } from "@src/api/v1/artist/artist-route-providers";
 import { getPlayedTracksApiRouteProviders } from "@src/api/v1/played-tracks/played-tracks-route-providers";
 import { getAlbumApiRouteProviders } from "@src/api/v1/album/album-route-providers";
@@ -18,13 +15,13 @@ import { getAccountRouteProviders } from "@src/api/v1/account/route-providers";
 import { getAccountTokenRouteProviders } from "@src/api/v1/account-token/route-providers";
 import { getAccountJobScheduleRouteProviders } from "@src/api/v1/account-job-schedule/route-providers";
 import { getLoginRouteProviders } from "./v1/login/route-providers";
+import { getOpsRouteProviders } from "./v1/ops/route-providers";
 
 export function getRouteProviders(): RouteProvider<unknown, unknown>[] {
     const chartService = dependencyManager.get<ChartService>(Dependencies.ChartService);
-    const spotifyMusicProvider = dependencyManager.get<SpotifyMusicProvider>(Dependencies.SpotifyMusicProvider);
+    
     const timeSource = dependencyManager.get<TimeSource>(Dependencies.TimeSource);
 
-    const manualSpotifyResponseUploadHandler = new ManualSpotifyResponseUploadHandler(spotifyMusicProvider);
     const dashboardHandler = new GetDashboardInformationHandler(chartService, timeSource);
 
     const providers: RouteProvider<any, any>[] = [
@@ -35,10 +32,10 @@ export function getRouteProviders(): RouteProvider<unknown, unknown>[] {
         ...getAlbumApiRouteProviders(),
         ...getChartApiRouteProviders(),
         ...getLoginRouteProviders(),
-        ...getTrackApiRouteProviders(),
+        ...getOpsRouteProviders(),
         ...getPlayedTracksApiRouteProviders(),
         ...getSearchRouteProviders(),
-        new ManualSpotifyResponseUploadRouteProvider(manualSpotifyResponseUploadHandler),
+        ...getTrackApiRouteProviders(),
         new GetDashboardInformationRouteProvider(dashboardHandler),
     ];
 

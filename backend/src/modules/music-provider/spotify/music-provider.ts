@@ -141,7 +141,8 @@ export class SpotifyMusicProvider extends MusicProvider {
             return;
         }
 
-        console.log(`${artistIdsWithMissingImages.length} artist${artistIdsWithMissingImages.length === 1 ? '' : 's'} need image fetching`);
+        const needsPlural = artistIdsWithMissingImages.length !== 1;
+        console.log(`${artistIdsWithMissingImages.length} artist${needsPlural ? 's' : ''} need${!needsPlural ? 's' : ''} image fetching`);
 
         const createArtistImageDtos: CreateArtistImageDto[] = [];
 
@@ -176,6 +177,28 @@ export class SpotifyMusicProvider extends MusicProvider {
         await this.catalogueService.createArtistImageRelations(createArtistImageDtos);
     }
 
+    public findSpotifyArtistIds(playedTracks: SpotifyPlayedTrackDto[]): string[] {
+        validateNotNull(playedTracks, "playedTracks");
+
+        const artistIds = new Set<string>();
+
+        for (const playedTrack of playedTracks) {
+            if (isDefined(playedTrack.track.album?.artists)) {
+                playedTrack.track.album.artists
+                    .map(item => item.id)
+                    .forEach(item => artistIds.add(item));
+            }
+
+            if (isDefined(playedTrack.track.artists)) {
+                playedTrack.track.artists
+                    .map(item => item.id)
+                    .forEach(item => artistIds.add(item));
+            }
+        }
+
+        return Array.from(artistIds);
+    }
+
     private async fetchRecentlyPlayedTracksForAccount(accountId: number, batchSize: number, before?: number): Promise<SpotifyPlayedTrackDto[]> {
         const accountToken = await this.retrieveAccountToken(accountId);
         const playedTracksResponse = await this.spotifyClient.getRecentlyPlayedTracks(accountToken.accessToken, batchSize, before);
@@ -200,26 +223,6 @@ export class SpotifyMusicProvider extends MusicProvider {
         }
 
         return oldestDate;
-    }
-
-    private findSpotifyArtistIds(playedTracks: SpotifyPlayedTrackDto[]): string[] {
-        const artistIds = new Set<string>();
-
-        for (const playedTrack of playedTracks) {
-            if (isDefined(playedTrack.track.album?.artists)) {
-                playedTrack.track.album.artists
-                    .map(item => item.id)
-                    .forEach(item => artistIds.add(item));
-            }
-
-            if (isDefined(playedTrack.track.artists)) {
-                playedTrack.track.artists
-                    .map(item => item.id)
-                    .forEach(item => artistIds.add(item));
-            }
-        }
-
-        return Array.from(artistIds);
     }
 
     private async retrieveAccountToken(accountId: number): Promise<AccountTokenDao> {
