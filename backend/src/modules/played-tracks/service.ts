@@ -15,6 +15,7 @@ import { PlayedTrackHistoryDao } from "@src/models/classes/dao/played-track-hist
 import { IdNameDao } from "@src/models/classes/dao/id-name";
 import { SimpleAlbumDao } from "@src/models/classes/dao/album-simple";
 import { AlbumDao } from "@src/models/classes/dao/album";
+import { PlayedStatsDao } from "@src/models/classes/dao/played-stats";
 
 export interface GetPlayedTracksPaginationParams extends PaginationParams<Date> {};
 export interface GetPlayedTrackHistoryPaginationParams extends PaginationParams<Date> {};
@@ -233,6 +234,12 @@ export class PlayedTrackService {
         validateNotNull(limit, "limit");
 
         return this.mapper.getAccountArtistChartForPeriod(accountId, from, to, limit);
+    }
+
+    public async getPlayedTrackStatsForPeriod(accountId: number, from: Date | null, to: Date | null): Promise<PlayedStatsDao> {
+        validateNotNull(accountId, "accountId");
+
+        return this.mapper.getPlayedTrackStatsForPeriod(accountId, from, to);
     }
 
     private static playedAtComparator(sortOrder: SortOrder): ((a: PlayedTrackDetailsDao, b: PlayedTrackDetailsDao) => number) | undefined {
