@@ -19,7 +19,13 @@ export class ManualSpotifyResponseUploadHandler implements RouteHandler<ManualSp
 
         const accountId = context.account.id;
         const convertedResponse = SpotifyApiResponseConverter.convertRecentlyPlayedTracksApiResponse(dto.response);
+
         await this.musicProvider.processPlayedTracks(accountId, convertedResponse.items);
+
+        if (dto.fetchMissingArtistImages === true) {
+            const artistIds = this.musicProvider.findSpotifyArtistIds(convertedResponse.items);
+            await this.musicProvider.fetchAndProcessMissingArtistImages(accountId, artistIds);
+        }
     }
     
 }
