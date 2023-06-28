@@ -19,6 +19,8 @@ import { PlayedTrackHistoryDao } from "@src/models/classes/dao/played-track-hist
 import { createIdNameDao } from "@src/util/dao";
 import { IdNameDao } from "@src/models/classes/dao/id-name";
 import { PlayedTrackDetailsNoAlbumImagesDao } from "@src/models/classes/dao/played-track-details-no-album-images";
+import { PlayedStatsDao } from "@src/models/classes/dao/played-stats";
+import { SimplePlayedStatsDaoInterface } from "@src/models/dao/simple-played-stats.dao";
 
 export class PlayedTrackMapper {
 
@@ -385,6 +387,34 @@ export class PlayedTrackMapper {
                 timesPlayed: item.timesPlayed,
             };
         });
+    }
+
+    public async getPlayedTrackStatsForPeriod(accountId: number, from: Date | null, to: Date | null): Promise<PlayedStatsDao> {
+        const result = await sql<SimplePlayedStatsDaoInterface[]>`
+            select
+                count(pt.played_at)::int as times_played
+            from
+                played_track pt
+            where
+                pt.account_id = ${ accountId }
+                ${isDefined(from) ? this.wherePlayedAtFrom(from as Date) : sql``}
+                ${isDefined(to) ? this.wherePlayedAtTo(to as Date) : sql``}
+                and pt.include_in_statistics = true
+        `;
+
+        if (!result || result.length === 0) {
+            return PlayedTrackMapper.convertToPlayedStatsDao(from, to, 0);
+        }
+
+        return PlayedTrackMapper.convertToPlayedStatsDao(from, to, result[0].timesPlayed);
+    }
+
+    private static convertToPlayedStatsDao(from: Date | null, to: Date | null, timesPlayed: number): PlayedStatsDao {
+        return PlayedStatsDao.Builder
+            .withFrom(from)
+            .withTo(to)
+            .withTimesPlayed(timesPlayed)
+            .build();
     }
 
     private async populateAndConvertTrackDetailsResult(items: PlayedTrackDetailsDaoInterface[]): Promise<PlayedTrackDetailsNoAlbumImagesDao[]> {
