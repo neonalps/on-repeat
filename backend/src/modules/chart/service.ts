@@ -44,8 +44,8 @@ export class ChartService {
         const artistIds = trackDaos.flatMap((track: TrackDao) => [...track.artistIds]);
 
         const [artistDaos, albumDaos] = await Promise.all([
-            this.catalogueService.getMultipleArtistsById(new Set(artistIds)),
-            this.catalogueService.getMultipleAlbumsById(new Set(albumIds)),
+            this.catalogueService.getMultipleArtistsById(artistIds),
+            this.catalogueService.getMultipleAlbumsById(albumIds),
         ]);
 
         const chartTracks: ChartTrackApiDto[] = [];
@@ -87,7 +87,7 @@ export class ChartService {
         
         const artistIds = chartItems.map((item: ChartItem) => item.itemId);
 
-        const artistDaos = await this.catalogueService.getMultipleArtistsById(new Set(artistIds));
+        const artistDaos = await this.catalogueService.getMultipleArtistsById(artistIds);
 
         const chartArtists: ChartArtistApiDto[] = [];
 

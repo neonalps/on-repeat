@@ -82,7 +82,7 @@ export class PlayedTrackService {
             .map(item => item.album?.id)
             .filter(item => isDefined(item)) as number[];
 
-        const albums = await this.catalogueService.getMultipleAlbumsById(new Set(albumIds));
+        const albums = await this.catalogueService.getMultipleAlbumsById(albumIds);
 
         const playedTrackDetailsWithAlbumImages = playedTrackDetails.map(item => {
             let album: SimpleAlbumDao | null = null;
@@ -95,7 +95,7 @@ export class PlayedTrackService {
                 album = SimpleAlbumDao.Builder
                     .withId(albumIdName.id)
                     .withName(albumIdName.name)
-                    .withImages(new Set(albumImages))
+                    .withImages(albumImages)
                     .build();
             }
 
@@ -149,7 +149,7 @@ export class PlayedTrackService {
             const item = ArtistPlayedTrackDetailsDao.Builder
                 .withTrack(trackDetails.track)
                 .withAlbum(trackDetails.album)
-                .withAdditionalArtists(new Set(additionalArtists))
+                .withAdditionalArtists(additionalArtists)
                 .withTimesPlayed(trackBucket.timesPlayed)
                 .build();
 

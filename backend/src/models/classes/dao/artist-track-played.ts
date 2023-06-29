@@ -1,16 +1,17 @@
 import { SimpleAlbumDao } from "@src/models/classes/dao/album-simple";
 import { IdNameDao } from "@src/models/classes/dao/id-name";
+import { SimpleArtistDao } from "@src/models/classes/dao/artist-simple";
 
 export class ArtistPlayedTrackDetailsDao {
    private _track!: IdNameDao;
    private _album!: SimpleAlbumDao | null;
-   private _additionalArtists!: Set<IdNameDao>;
+   private _additionalArtists!: SimpleArtistDao[];
    private _timesPlayed!: number;
 
    constructor(builder: ArtistPlayedTrackDetailsDaoBuilder) {
       this._track = builder.track;
       this._album = builder.album;
-      this._additionalArtists = new Set(builder.additionalArtists);
+      this._additionalArtists = [...builder.additionalArtists];
       this._timesPlayed = builder.timesPlayed;
    }
 
@@ -22,8 +23,8 @@ export class ArtistPlayedTrackDetailsDao {
       return this._album;
    }
 
-   public get additionalArtists(): Set<IdNameDao> {
-      return new Set(this._additionalArtists);
+   public get additionalArtists(): SimpleArtistDao[] {
+      return [...this._additionalArtists];
    }
 
    public get timesPlayed(): number {
@@ -38,7 +39,7 @@ export class ArtistPlayedTrackDetailsDao {
 class ArtistPlayedTrackDetailsDaoBuilder {
    private _track!: IdNameDao;
    private _album!: SimpleAlbumDao | null;
-   private _additionalArtists!: Set<IdNameDao>;
+   private _additionalArtists!: SimpleArtistDao[];
    private _timesPlayed!: number;
 
    public withTrack(track: IdNameDao): ArtistPlayedTrackDetailsDaoBuilder {
@@ -51,8 +52,8 @@ class ArtistPlayedTrackDetailsDaoBuilder {
       return this;
    }
 
-   public withAdditionalArtists(additionalArtists: Set<IdNameDao>): ArtistPlayedTrackDetailsDaoBuilder {
-      this._additionalArtists = new Set(additionalArtists);
+   public withAdditionalArtists(additionalArtists: SimpleArtistDao[]): ArtistPlayedTrackDetailsDaoBuilder {
+      this._additionalArtists = [...additionalArtists];
       return this;
    }
 
@@ -69,8 +70,8 @@ class ArtistPlayedTrackDetailsDaoBuilder {
       return this._album;
    }
 
-   public get additionalArtists(): Set<IdNameDao> {
-      return new Set(this._additionalArtists);
+   public get additionalArtists(): SimpleArtistDao[] {
+      return [...this._additionalArtists];
    }
 
    public get timesPlayed(): number {

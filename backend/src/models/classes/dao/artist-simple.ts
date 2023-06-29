@@ -1,12 +1,12 @@
-import { AlbumDao } from "@src/models/classes/dao/album";
 import { ImageDao } from "@src/models/classes/dao/image";
+import { ArtistDao } from "@src/models/classes/dao/artist";
 
-export class SimpleAlbumDao {
+export class SimpleArtistDao {
    private _id!: number;
    private _name!: string;
    private _images!: ImageDao[];
 
-   constructor(builder: SimpleAlbumDaoBuilder) {
+   constructor(builder: SimpleArtistDaoBuilder) {
       this._id = builder.id;
       this._name = builder.name;
       this._images = [...builder.images];
@@ -21,14 +21,14 @@ export class SimpleAlbumDao {
    }
 
    public get images(): ImageDao[] {
-      return [...this._images]
+      return [...this._images];
    }
 
-   public static get Builder(): SimpleAlbumDaoBuilder {
-      return new SimpleAlbumDaoBuilder();
+   public static get Builder(): SimpleArtistDaoBuilder {
+      return new SimpleArtistDaoBuilder();
    }
 
-   public static fromAlbumDao(item: AlbumDao): SimpleAlbumDao {
+   public static fromArtistDao(item: ArtistDao): SimpleArtistDao {
       return this.Builder
          .withId(item.id)
          .withName(item.name)
@@ -37,22 +37,22 @@ export class SimpleAlbumDao {
    }
 }
 
-class SimpleAlbumDaoBuilder {
+class SimpleArtistDaoBuilder {
    private _id!: number;
    private _name!: string;
    private _images!: ImageDao[];
 
-   public withId(id: number): SimpleAlbumDaoBuilder {
+   public withId(id: number): SimpleArtistDaoBuilder {
       this._id = id;
       return this;
    }
 
-   public withName(name: string): SimpleAlbumDaoBuilder {
+   public withName(name: string): SimpleArtistDaoBuilder {
       this._name = name;
       return this;
    }
 
-   public withImages(images: ImageDao[]): SimpleAlbumDaoBuilder {
+   public withImages(images: ImageDao[]): SimpleArtistDaoBuilder {
       this._images = [...images];
       return this;
    }
@@ -69,7 +69,7 @@ class SimpleAlbumDaoBuilder {
       return [...this._images];
    }
 
-   build(): SimpleAlbumDao {
-      return new SimpleAlbumDao(this);
+   build(): SimpleArtistDao {
+      return new SimpleArtistDao(this);
    }
 }

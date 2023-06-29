@@ -3,26 +3,26 @@ import { ImageDao } from "@src/models/classes/dao/image";
 export class AlbumDao {
     private _id!: number;
     private _name!: string;
-    private _artistIds!: Set<number>;
+    private _artistIds!: number[];
     private _albumType!: string | null;
     private _albumGroup!: string | null;
     private _totalTracks!: number | null;
     private _releaseDate!: Date | null;
     private _releaseDatePrecision!: string | null;
-    private _images!: Set<ImageDao>;
+    private _images!: ImageDao[];
     private _createdAt!: Date;
     private _updatedAt!: Date | null;
  
     constructor(builder: AlbumDaoBuilder) {
        this._id = builder.id;
        this._name = builder.name;
-       this._artistIds = new Set(builder.artistIds);
+       this._artistIds = [...builder.artistIds];
        this._albumType = builder.albumType;
        this._albumGroup = builder.albumGroup;
        this._totalTracks = builder.totalTracks;
        this._releaseDate = builder.releaseDate;
        this._releaseDatePrecision = builder.releaseDatePrecision;
-       this._images = new Set(builder.images);
+       this._images = [...builder.images];
        this._createdAt = builder.createdAt;
        this._updatedAt = builder.updatedAt;
     }
@@ -35,8 +35,8 @@ export class AlbumDao {
        return this._name;
     }
  
-    public get artistIds(): Set<number> {
-       return new Set(this._artistIds);
+    public get artistIds(): number[] {
+       return [...this._artistIds];
     }
  
     public get albumType(): string | null {
@@ -59,8 +59,8 @@ export class AlbumDao {
        return this._releaseDatePrecision;
     }
  
-    public get images(): Set<ImageDao> {
-       return new Set(this._images);
+    public get images(): ImageDao[] {
+       return [...this._images];
     }
  
     public get createdAt(): Date {
@@ -97,13 +97,13 @@ export class AlbumDao {
  class AlbumDaoBuilder {
     private _id!: number;
     private _name!: string;
-    private _artistIds!: Set<number>;
+    private _artistIds!: number[];
     private _albumType!: string | null;
     private _albumGroup!: string | null;
     private _totalTracks!: number | null;
     private _releaseDate!: Date | null;
     private _releaseDatePrecision!: string | null;
-    private _images!: Set<ImageDao>;
+    private _images!: ImageDao[];
     private _createdAt!: Date;
     private _updatedAt!: Date | null;
  
@@ -117,8 +117,8 @@ export class AlbumDao {
        return this;
     }
  
-    public withArtistIds(artistIds: Set<number>): AlbumDaoBuilder {
-       this._artistIds = new Set(artistIds);
+    public withArtistIds(artistIds: number[]): AlbumDaoBuilder {
+       this._artistIds = [...artistIds];
        return this;
     }
  
@@ -147,8 +147,8 @@ export class AlbumDao {
        return this;
     }
  
-    public withImages(images: Set<ImageDao>): AlbumDaoBuilder {
-       this._images = new Set(images);
+    public withImages(images: ImageDao[]): AlbumDaoBuilder {
+       this._images = [...images];
        return this;
     }
  
@@ -170,8 +170,8 @@ export class AlbumDao {
        return this._name;
     }
  
-    public get artistIds(): Set<number> {
-       return new Set(this._artistIds);
+    public get artistIds(): number[] {
+       return [...this._artistIds];
     }
  
     public get albumType(): string | null {
@@ -194,8 +194,8 @@ export class AlbumDao {
        return this._releaseDatePrecision;
     }
  
-    public get images(): Set<ImageDao> {
-       return new Set(this._images);
+    public get images(): ImageDao[] {
+       return [...this._images];
     }
  
     public get createdAt(): Date {

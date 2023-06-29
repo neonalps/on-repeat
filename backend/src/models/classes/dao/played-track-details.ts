@@ -1,11 +1,12 @@
 import { SimpleAlbumDao } from "@src/models/classes/dao/album-simple";
 import { IdNameDao } from "@src/models/classes/dao/id-name";
+import { SimpleArtistDao } from "@src/models/classes/dao/artist-simple";
 
 export class PlayedTrackDetailsDao {
    private _playedTrackId!: number;
    private _track!: IdNameDao;
    private _album!: SimpleAlbumDao | null;
-   private _artists!: Set<IdNameDao>;
+   private _artists!: SimpleArtistDao[];
    private _musicProvider!: IdNameDao;
    private _playedAt!: Date;
    private _includeInStatistics!: boolean;
@@ -14,7 +15,7 @@ export class PlayedTrackDetailsDao {
       this._playedTrackId = builder.playedTrackId;
       this._track = builder.track;
       this._album = builder.album;
-      this._artists = new Set(builder.artists);
+      this._artists = [...builder.artists];
       this._musicProvider = builder.musicProvider;
       this._playedAt = builder.playedAt;
       this._includeInStatistics = builder.includeInStatistics;
@@ -32,8 +33,8 @@ export class PlayedTrackDetailsDao {
       return this._album;
    }
 
-   public get artists(): Set<IdNameDao> {
-      return new Set(this._artists);
+   public get artists(): SimpleArtistDao[] {
+      return [...this._artists];
    }
 
    public get musicProvider(): IdNameDao {
@@ -57,7 +58,7 @@ class PlayedTrackDetailsDaoBuilder {
    private _playedTrackId!: number;
    private _track!: IdNameDao;
    private _album!: SimpleAlbumDao | null;
-   private _artists!: Set<IdNameDao>;
+   private _artists!: SimpleArtistDao[];
    private _musicProvider!: IdNameDao;
    private _playedAt!: Date;
    private _includeInStatistics!: boolean;
@@ -77,8 +78,8 @@ class PlayedTrackDetailsDaoBuilder {
       return this;
    }
 
-   public withArtists(artists: Set<IdNameDao>): PlayedTrackDetailsDaoBuilder {
-      this._artists = new Set(artists);
+   public withArtists(artists: SimpleArtistDao[]): PlayedTrackDetailsDaoBuilder {
+      this._artists = [...artists];
       return this;
    }
 
@@ -109,8 +110,8 @@ class PlayedTrackDetailsDaoBuilder {
       return this._album;
    }
 
-   public get artists(): Set<IdNameDao> {
-      return new Set(this._artists);
+   public get artists(): SimpleArtistDao[] {
+      return [...this._artists];
    }
 
    public get musicProvider(): IdNameDao {

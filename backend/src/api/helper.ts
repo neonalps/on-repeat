@@ -10,14 +10,18 @@ import { AccountTokenDao } from "@src/models/classes/dao/account-token";
 import { AlbumDao } from "@src/models/classes/dao/album";
 import { SimpleAlbumDao } from "@src/models/classes/dao/album-simple";
 import { ArtistDao } from "@src/models/classes/dao/artist";
-import { IdNameDao } from "@src/models/classes/dao/id-name";
 import { ImageDao } from "@src/models/classes/dao/image";
 import { SimpleTrackDetailsDao } from "@src/models/classes/dao/simple-track-details";
 import { TrackDao } from "@src/models/classes/dao/track";
 import { isDefined, removeNull, requireNonNull } from "@src/util/common";
 
+interface PublicArtist {
+    id: number;
+    name: string;
+    images: ImageLike[];
+}
+
 type AlbumLike = AlbumDao | SimpleAlbumDao;
-type ArtistLike = ArtistDao | IdNameDao;
 type ImageLike = ImageDao;
 
 export class ApiHelper {
@@ -55,7 +59,7 @@ export class ApiHelper {
             id: item.track.id,
             name: item.track.name,
             album: this.convertAlbumApiDto(item.album),
-            artists: this.convertArtistApiDtos(Array.from(item.artists)),
+            artists: this.convertArtistApiDtos(item.artists),
             href: this.getTrackResourceUrl(item.track.id),
         }
     }
@@ -90,7 +94,7 @@ export class ApiHelper {
         };
     }
 
-    public convertArtistApiDto(artist: ArtistLike): ArtistApiDto | null {
+    public convertArtistApiDto(artist: PublicArtist): ArtistApiDto | null {
         if (!artist) {
             return null;
         }
@@ -101,10 +105,11 @@ export class ApiHelper {
             id: artistId, 
             name: artist.name, 
             href: this.getArtistResourceUrl(artistId),
+            images: this.convertImageApiDtos(artist.images),
         };
     }
 
-    public convertArtistApiDtos(artists: ArtistLike[]): ArtistApiDto[] {
+    public convertArtistApiDtos(artists: PublicArtist[]): ArtistApiDto[] {
         if (!artists || artists.length === 0) {
             return [];
         }
