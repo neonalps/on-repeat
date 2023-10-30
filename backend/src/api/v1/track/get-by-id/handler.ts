@@ -47,14 +47,14 @@ export class GetTrackByIdHandler implements RouteHandler<GetTrackByIdRequestDto,
             this.catalogueService.getMultipleArtistsById(track.artistIds),
         ]);
 
-        const artistsApiDtos = [];
-        for (const artist of artists) {
-            artistsApiDtos.push({
+        const artistsApiDtos = artists.map(artist => {
+            return {
                 id: artist.id,
                 name: artist.name,
                 href: this.apiHelper.getArtistResourceUrl(artist.id),
-            });
-        }
+                images: this.apiHelper.convertImageApiDtos(artist.images),
+            };
+        });
 
         const albumApiDto = album !== null ? {
             id: album.id,

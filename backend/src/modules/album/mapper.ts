@@ -83,8 +83,8 @@ export class AlbumMapper {
         return AlbumDao.Builder
             .withId(albumId)
             .withName(item.name)
-            .withArtistIds(new Set(artistIds))
-            .withImages(new Set(albumImages))
+            .withArtistIds([...artistIds])
+            .withImages([...albumImages])
             .withAlbumType(item.albumType)
             .withAlbumGroup(item.albumGroup)
             .withTotalTracks(item.totalTracks)

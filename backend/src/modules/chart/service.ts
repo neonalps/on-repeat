@@ -62,7 +62,7 @@ export class ChartService {
             }
 
             const album = albumDaos.find(album => album.id === track.albumId);
-            const artists = artistDaos.filter(artist => track.artistIds.has(artist.id));
+            const artists = artistDaos.filter(artist => track.artistIds.indexOf(artist.id) >= 0);
 
             chartTracks.push({
                 position: chartItem.rank,

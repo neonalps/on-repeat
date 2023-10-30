@@ -168,7 +168,7 @@ export class TrackMapper {
         return TrackDao.Builder
             .withId(item.id)
             .withName(item.name)
-            .withArtistIds(new Set(artistIds))
+            .withArtistIds([...artistIds])
             .withAlbumId(item.albumId)
             .withIsrc(item.isrc)
             .withBucket(item.bucket)

@@ -1,4 +1,4 @@
-import { isDefined, removeNull, requireNonNull } from "@src/util/common";
+import { isDefined, isNotDefined, removeNull, requireNonNull } from "@src/util/common";
 import { PlayedTrackMapper } from "./mapper";
 import { validateNotNull } from "@src/util/validation";
 import { PlayedTrackDao } from "@src/models/classes/dao/played-track";
@@ -16,6 +16,8 @@ import { IdNameDao } from "@src/models/classes/dao/id-name";
 import { SimpleAlbumDao } from "@src/models/classes/dao/album-simple";
 import { AlbumDao } from "@src/models/classes/dao/album";
 import { PlayedStatsDao } from "@src/models/classes/dao/played-stats";
+import { SimpleArtistDao } from "@src/models/classes/dao/artist-simple";
+import { ArtistDao } from "@src/models/classes/dao/artist";
 
 export interface GetPlayedTracksPaginationParams extends PaginationParams<Date> {};
 export interface GetPlayedTrackHistoryPaginationParams extends PaginationParams<Date> {};
@@ -84,6 +86,13 @@ export class PlayedTrackService {
 
         const albums = await this.catalogueService.getMultipleAlbumsById(albumIds);
 
+        // TODO get images
+        const artistIds = new Set<number>();
+        for (const playedTrack of playedTrackDetails) {
+            playedTrack.artists.forEach(artist => artistIds.add(artist.id));
+        }
+        const artists = await this.catalogueService.getMultipleArtistsById(Array.from(artistIds));
+
         const playedTrackDetailsWithAlbumImages = playedTrackDetails.map(item => {
             let album: SimpleAlbumDao | null = null;
             if (isDefined(item.album)) {
@@ -99,11 +108,27 @@ export class PlayedTrackService {
                     .build();
             }
 
+            const trackArtists: SimpleArtistDao[] = [];
+            for (const trackArtistItem of item.artists) {
+                const trackArtist = artists.find(artist => artist.id === trackArtistItem.id);
+                if (isNotDefined(trackArtist)) {
+                    continue;
+                }
+
+                trackArtists.push(
+                    SimpleArtistDao.Builder
+                        .withId((trackArtist as ArtistDao).id)
+                        .withName((trackArtist as ArtistDao).name)
+                        .withImages((trackArtist as ArtistDao).images)
+                        .build()
+                );
+            }
+
             return PlayedTrackDetailsDao.Builder
                 .withPlayedTrackId(item.playedTrackId)
                 .withPlayedAt(item.playedAt)
                 .withTrack(item.track)
-                .withArtists(item.artists)
+                .withArtists(trackArtists)
                 .withAlbum(album)
                 .withMusicProvider(item.musicProvider)
                 .withIncludeInStatistics(item.includeInStatistics)

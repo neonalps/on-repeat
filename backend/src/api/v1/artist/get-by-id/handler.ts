@@ -7,16 +7,24 @@ import { PlayedTrackService } from "@src/modules/played-tracks/service";
 import { AccountDao } from "@src/models/classes/dao/account";
 import { IllegalStateError } from "@src/api/error/illegal-state-error";
 import { CatalogueService } from "@src/modules/catalogue/service";
+import { ApiHelper } from "@src/api/helper";
 
 export class GetArtistByIdHandler implements RouteHandler<GetArtistByIdRequestDto, DetailedArtistApiDto> {
 
     static readonly ERROR_ARTIST_NOT_FOUND = "No artist with this ID exists";
 
+    private readonly apiHelper: ApiHelper;
     private readonly catalogueService: CatalogueService;
     private readonly musicProviderService: MusicProviderService;
     private readonly playedTrackService: PlayedTrackService;
     
-    constructor(catalogueService: CatalogueService, musicProviderService: MusicProviderService, playedTrackService: PlayedTrackService) {
+    constructor(
+        apiHelper: ApiHelper, 
+        catalogueService: CatalogueService, 
+        musicProviderService: MusicProviderService, 
+        playedTrackService: PlayedTrackService
+    ) {
+        this.apiHelper = requireNonNull(apiHelper);
         this.catalogueService = requireNonNull(catalogueService);
         this.musicProviderService = requireNonNull(musicProviderService);
         this.playedTrackService = requireNonNull(playedTrackService);
@@ -39,6 +47,7 @@ export class GetArtistByIdHandler implements RouteHandler<GetArtistByIdRequestDt
         return {
             id: artist.id,
             name: artist.name,
+            images: this.apiHelper.convertImageApiDtos(artist.images),
             externalUrls,
             playedInfo: { 
                 firstPlayedAt: playedInfo.firstPlayedAt,

@@ -2,7 +2,7 @@ import { TrackDao } from "@src/models/classes/dao/track";
 
 export class CreateTrackDto {
     private _name!: string;
-    private _artistIds!: Set<number>;
+    private _artistIds!: number[];
     private _albumId!: number | null;
     private _isrc!: string | null;
     private _discNumber!: number | null;
@@ -12,7 +12,7 @@ export class CreateTrackDto {
  
     constructor(builder: CreateTrackDtoBuilder) {
        this._name = builder.name;
-       this._artistIds = new Set(builder.artistIds);
+       this._artistIds = [...builder.artistIds];
        this._albumId = builder.albumId;
        this._isrc = builder.isrc;
        this._discNumber = builder.discNumber;
@@ -25,8 +25,8 @@ export class CreateTrackDto {
        return this._name;
     }
  
-    public get artistIds(): Set<number> {
-       return new Set(this._artistIds);
+    public get artistIds(): number[] {
+       return [...this._artistIds];
     }
  
     public get albumId(): number | null {
@@ -77,7 +77,7 @@ export class CreateTrackDto {
  
  class CreateTrackDtoBuilder {
     private _name!: string;
-    private _artistIds!: Set<number>;
+    private _artistIds!: number[];
     private _albumId!: number | null;
     private _isrc!: string | null;
     private _discNumber!: number | null;
@@ -90,8 +90,8 @@ export class CreateTrackDto {
        return this;
     }
  
-    public withArtistIds(artistIds: Set<number>): CreateTrackDtoBuilder {
-       this._artistIds = new Set(artistIds);
+    public withArtistIds(artistIds: number[]): CreateTrackDtoBuilder {
+       this._artistIds = [...artistIds];
        return this;
     }
  
@@ -129,8 +129,8 @@ export class CreateTrackDto {
        return this._name;
     }
  
-    public get artistIds(): Set<number> {
-       return new Set(this._artistIds);
+    public get artistIds(): number[] {
+       return [...this._artistIds];
     }
  
     public get albumId(): number | null {

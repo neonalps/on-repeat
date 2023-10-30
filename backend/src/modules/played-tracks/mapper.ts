@@ -446,11 +446,12 @@ export class PlayedTrackMapper {
         
         for (const item of playedTrackDetailsMap.values()) {
             const album = isDefined(item.albumId) ? createIdNameDao(item.albumId, item.albumName) : null;
+            const artists = trackArtistsMap.get(item.trackId);
 
             const dao = PlayedTrackDetailsNoAlbumImagesDao.Builder
                 .withPlayedTrackId(item.playedTrackId)
                 .withTrack(createIdNameDao(item.trackId, item.trackName))
-                .withArtists(new Set(trackArtistsMap.get(item.trackId)))
+                .withArtists(isDefined(artists) ? [...(artists as IdNameDao[])] : [])
                 .withAlbum(album)
                 .withMusicProvider(createIdNameDao(item.musicProviderId, item.musicProviderName))
                 .withPlayedAt(item.playedAt)
