@@ -1,6 +1,6 @@
 import { TrackDao } from "@src/models/classes/dao/track";
 import { CreateTrackDto } from "@src/models/classes/dto/create-track";
-import { validateNotBlank, validateNotEmpty, validateNotNull } from "@src/util/validation";
+import { validateNotBlank, validateNotEmpty, validateNotNull, validateTrue } from "@src/util/validation";
 import { requireNonNull } from "@src/util/common";
 import { TrackMapper } from "./mapper";
 import { UpdateTrackDto } from "@src/models/classes/dto/update-track";
@@ -16,7 +16,7 @@ export class TrackService {
     public async create(dto: CreateTrackDto): Promise<TrackDao | null> {
         validateNotNull(dto, "createTrackDto");
         validateNotBlank(dto.name, "createTrackDto.name");
-        validateNotEmpty(dto.artistIds, "createTrackDto.artistIds");
+        validateTrue(dto.artistIds !== null && dto.artistIds.length > 0, "createTrackDto.artistIds");
     
         const createdTrackId = await this.mapper.create(dto);
 

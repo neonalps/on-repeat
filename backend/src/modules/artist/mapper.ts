@@ -136,7 +136,7 @@ export class ArtistMapper {
         return ArtistDao.Builder
             .withId(item.id)
             .withName(item.name)
-            .withImages(new Set(images))
+            .withImages(images)
             .withCreatedAt(item.createdAt)
             .withUpdatedAt(item.updatedAt)
             .build();

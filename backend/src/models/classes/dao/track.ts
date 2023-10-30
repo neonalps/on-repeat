@@ -1,7 +1,7 @@
 export class TrackDao {
     private _id!: number;
     private _name!: string;
-    private _artistIds!: Set<number>;
+    private _artistIds!: number[];
     private _albumId!: number | null;
     private _isrc!: string | null;
     private _bucket!: number;
@@ -15,7 +15,7 @@ export class TrackDao {
     constructor(builder: TrackDaoBuilder) {
        this._id = builder.id;
        this._name = builder.name;
-       this._artistIds = new Set(builder.artistIds);
+       this._artistIds = [...builder.artistIds];
        this._albumId = builder.albumId;
        this._isrc = builder.isrc;
        this._bucket = builder.bucket;
@@ -35,8 +35,8 @@ export class TrackDao {
        return this._name;
     }
  
-    public get artistIds(): Set<number> {
-       return new Set(this._artistIds);
+    public get artistIds(): number[] {
+       return [...this._artistIds];
     }
  
     public get albumId(): number | null {
@@ -101,7 +101,7 @@ export class TrackDao {
  class TrackDaoBuilder {
     private _id!: number;
     private _name!: string;
-    private _artistIds!: Set<number>;
+    private _artistIds!: number[];
     private _albumId!: number | null;
     private _isrc!: string | null;
     private _bucket!: number;
@@ -122,8 +122,8 @@ export class TrackDao {
        return this;
     }
  
-    public withArtistIds(artistIds: Set<number>): TrackDaoBuilder {
-       this._artistIds = new Set(artistIds);
+    public withArtistIds(artistIds: number[]): TrackDaoBuilder {
+       this._artistIds = [...artistIds];
        return this;
     }
  
@@ -180,8 +180,8 @@ export class TrackDao {
        return this._name;
     }
  
-    public get artistIds(): Set<number> {
-       return new Set(this._artistIds);
+    public get artistIds(): number[] {
+       return [...this._artistIds];
     }
  
     public get albumId(): number | null {

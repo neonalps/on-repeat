@@ -1,15 +1,16 @@
 import { SimpleAlbumDao } from "@src/models/classes/dao/album-simple";
 import { IdNameDao } from "@src/models/classes/dao/id-name";
+import { SimpleArtistDao } from "@src/models/classes/dao/artist-simple";
 
 export class SimpleTrackDetailsDao {
    private _track!: IdNameDao;
    private _album!: SimpleAlbumDao | null;
-   private _artists!: Set<IdNameDao>;
+   private _artists!: SimpleArtistDao[];
 
    constructor(builder: SimpleTrackDetailsDaoBuilder) {
       this._track = builder.track;
       this._album = builder.album;
-      this._artists = new Set(builder.artists);
+      this._artists = [...builder.artists];
    }
 
    public get track(): IdNameDao {
@@ -20,8 +21,8 @@ export class SimpleTrackDetailsDao {
       return this._album;
    }
 
-   public get artists(): Set<IdNameDao> {
-      return new Set(this._artists);
+   public get artists(): SimpleArtistDao[] {
+      return [...this._artists];
    }
 
    public static get Builder(): SimpleTrackDetailsDaoBuilder {
@@ -32,7 +33,7 @@ export class SimpleTrackDetailsDao {
 class SimpleTrackDetailsDaoBuilder {
    private _track!: IdNameDao;
    private _album!: SimpleAlbumDao | null;
-   private _artists!: Set<IdNameDao>;
+   private _artists!: SimpleArtistDao[];
 
    public withTrack(track: IdNameDao): SimpleTrackDetailsDaoBuilder {
       this._track = track;
@@ -44,8 +45,8 @@ class SimpleTrackDetailsDaoBuilder {
       return this;
    }
 
-   public withArtists(artists: Set<IdNameDao>): SimpleTrackDetailsDaoBuilder {
-      this._artists = new Set(artists);
+   public withArtists(artists: SimpleArtistDao[]): SimpleTrackDetailsDaoBuilder {
+      this._artists = [...artists];
       return this;
    }
 
@@ -57,8 +58,8 @@ class SimpleTrackDetailsDaoBuilder {
       return this._album;
    }
 
-   public get artists(): Set<IdNameDao> {
-      return new Set(this._artists);
+   public get artists(): SimpleArtistDao[] {
+      return [...this._artists];
    }
 
    build(): SimpleTrackDetailsDao {

@@ -9,6 +9,7 @@ import { GetAlbumByIdRequestDto } from "@src/models/api/get-album-by-id-request"
 import { DetailedAlbumApiDto } from "@src/models/api/detailed-album";
 import { ApiHelper } from "@src/api/helper";
 import { CatalogueService } from "@src/modules/catalogue/service";
+import { ArtistApiDto } from "@src/models/api/artist";
 
 export class GetAlbumByIdHandler implements RouteHandler<GetAlbumByIdRequestDto, DetailedAlbumApiDto> {
 
@@ -23,7 +24,7 @@ export class GetAlbumByIdHandler implements RouteHandler<GetAlbumByIdRequestDto,
         apiHelper: ApiHelper,
         catalogueService: CatalogueService,
         musicProviderService: MusicProviderService, 
-        playedTrackService: PlayedTrackService
+        playedTrackService: PlayedTrackService,
     ) {
         this.apiHelper = requireNonNull(apiHelper);
         this.catalogueService = requireNonNull(catalogueService);
@@ -46,12 +47,13 @@ export class GetAlbumByIdHandler implements RouteHandler<GetAlbumByIdRequestDto,
             this.catalogueService.getMultipleArtistsById(album.artistIds),
         ]);
 
-        const artistsApiDtos = [];
+        const artistsApiDtos: ArtistApiDto[] = [];
         for (const artist of artists) {
             artistsApiDtos.push({
                 id: artist.id,
                 name: artist.name,
                 href: this.apiHelper.getArtistResourceUrl(artist.id),
+                images: this.apiHelper.convertImageApiDtos(artist.images),
             });
         }
 

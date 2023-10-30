@@ -19,6 +19,7 @@ import { createIdNameDao } from "@src/util/dao";
 import { SimpleAlbumDao } from "@src/models/classes/dao/album-simple";
 import { CreateArtistImageDto } from "@src/models/classes/dto/create-artist-image";
 import { ImageDao } from "@src/models/classes/dao/image";
+import { SimpleArtistDao } from "@src/models/classes/dao/artist-simple";
 
 interface TrackBucketContext {
     trackId: number;
@@ -109,13 +110,13 @@ export class CatalogueService {
 
         const [album, artists] = await Promise.all([
             this.getAlbumById(track.albumId),
-            this.getMultipleArtistsById(track.artistIds)
+            this.getMultipleArtistsById(Array.from(track.artistIds))
         ]);
 
         return SimpleTrackDetailsDao.Builder
             .withTrack(createIdNameDao(track.id, track.name))
             .withAlbum(album !== null ? SimpleAlbumDao.fromAlbumDao(album) : null)
-            .withArtists(new Set(artists.map(artist => createIdNameDao(artist.id, artist.name))))
+            .withArtists(artists.map(artist => SimpleArtistDao.fromArtistDao(artist)))
             .build();
     }
 
@@ -127,7 +128,7 @@ export class CatalogueService {
         return this.artistService.getById(artistId);
     }
 
-    public async getMultipleArtistsById(ids: Set<number>): Promise<ArtistDao[]> {
+    public async getMultipleArtistsById(ids: number[]): Promise<ArtistDao[]> {
         return this.artistService.getMultipleById(ids);
     }
     
@@ -188,7 +189,7 @@ export class CatalogueService {
         return this.albumService.getById(albumId);
     }
 
-    public async getMultipleAlbumsById(albumIds: Set<number>): Promise<AlbumDao[]> {
+    public async getMultipleAlbumsById(albumIds: number[]): Promise<AlbumDao[]> {
         return this.albumService.getMultipleById(albumIds);
     }
     
@@ -216,13 +217,13 @@ export class CatalogueService {
     public async insertAlbum(album: AlbumDao): Promise<number> {
         const createAlbumDto = CreateAlbumDto.Builder
             .withName(album.name)
-            .withArtistIds(album.artistIds)
+            .withArtistIds(new Set(album.artistIds))
             .withAlbumGroup(album.albumGroup)
             .withAlbumType(album.albumType)
             .withTotalTracks(album.totalTracks)
             .withReleaseDate(album.releaseDate)
             .withReleaseDatePrecision(album.releaseDatePrecision)
-            .withImages(CatalogueService.convertAlbumImages(album.images))
+            .withImages(CatalogueService.convertAlbumImages(new Set(album.images)))
             .build();
 
         const createdAlbum = await this.albumService.create(createAlbumDto);

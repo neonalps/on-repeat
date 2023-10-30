@@ -263,13 +263,13 @@ export class SpotifyMusicProvider extends MusicProvider {
 
         const album = AlbumDao.Builder
             .withName(albumToProcess.name)
-            .withArtistIds(catalogueArtistIds)
+            .withArtistIds([...catalogueArtistIds])
             .withAlbumGroup(albumToProcess.albumGroup)
             .withAlbumType(albumToProcess.albumType)
             .withTotalTracks(albumToProcess.totalTracks)
             .withReleaseDate(albumToProcess.releaseDate)
             .withReleaseDatePrecision(albumToProcess.releaseDatePrecision)
-            .withImages(new Set(albumImages))
+            .withImages([...albumImages])
             .build();
 
         const catalogueAlbumId = await this.catalogueService.upsertAlbum(storedAlbumId, album);
@@ -304,10 +304,10 @@ export class SpotifyMusicProvider extends MusicProvider {
 
         const artist = ArtistDao.Builder
             .withName(artistToProcess.name)
-            .withImages(new Set())
+            .withImages([])
             .build();
 
-        const catalogueArtistId = await this.catalogueService.upsertArtist(storedArtistId, artist as ArtistDao);
+        const catalogueArtistId = await this.catalogueService.upsertArtist(storedArtistId, artist);
 
         if (!storedArtistId) {
             await this.addMusicProviderArtistRelation(catalogueArtistId, spotifyArtistId, spotifyArtistHref);
@@ -325,7 +325,7 @@ export class SpotifyMusicProvider extends MusicProvider {
 
         const track = TrackDao.Builder
             .withName(trackToProcess.name)
-            .withArtistIds(catalogueArtistIds)
+            .withArtistIds([...catalogueArtistIds])
             .withAlbumId(catalogueAlbumId)
             .withIsrc(SpotifyMusicProvider.safelyExtractIsrc(trackToProcess.externalIds))
             .withDiscNumber(trackToProcess.discNumber)
