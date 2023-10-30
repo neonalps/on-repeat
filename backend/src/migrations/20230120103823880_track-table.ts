@@ -12,16 +12,45 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
             type: 'varchar(1000)',
             notNull: true
         },
-        record_id: {
+        album_id: {
             type: 'integer',
+            notNull: false,
+            references: `"album"`
+        },
+        isrc: {
+            type: 'varchar(20)',
+            notNull: false,
+        },
+        bucket: {
+            type: 'serial',
             notNull: true,
-            references: `"record"`
+            references: `"track"`,
+        },
+        disc_number: {
+            type: 'smallint',
+            notNull: false,
+        },
+        track_number: {
+            type: 'smallint',
+            notNull: false,
+        },
+        duration_ms: {
+            type: 'integer',
+            notNull: false,
+        },
+        explicit: {
+            type: 'boolean',
+            notNull: false,
         },
         created_at: {
-            type: 'timestamp',
+            type: 'timestamptz',
             notNull: true,
             default: pgm.func('current_timestamp')
-        }
+        },
+        updated_at: {
+            type: 'timestamptz',
+            notNull: false,
+        },
     });
 }
 

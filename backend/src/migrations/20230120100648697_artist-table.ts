@@ -10,13 +10,17 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
         id: 'id',
         name: {
             type: 'varchar(1000)',
-            notNull: true
+            notNull: true,
         },
         created_at: {
-            type: 'timestamp',
+            type: 'timestamptz',
             notNull: true,
-            default: pgm.func('current_timestamp')
-        }
+            default: pgm.func('current_timestamp'),
+        },
+        updated_at: {
+            type: 'timestamptz',
+            notNull: false,
+        },
     });
 }
 

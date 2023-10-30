@@ -4,10 +4,9 @@
         "lib": [
             "es6"
         ],
+        "types": ["node", "jest"],
         "paths": {
-            "@src/*": ["src/*"],
-            "@crypto/*": ["src/crypto/*"],
-            "@jobs/*": ["src/jobs/*"]
+            "@src/*": ["src/*"]
         },
         "baseUrl": ".",
         "module": "commonjs",
@@ -20,5 +19,8 @@
         "strict": true,
         "noImplicitAny": true,
         "skipLibCheck": true
-    }
+    },
+    "exclude": [
+        "jest.config.js",
+    ]
 }
