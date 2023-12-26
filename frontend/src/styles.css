@@ -1,5 +1,5 @@
 :root {
-    --primary: #4193a9;
+    --primary: #0db4b9;
     --white: #fafafa;
     --dark-grey: #363737;
     --dark-grey-lighter: #4c4e4e;
@@ -26,7 +26,7 @@ a {
 }
 
 header {
-    background-color: var(--dark-grey-lighter);
+    background-color: var(--primary);
     color: var(--white);
 
     padding: .5rem 0;
