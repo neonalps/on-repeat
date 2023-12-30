@@ -20,7 +20,6 @@ export class OauthLoginRouteProvider implements RouteProvider<OauthLoginRequestD
                 properties: {
                     provider: { type: 'string', enum: ['spotify', 'google'] },
                     code: { type: 'string' },
-                    state: { type: 'string' },
                 },
             }
         };
