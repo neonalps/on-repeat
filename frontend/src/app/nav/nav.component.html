@@ -1,5 +1,5 @@
 <div class="nav-container">
-    <span class="logo">
+    <span class="logo pointer" (click)="goToHome()">
       <app-app-logo />
       on repeat
     </span>
@@ -10,8 +10,13 @@
             <li class="nav-link"><a href="#">About Us</a></li>
         </ul>
         <ul class="nav--ul__two">
-            <li class="nav-link"><a href="#">Login</a></li>
-            <li class="nav-link"><a href="#">Signup</a></li>
+            <ng-container *ngIf="user !== null; else login">
+                <li class="nav-link">{{ user.username }}</li>
+                <li class="nav-link pointer" (click)="logout()">Logout</li>
+            </ng-container>
+            <ng-template #login>
+                <li class="nav-link"><a href="/login">Login</a></li>
+            </ng-template>
         </ul>
     </nav>
     <span class="hamburger-menu material-symbols-outlined" (click)="toggle()">menu</span>
