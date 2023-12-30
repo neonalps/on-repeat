@@ -1,11 +1,11 @@
-import { Component, DestroyRef, OnDestroy, inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { selectMenuVisible } from '@src/app/ui-state/store/ui-state.selectors';
 import { AppState } from '@src/app/store.index';
-import { toggleMenu } from '@src/app/ui-state/store/ui-state.actions';
+import { hideMenu, toggleMenu } from '@src/app/ui-state/store/ui-state.actions';
 import { AppLogoComponent } from '@src/app/app-logo/app-logo.component';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { selectAuthUser } from '@src/app/auth/store/auth.selectors';
 import { AuthUser } from '@src/app/models';
 import { logout } from '@src/app/auth/store/auth.actions';
@@ -17,13 +17,13 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
   imports: [
     AppLogoComponent,
     CommonModule,
+    RouterModule,
   ],
   templateUrl: './nav.component.html',
   styleUrl: './nav.component.css'
 })
 export class NavComponent {
 
-  destroyRef = inject(DestroyRef);
   menuVisible$ = this.store.select(selectMenuVisible);
   user: AuthUser | null = null;
 
@@ -33,10 +33,22 @@ export class NavComponent {
       .subscribe(value => {
         this.user = value;
       });
+
+      this.router.events
+        .pipe(takeUntilDestroyed())
+        .subscribe(value => {
+          if (value instanceof NavigationEnd) {
+            this.hideMenu();
+          }
+        });
   }
 
   goToHome() {
     this.router.navigate(['/']);
+  }
+
+  hideMenu() {
+    this.store.dispatch(hideMenu());
   }
 
   logout() {
@@ -48,5 +60,6 @@ export class NavComponent {
   toggle() {
     this.store.dispatch(toggleMenu());
   }
+
 
 }
