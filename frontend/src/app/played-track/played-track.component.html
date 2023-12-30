@@ -1,0 +1,10 @@
+<div class="mt-24 flex">
+    <div class="image-container flex justify-content-center flex-grow-1 align-self-center">
+        <img loading="lazy" [src]="getImageUrl()" [attr.height]="getImageHeight()" [attr.width]="getImageWidth()"/>
+    </div>
+    <div class="flex-grow-6 pl-4">
+        <div class="bold">{{ getArtists() }}</div>
+        <div class="mt-4">{{ getTitle() }}</div>
+        <div class="mt-6 small">{{ getPlayedAt() }} </div>
+    </div>
+</div>

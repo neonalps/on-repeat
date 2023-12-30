@@ -1,0 +1,13 @@
+<section class="title center">Recently played tracks</section>
+
+<section class="page-content">
+    <div *ngIf="!loading; else loadingTemplate">
+        <ng-container *ngIf="playedTracks.length > 0; else emptyList">
+            <app-played-track *ngFor="let playedTrack of playedTracks" [playedTrack]="playedTrack"/>
+        </ng-container>
+        <ng-template #emptyList>No played tracks recorded yet. Why don't you go and listen to some right now?</ng-template>
+    </div>
+    <ng-template #loadingTemplate>
+        Loading...
+    </ng-template>
+</section>

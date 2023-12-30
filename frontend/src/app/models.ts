@@ -23,3 +23,49 @@ export interface LoginResponseDto {
         accessToken: string;
     }
 }
+
+export interface PaginatedResponseDto<T> {
+    items: T[];
+    nextPageKey?: string;
+}
+
+export interface PlayedTrackApiDto {
+    playedTrackId: number;
+    playedAt: Date;
+    track: TrackApiDto;
+    musicProvider: MusicProviderApiDto;
+    includeInStatistics: boolean;
+}
+
+export interface TrackApiDto {
+    id: number;
+    name: string;
+    href: string;
+    album: AlbumApiDto | null;
+    artists: ArtistApiDto[];
+}
+
+export interface AlbumApiDto {
+    id: number;
+    name: string;
+    href: string;
+    images: ImageApiDto[];
+}
+
+export interface ImageApiDto {
+    height: number;
+    width: number;
+    url: string;
+}
+
+export interface ArtistApiDto {
+    id: number;
+    name: string;
+    href: string;
+    images: ImageApiDto[];
+}
+
+export interface MusicProviderApiDto {
+    id: number;
+    name: string;
+}
