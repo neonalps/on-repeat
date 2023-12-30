@@ -40,4 +40,8 @@ export class AuthService {
     return this.user !== null;
   }
 
+  public getAccessToken(): string | null {
+    return this.user !== null ? this.user.accessToken : null;
+  }
+
 }
