@@ -1,3 +1,5 @@
+@import "theme.css";
+
 .bold {
     font-weight: bold;
 }
@@ -108,4 +110,16 @@
 
 .small {
     font-size: small;
+}
+
+.smaller {
+    font-size: smaller;
+}
+
+.xs {
+    font-size: x-small;
+}
+
+.xxs {
+    font-size: xx-small;
 }
