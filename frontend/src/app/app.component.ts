@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { NavComponent } from '@src/app/nav/nav.component';
+import { AuthService } from '@src/app/auth/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -16,4 +17,8 @@ import { NavComponent } from '@src/app/nav/nav.component';
 })
 export class AppComponent {
   title = 'on-repeat-frontend';
+
+  constructor(private readonly authService: AuthService) {
+    this.authService.init();
+  }
 }
