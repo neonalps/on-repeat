@@ -1,10 +1,12 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { ImageApiDto, PlayedTrackApiDto } from '@src/app/models';
+import { ToggleCheckboxComponent } from '@src/app/toggle-checkbox/toggle-checkbox.component';
 
 @Component({
   selector: 'app-played-track',
   standalone: true,
-  imports: [],
+  imports: [CommonModule, ToggleCheckboxComponent],
   templateUrl: './played-track.component.html',
   styleUrl: './played-track.component.css'
 })
