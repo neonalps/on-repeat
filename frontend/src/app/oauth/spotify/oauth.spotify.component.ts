@@ -6,7 +6,8 @@ import { AuthService } from '@src/app/auth/auth.service';
 import { login } from '@src/app/auth/store/auth.actions';
 import { AuthState } from '@src/app/auth/store/auth.selectors';
 import { hasText } from '@src/app/util/common';
-import { getDateFromUnixTimestamp, parseJwt } from '@src/app/util/token.util';
+import { parseJwt } from '@src/app/util/token';
+import { getDateFromUnixTimestamp } from '@src/app/util/date';
 import { first } from 'rxjs';
 
 @Component({

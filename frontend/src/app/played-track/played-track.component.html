@@ -3,7 +3,7 @@
         <img loading="lazy" [src]="getImageUrl()" [attr.height]="getImageHeight()" [attr.width]="getImageWidth()"/>
     </div>
     <div class="flex-grow-6 pl-4">
-        <div class="xs">{{ getPlayedAt() | date:'short' }} </div>
+        <div class="xs">{{ getPlayedAt() | date:'shortTime' }} </div>
         <div class="mt-8"><a class="bold pointer color-primary-hover">{{ getArtists() }}</a></div>
         <div class="mt-4"><a class="pointer color-primary-hover">{{ getTitle() }}</a></div>
     </div>

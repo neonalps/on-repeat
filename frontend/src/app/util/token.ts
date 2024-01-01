@@ -8,7 +8,3 @@ export function parseJwt(jwt: string): Record<string, any> {
 
     return JSON.parse(decode(parts[1]));
 }
-
-export function getDateFromUnixTimestamp(unix: number): Date {
-    return new Date(unix * 1000);
-}
