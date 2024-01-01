@@ -2,11 +2,12 @@ import { Component } from '@angular/core';
 import { environment } from '@src/environments/environment';
 import { OAuthConfig } from '@src/app/models';
 import { generateRandomString } from '@src/app/util/common';
+import { I18nPipe } from '@src/app/i18n/i18n.pipe';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [],
+  imports: [I18nPipe],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })

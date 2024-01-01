@@ -115,7 +115,7 @@ main {
 @media (max-width: 700px) {
     .nav-container .logo {
         font-size: 1.2rem;
-        z-index: 2;
+        z-index: 10001;
     }
 
     .nav {
@@ -131,7 +131,7 @@ main {
 
     .hamburger-menu {
         display: block;
-        z-index: 2;
+        z-index: 10001;
     }
 
     .nav {
@@ -149,6 +149,8 @@ main {
         color: var(--white);
 
         transition: 0.15s ease-in-out;
+
+        z-index: 10000;
     }
 
     .nav.active {

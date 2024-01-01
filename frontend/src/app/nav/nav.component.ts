@@ -10,6 +10,7 @@ import { selectAuthUser } from '@src/app/auth/store/auth.selectors';
 import { AuthUser } from '@src/app/models';
 import { logout } from '@src/app/auth/store/auth.actions';
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { I18nPipe } from '@src/app/i18n/i18n.pipe';
 
 @Component({
   selector: 'app-nav',
@@ -17,6 +18,7 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
   imports: [
     AppLogoComponent,
     CommonModule,
+    I18nPipe,
     RouterModule,
   ],
   templateUrl: './nav.component.html',
