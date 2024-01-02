@@ -6,19 +6,29 @@ import { AuthService } from '@src/app/auth/auth.service';
 import { CommonModule } from '@angular/common';
 import { PlayedTrackComponent } from '@src/app/played-track/played-track.component';
 import { I18nPipe } from '@src/app/i18n/i18n.pipe';
-import { groupBy } from '../util/collection';
+import { groupBy } from '@src/app/util/collection';
+import { isDefined } from '@src/app/util/common';
+import { getGroupableDateString } from '@src/app/util/date';
+import { ScrollNearEndDirective } from '@src/app/directives/scroll-near-end/scroll-near-end.directive';
 
 @Component({
   selector: 'app-recently-played',
   standalone: true,
-  imports: [CommonModule, I18nPipe, PlayedTrackComponent],
+  imports: [
+    CommonModule, 
+    I18nPipe,
+    PlayedTrackComponent,
+    ScrollNearEndDirective,
+  ],
   templateUrl: './recently-played.component.html',
   styleUrl: './recently-played.component.css'
 })
 export class RecentlyPlayedComponent {
 
   loading: boolean = false;
-  groupedPlayedTracks: Map<string, PlayedTrackApiDto[]> = new Map();
+  playedTracksOnDate: PlayedTracksOnDate[] = [];
+  
+  private nextPageKey: string | null = null;
 
   constructor(
       private readonly authService: AuthService, 
@@ -27,29 +37,56 @@ export class RecentlyPlayedComponent {
     this.loadRecentlyPlayedTracks();
   }
 
-  loadRecentlyPlayedTracks(): void {
+  loadMore(): void {
+    if (!this.isLoadMoreAvailable()) {
+      return;
+    }
+
+    this.loadRecentlyPlayedTracks(this.nextPageKey as string);
+  }
+
+  isLoadMoreAvailable(): boolean {
+    return !this.loading && isDefined(this.nextPageKey);
+  }
+
+  onNearEndScroll(): void {
+    this.loadMore();
+  }
+
+  private loadRecentlyPlayedTracks(nextPageKey?: string): void {
+    console.log('fetching recently played tracks');
+
     this.loading = true;
 
-    this.playedTracksService.fetchRecentlyPlayedTracks(this.authService.getAccessToken() as string)
+    this.playedTracksService.fetchRecentlyPlayedTracks(this.authService.getAccessToken() as string, nextPageKey)
       .pipe(first())
       .subscribe(response => {
         this.processIncomingPlayedTracks(response.items);
+        this.nextPageKey = isDefined(response.nextPageKey) ? response.nextPageKey as string : null;
         this.loading = false;
       });
   }
 
   private processIncomingPlayedTracks(items: PlayedTrackApiDto[]): void {
-    const groupedTracks = groupBy(items, (track: PlayedTrackApiDto) => new Date(track.playedAt).toDateString());
+    const groupedTracks = groupBy(items, (track: PlayedTrackApiDto) => getGroupableDateString(new Date(track.playedAt)));
 
-    for (const [key, tracks] of groupedTracks) {
-      if (this.groupedPlayedTracks.has(key)) {
-        const currentTracks = this.groupedPlayedTracks.get(key) as PlayedTrackApiDto[];
-        currentTracks.push(...tracks);
-        this.groupedPlayedTracks.set(key, currentTracks);
+    for (const [date, tracks] of groupedTracks) {
+      const currentTracksOnDate = this.playedTracksOnDate.find(item => item.date === date);
+
+      if (isDefined(currentTracksOnDate)) {
+        (currentTracksOnDate as PlayedTracksOnDate).tracks.push(...tracks);
       } else {
-        this.groupedPlayedTracks.set(key, tracks);
+        this.playedTracksOnDate.push({
+          date,
+          tracks
+        });
       }
     }
   }
 
+}
+
+interface PlayedTracksOnDate {
+  date: string;
+  tracks: PlayedTrackApiDto[];
 }

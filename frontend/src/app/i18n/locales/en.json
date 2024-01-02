@@ -7,5 +7,6 @@
     "logout.title": "Logout",
     "dashboard.title": "Dashboard",
     "recentlyPlayedTracks.title": "Recently played tracks",
-    "recentlyPlayedTracks.empty": "No played tracks recorded yet. Why don't you go and listen to some right now?"
+    "recentlyPlayedTracks.empty": "No played tracks recorded yet. Why don't you go and listen to some right now?",
+    "recentlyPlayedTracks.loadMore": "Load more tracks"
 }

@@ -23,7 +23,7 @@ export class PlayedTrackComponent {
   }
 
   getPlayedAt(): Date {
-    return this.playedTrack.playedAt;
+    return new Date(this.playedTrack.playedAt);
   }
 
   getImageUrl(): string | undefined {
