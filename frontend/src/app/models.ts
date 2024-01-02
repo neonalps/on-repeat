@@ -31,7 +31,7 @@ export interface PaginatedResponseDto<T> {
 
 export interface PlayedTrackApiDto {
     playedTrackId: number;
-    playedAt: Date;
+    playedAt: string;
     track: TrackApiDto;
     musicProvider: MusicProviderApiDto;
     includeInStatistics: boolean;

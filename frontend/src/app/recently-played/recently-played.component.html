@@ -1,14 +1,15 @@
 <section class="title center">{{ 'recentlyPlayedTracks.title' | $t }}</section>
 
-<section class="page-content">
-    <div *ngIf="!loading; else loadingTemplate">
-        <ng-container *ngIf="groupedPlayedTracks.size > 0; else emptyList">
-            <ng-container *ngFor="let playedTrackGroup of groupedPlayedTracks | keyvalue">
-                <div class="mt-48 bold">{{ playedTrackGroup.key | date }}</div>
-                <app-played-track *ngFor="let playedTrack of playedTrackGroup.value" [playedTrack]="playedTrack"/>
-            </ng-container>
+<section class="page-content" appScrollNearEnd (nearEnd)="onNearEndScroll()">
+    <ng-container *ngIf="playedTracksOnDate.length > 0; else emptyList">
+        <ng-container *ngFor="let playedTrackGroup of playedTracksOnDate">
+            <div class="mt-48 bold">{{ playedTrackGroup.date | date }}</div>
+            <app-played-track *ngFor="let playedTrack of playedTrackGroup.tracks" [playedTrack]="playedTrack"/>
         </ng-container>
-        <ng-template #emptyList>{{ 'recentlyPlayedTracks.empty' | $t }}</ng-template>
+    </ng-container>
+    <div class="mt-32 center" *ngIf="isLoadMoreAvailable()">
+        <button class="button-secondary" (click)="loadMore()">{{ 'recentlyPlayedTracks.loadMore' | $t }}</button>
     </div>
-    <ng-template #loadingTemplate>{{ 'loading' | $t }}</ng-template>
+    <ng-container *ngIf="loading">{{ 'loading' | $t }}</ng-container>
+    <ng-template #emptyList>{{ 'recentlyPlayedTracks.empty' | $t }}</ng-template>
 </section>
