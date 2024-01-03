@@ -9,7 +9,7 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { selectAuthUser } from '@src/app/auth/store/auth.selectors';
 import { AppState } from '@src/app/store.index';
 import { SessionStorageService } from '@src/app/storage/session-storage.service';
-import { hasText, isDefined } from '../util/common';
+import { hasText, isDefined } from '@src/app/util/common';
 import { login } from './store/auth.actions';
 
 @Injectable({
