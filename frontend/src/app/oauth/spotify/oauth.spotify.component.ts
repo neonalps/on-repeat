@@ -5,10 +5,12 @@ import { Store } from '@ngrx/store';
 import { AuthService } from '@src/app/auth/auth.service';
 import { login } from '@src/app/auth/store/auth.actions';
 import { AuthState } from '@src/app/auth/store/auth.selectors';
-import { hasText } from '@src/app/util/common';
+import { hasText, isDefined } from '@src/app/util/common';
 import { parseJwt } from '@src/app/util/token';
 import { getDateFromUnixTimestamp } from '@src/app/util/date';
 import { first } from 'rxjs';
+import { decode } from '@src/app/util/base64';
+import { PostLoginTarget } from '@src/app/auth/guards/loggedin.guard';
 
 @Component({
   selector: 'app-oauth-spotify',
@@ -31,6 +33,9 @@ export class OauthSpotifyComponent implements OnInit {
       throw new Error(`Spotify OAuth handler called without code`);
     }
 
+    const state = queryParams.get("state");
+    const decodedState: PostLoginTarget | null = hasText(state) ? JSON.parse(decode(state as string)) : null;
+
     this.authService.handleOAuthLogin("spotify", code as string)
       .pipe(first())
       .subscribe((authResponse) => {
@@ -52,7 +57,8 @@ export class OauthSpotifyComponent implements OnInit {
         };
 
         this.store.dispatch(login({ auth: authState }));
-        setTimeout(() => this.router.navigate(["/"]), 100);
+        const targetUrl = isDefined(decodedState) ? decodedState?.target : "/";
+        setTimeout(() => this.router.navigate([targetUrl]), 100);
       });
   }
 

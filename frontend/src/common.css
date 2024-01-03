@@ -24,6 +24,10 @@
     justify-content: center;
 }
 
+.flex-auto {
+    flex: auto;
+}
+
 .flex-grow, .flex-grow-1 {
     flex-grow: 1;
 }
@@ -108,6 +112,14 @@
     padding-left: 4px;
 }
 
+.pl-8 {
+    padding-left: 8px;
+}
+
+.pl-16 {
+    padding-left: 16px;
+}
+
 .pointer {
     cursor: pointer;
 }
@@ -126,4 +138,16 @@
 
 .xxs {
     font-size: xx-small;
+}
+
+.background-color-martinique {
+    background-color: #392e4a;
+}
+
+.background-color-teak {
+    background-color: #a6915c;
+}
+
+.background-color-melon-melody {
+    background-color: #fbc093;
 }

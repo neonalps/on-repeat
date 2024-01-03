@@ -152,7 +152,7 @@ main {
     background-color: var(--spotify-lighter);
 }
 
-@media (max-width: 700px) {
+@media screen and (max-width: 700px) {
     .nav-container .logo {
         font-size: 1.2rem;
         z-index: 10001;
@@ -197,4 +197,32 @@ main {
         right: 0;
     }
 
+}
+
+@media screen and (min-width: 700px) and (max-width: 999px) {
+    .large-screen {
+        display: flex;
+    }
+
+    .large-screen-placeholder {
+        flex: auto;
+    }
+
+    .large-screen-main {
+        flex: 0 1 70%;
+    }
+}
+
+@media screen and (min-width: 1000px) {
+    .large-screen {
+        display: flex;
+    }
+
+    .large-screen-placeholder {
+        flex: auto;
+    }
+
+    .large-screen-main {
+        flex: 0 1 55%;
+    }
 }
