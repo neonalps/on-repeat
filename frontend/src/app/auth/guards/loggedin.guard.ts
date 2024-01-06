@@ -9,19 +9,16 @@ export interface PostLoginTarget {
   target: string;
 }
 
-export const loggedInGuard = async (_: ActivatedRouteSnapshot, state: RouterStateSnapshot): Promise<boolean> => {
-    const authService = inject(AuthService);
-    const router = inject(Router);
-  
-    if (authService.isLoggedIn()) {
-      return true;
-    }
-  
-    const postLoginTarget: PostLoginTarget = {
-      state: generateRandomString(12),
-      target: state.url,
-    };
+export function loginRedirect(router: Router, targetUrl: string): Promise<boolean> {
+  const postLoginTarget: PostLoginTarget = {
+    state: generateRandomString(12),
+    target: targetUrl,
+  };
 
-    const encodedRedirectState = encode(JSON.stringify(postLoginTarget));
-    return router.navigate(['/login'], { queryParams: { state: encodedRedirectState } });
+  const encodedRedirectState = encode(JSON.stringify(postLoginTarget));
+  return router.navigate(['/login'], { queryParams: { state: encodedRedirectState } });
+} 
+
+export async function loggedInGuard(_: ActivatedRouteSnapshot, state: RouterStateSnapshot): Promise<boolean> {
+    return inject(AuthService).isLoggedIn() ? true : loginRedirect(inject(Router), state.url);
 };

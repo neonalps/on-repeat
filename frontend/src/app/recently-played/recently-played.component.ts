@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { PlayedTracksService } from '@src/app/played-tracks/played-tracks.service';
-import { PlayedTrackApiDto } from '@src/app/models';
+import { PaginatedResponseDto, PlayedTrackApiDto } from '@src/app/models';
 import { first } from 'rxjs';
 import { AuthService } from '@src/app/auth/auth.service';
 import { CommonModule } from '@angular/common';
@@ -12,6 +12,9 @@ import { getGroupableDateString } from '@src/app/util/date';
 import { ScrollNearEndDirective } from '@src/app/directives/scroll-near-end/scroll-near-end.directive';
 import { ReloadComponent } from '@src/app/reload/reload.component';
 import { FilterComponent } from '@src/app/filter/filter.component';
+import { HttpErrorResponse } from '@angular/common/http';
+import { loginRedirect } from '@src/app/auth/guards/loggedin.guard';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-recently-played',
@@ -37,6 +40,7 @@ export class RecentlyPlayedComponent {
   constructor(
       private readonly authService: AuthService, 
       private readonly playedTracksService: PlayedTracksService,
+      private readonly router: Router,
   ) {
     this.loadRecentlyPlayedTracks();
   }
@@ -58,16 +62,24 @@ export class RecentlyPlayedComponent {
   }
 
   private loadRecentlyPlayedTracks(nextPageKey?: string): void {
-    console.log('fetching recently played tracks');
-
     this.loading = true;
 
     this.playedTracksService.fetchRecentlyPlayedTracks(this.authService.getAccessToken() as string, nextPageKey)
       .pipe(first())
-      .subscribe(response => {
-        this.processIncomingPlayedTracks(response.items);
-        this.nextPageKey = isDefined(response.nextPageKey) ? response.nextPageKey as string : null;
-        this.loading = false;
+      .subscribe({
+        next: (response: PaginatedResponseDto<PlayedTrackApiDto>) => {
+          this.processIncomingPlayedTracks(response.items);
+          this.nextPageKey = isDefined(response.nextPageKey) ? response.nextPageKey as string : null;
+          this.loading = false;
+        },
+        error: (error: HttpErrorResponse) => {
+          if (error.status === 401) {
+            loginRedirect(this.router, this.router.url);
+            return;
+          }
+
+          this.loading = false;
+        } 
       });
   }
 
