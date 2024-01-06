@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'app-app-logo',
@@ -9,4 +9,7 @@ import { Component } from '@angular/core';
 })
 export class AppLogoComponent {
   color: string = "white"
+
+  @Input() top: number = 0;
+  @Input() width: number = 32;
 }
