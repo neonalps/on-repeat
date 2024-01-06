@@ -28,10 +28,6 @@ header {
     padding: .5rem 0;
 }
 
-main {
-    padding: 1rem;
-}
-
 .color-primary {
     color: var(--primary);
 }
@@ -83,7 +79,11 @@ main {
 }
 
 .page-content {
-    margin-top: 2rem;
+    margin-top: 1rem;
+}
+
+.content {
+    padding: 1rem;
 }
 
 .button-primary {
