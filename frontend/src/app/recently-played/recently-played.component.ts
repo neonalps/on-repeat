@@ -10,14 +10,18 @@ import { groupBy } from '@src/app/util/collection';
 import { isDefined } from '@src/app/util/common';
 import { getGroupableDateString } from '@src/app/util/date';
 import { ScrollNearEndDirective } from '@src/app/directives/scroll-near-end/scroll-near-end.directive';
+import { ReloadComponent } from '@src/app/reload/reload.component';
+import { FilterComponent } from '@src/app/filter/filter.component';
 
 @Component({
   selector: 'app-recently-played',
   standalone: true,
   imports: [
-    CommonModule, 
+    CommonModule,
+    FilterComponent,
     I18nPipe,
     PlayedTrackComponent,
+    ReloadComponent,
     ScrollNearEndDirective,
   ],
   templateUrl: './recently-played.component.html',
